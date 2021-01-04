@@ -1,9 +1,10 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 package com.microsoft.bot.dialogs.prompts;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
 import com.microsoft.bot.builder.TurnContext;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityTypes;

@@ -3,7 +3,6 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "groupLocation": {
-            "defaultValue": "",
             "type": "string",
             "metadata": {
                 "description": "Specifies the location of the Resource Group."
@@ -34,14 +33,12 @@
             }
         },
         "botSku": {
-            "defaultValue": "F0",
             "type": "string",
             "metadata": {
                 "description": "The pricing tier of the Bot Service Registration. Acceptable values are F0 and S1."
             }
         },
         "newAppServicePlanName": {
-            "defaultValue": "",
             "type": "string",
             "metadata": {
                 "description": "The name of the App Service Plan."
@@ -50,10 +47,10 @@
         "newAppServicePlanSku": {
             "type": "object",
             "defaultValue": {
-                "name": "P1v2",
-                "tier": "PremiumV2",
-                "size": "P1v2",
-                "family": "Pv2",
+                "name": "S1",
+                "tier": "Standard",
+                "size": "S1",
+                "family": "S",
                 "capacity": 1
             },
             "metadata": {
@@ -61,7 +58,6 @@
             }
         },
         "newAppServicePlanLocation": {
-            "defaultValue": "",
             "type": "string",
             "metadata": {
                 "description": "The location of the App Service Plan. Defaults to \"westus\"."
@@ -76,22 +72,20 @@
         }
     },
     "variables": {
-        "resourcesLocation": "[deployment().location]",
-        "effectiveGroupLocation": "[if(empty(parameters('groupLocation')), variables('resourcesLocation'), parameters('groupLocation'))]",
-        "effectivePlanLocation": "[if(empty(parameters('newAppServicePlanLocation')), variables('resourcesLocation'), parameters('newAppServicePlanLocation'))]",
-        "appServicePlanName": "[if(empty(parameters('newAppServicePlanName')), concat(parameters('botId'), 'ServicePlan'), parameters('newAppServicePlanName'))]",
+        "appServicePlanName": "[parameters('newAppServicePlanName')]",
+        "resourcesLocation": "[parameters('newAppServicePlanLocation')]",
         "webAppName": "[if(empty(parameters('newWebAppName')), parameters('botId'), parameters('newWebAppName'))]",
         "siteHost": "[concat(variables('webAppName'), '.azurewebsites.net')]",
-        "botEndpoint": "[concat('https://', variables('siteHost'), '/api/messages')]"
+        "botEndpoint": "[concat('https://', variables('siteHost'), '/api/messages')]",
+        "resourceGroupId": "[concat(subscription().id, '/resourceGroups/', parameters('groupName'))]"
     },
     "resources": [
         {
             "name": "[parameters('groupName')]",
             "type": "Microsoft.Resources/resourceGroups",
             "apiVersion": "2018-05-01",
-            "location": "[variables('effectiveGroupLocation')]",
-            "properties": {
-            }
+            "location": "[parameters('groupLocation')]",
+            "properties": {}
         },
         {
             "type": "Microsoft.Resources/deployments",
@@ -114,12 +108,10 @@
                             "type": "Microsoft.Web/serverfarms",
                             "name": "[variables('appServicePlanName')]",
                             "apiVersion": "2018-02-01",
-                            "location": "[variables('effectivePlanLocation')]",
+                            "location": "[variables('resourcesLocation')]",
                             "sku": "[parameters('newAppServicePlanSku')]",
-                            "kind": "linux",
                             "properties": {
-                                "name": "[variables('appServicePlanName')]",
-                                "reserved":true
+                                "name": "[variables('appServicePlanName')]"
                             }
                         },
                         {
@@ -129,7 +121,7 @@
                             "location": "[variables('resourcesLocation')]",
                             "kind": "app",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Web/serverfarms/', variables('appServicePlanName'))]"
+                                "[concat(variables('resourceGroupId'), '/providers/Microsoft.Web/serverfarms/', variables('appServicePlanName'))]"
                             ],
                             "name": "[variables('webAppName')]",
                             "properties": {
@@ -138,8 +130,8 @@
                                 "siteConfig": {
                                     "appSettings": [
                                         {
-                                            "name": "JAVA_OPTS",
-                                            "value": "-Dserver.port=80"
+                                            "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                                            "value": "10.14.1"
                                         },
                                         {
                                             "name": "MicrosoftAppId",
@@ -179,7 +171,7 @@
                                 "storageResourceId": null
                             },
                             "dependsOn": [
-                                "[resourceId('Microsoft.Web/sites/', variables('webAppName'))]"
+                                "[concat(variables('resourceGroupId'), '/providers/Microsoft.Web/sites/', variables('webAppName'))]"
                             ]
                         }
                     ],

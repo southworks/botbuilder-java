@@ -21,7 +21,7 @@
             }
         },
         "botSku": {
-            "defaultValue": "S1",
+            "defaultValue": "F0",
             "type": "string",
             "metadata": {
                 "description": "The pricing tier of the Bot Service Registration. Acceptable values are F0 and S1."
@@ -37,10 +37,10 @@
         "newAppServicePlanSku": {
             "type": "object",
             "defaultValue": {
-                "name": "P1v2",
-                "tier": "PremiumV2",
-                "size": "P1v2",
-                "family": "Pv2",
+                "name": "S1",
+                "tier": "Standard",
+                "size": "S1",
+                "family": "S",
                 "capacity": 1
             },
             "metadata": {
@@ -49,7 +49,6 @@
         },
         "appServicePlanLocation": {
             "type": "string",
-            "defaultValue": "",
             "metadata": {
                 "description": "The location of the App Service Plan."
             }
@@ -72,8 +71,8 @@
     "variables": {
         "defaultAppServicePlanName": "[if(empty(parameters('existingAppServicePlan')), 'createNewAppServicePlan', parameters('existingAppServicePlan'))]",
         "useExistingAppServicePlan": "[not(equals(variables('defaultAppServicePlanName'), 'createNewAppServicePlan'))]",
-        "servicePlanName": "[if(variables('useExistingAppServicePlan'), parameters('existingAppServicePlan'), if(empty(parameters('newAppServicePlanName')),concat(parameters('botId'), 'ServicePlan'),parameters('newAppServicePlanName')))]",
-        "resourcesLocation": "[if(empty(parameters('appServicePlanLocation')), resourceGroup().location, parameters('appServicePlanLocation'))]",
+        "servicePlanName": "[if(variables('useExistingAppServicePlan'), parameters('existingAppServicePlan'), parameters('newAppServicePlanName'))]",
+        "resourcesLocation": "[parameters('appServicePlanLocation')]",
         "webAppName": "[if(empty(parameters('newWebAppName')), parameters('botId'), parameters('newWebAppName'))]",
         "siteHost": "[concat(variables('webAppName'), '.azurewebsites.net')]",
         "botEndpoint": "[concat('https://', variables('siteHost'), '/api/messages')]"
@@ -87,31 +86,28 @@
             "apiVersion": "2018-02-01",
             "location": "[variables('resourcesLocation')]",
             "sku": "[parameters('newAppServicePlanSku')]",
-            "kind": "linux",
             "properties": {
-                "name": "[variables('servicePlanName')]",
-                "reserved":true
+                "name": "[variables('servicePlanName')]"
             }
         },
         {
             "comments": "Create a Web App using an App Service Plan",
             "type": "Microsoft.Web/sites",
-            "apiVersion": "2016-08-01",
+            "apiVersion": "2015-08-01",
             "location": "[variables('resourcesLocation')]",
             "kind": "app",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms/', variables('servicePlanName'))]"
+                "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]"
             ],
             "name": "[variables('webAppName')]",
             "properties": {
                 "name": "[variables('webAppName')]",
-                "serverFarmId": "[variables('servicePlanName')]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]",
                 "siteConfig": {
-                    "linuxFxVersion": "JAVA|8-jre8",
                     "appSettings": [
                         {
-                            "name": "JAVA_OPTS",
-                            "value": "-Dserver.port=80"
+                            "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                            "value": "10.14.1"
                         },
                         {
                             "name": "MicrosoftAppId",

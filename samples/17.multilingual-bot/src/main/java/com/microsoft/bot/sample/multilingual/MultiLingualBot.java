@@ -30,8 +30,9 @@ import java.util.concurrent.CompletableFuture;
  * here https://docs.microsoft.com/en-us/azure/cognitive-services/translator/translator-info-overview.
  */
 public class MultiLingualBot extends ActivityHandler {
-    private static final String WELCOME_TEXT = "This bot will introduce you to translation middleware. "
-        + "Say 'hi' to get started.";
+    private static final StringBuilder WELCOME_TEXT =
+        new StringBuilder("This bot will introduce you to translation middleware. ")
+        .append("Say 'hi' to get started.");
     private static final String ENGLISH_ENGLISH = "en";
     private static final String ENGLISH_SPANISH = "es";
     private static final String SPANISH_ENGLISH = "in";
@@ -40,6 +41,10 @@ public class MultiLingualBot extends ActivityHandler {
     private UserState userState;
     private StatePropertyAccessor<String> languagePreference;
 
+    /**
+     * Creates a Multilingual bot.
+     * @param withUserState User state object.
+     */
     public MultiLingualBot(UserState withUserState) {
         if (withUserState != null) {
             userState = withUserState;
@@ -49,40 +54,59 @@ public class MultiLingualBot extends ActivityHandler {
         languagePreference = userState.createProperty("LanguagePreference");
     }
 
+    /**
+     * This method is executed when a user is joining to the conversation.
+     * @param membersAdded A list of all the members added to the conversation,
+     *                     as described by the conversation update activity.
+     * @param turnContext The context object for this turn.
+     * @return A task that represents the work queued to execute.
+     */
     @Override
     protected CompletableFuture<Void> onMembersAdded(List<ChannelAccount> membersAdded,
                                                      TurnContext turnContext) {
-        return sendWelcomeMessage(turnContext);
+        return this.sendWelcomeMessage(turnContext);
     }
 
+    /**
+     * This method is executed when the turnContext receives a message activity.
+     * @param turnContext The context object for this turn.
+     * @return A task that represents the work queued to execute.
+     */
     @Override
     protected CompletableFuture<Void> onMessageActivity(TurnContext turnContext) {
-        if (isLanguageChangeRequested(turnContext.getActivity().getText())) {
+        if (this.isLanguageChangeRequested(turnContext.getActivity().getText())) {
             String currentLang = turnContext.getActivity().getText().toLowerCase();
             String lang = currentLang.equals(ENGLISH_ENGLISH) || currentLang.equals(SPANISH_ENGLISH)
                 ? ENGLISH_ENGLISH : ENGLISH_SPANISH;
+
             // If the user requested a language change through the suggested actions with values "es" or "en",
             // simply change the user's language preference in the user state.
             // The translation middleware will catch this setting and translate both ways to the user's
             // selected language.
             // If Spanish was selected by the user, the reply below will actually be shown in spanish to the user.
-            languagePreference.set(turnContext, lang);
             Activity reply = MessageFactory.text(String.format("Your current language code is: %1$s", lang));
-            turnContext.sendActivity(reply);
-            return userState.saveChanges(turnContext, false);
+            return languagePreference.set(turnContext, lang)
+                .thenCompose(task -> turnContext.sendActivity(reply))
+                .thenCompose(task -> userState.saveChanges(turnContext, false));
         } else {
             // Show the user the possible options for language. If the user chooses a different language
             // than the default, then the translation middleware will pick it up from the user state and
             // translate messages both ways, i.e. user to bot and bot to user.
             Activity reply = MessageFactory.text("Choose your language:");
-            CardAction esAction = new CardAction();
-            esAction.setTitle("Español");
-            esAction.setType(ActionTypes.POST_BACK);
-            esAction.setValue(ENGLISH_SPANISH);
-            CardAction enAction = new CardAction();
-            enAction.setTitle("English");
-            enAction.setType(ActionTypes.POST_BACK);
-            enAction.setValue(ENGLISH_ENGLISH);
+            CardAction esAction = new CardAction() {
+                {
+                    setTitle("Español");
+                    setType(ActionTypes.POST_BACK);
+                    setValue(ENGLISH_SPANISH);
+                }
+            };
+            CardAction enAction = new CardAction() {
+                {
+                    setTitle("English");
+                    setType(ActionTypes.POST_BACK);
+                    setValue(ENGLISH_ENGLISH);
+                }
+            };
             List<CardAction> actions = new ArrayList<>(Arrays.asList(esAction, enAction));
             SuggestedActions suggestedActions = new SuggestedActions();
             suggestedActions.setActions(actions);
@@ -94,36 +118,52 @@ public class MultiLingualBot extends ActivityHandler {
         for (ChannelAccount member: turnContext.getActivity().getMembersAdded()) {
             // Greet anyone that was not the target (recipient) of this message.
             // To learn more about Adaptive Cards, see https://aka.ms/msbot-adaptivecards for more details.
-            if (!member.getId().equals(turnContext.getActivity().getRecipient().getId())) {
+            if (member.getId() != turnContext.getActivity().getRecipient().getId()) {
                 Attachment welcomeCard = createAdaptiveCardAttachment();
                 Activity response = MessageFactory.attachment(welcomeCard);
                 return turnContext.sendActivity(response)
-                    .thenCompose(task -> turnContext.sendActivity(MessageFactory.text(WELCOME_TEXT))
+                    .thenCompose(task -> turnContext.sendActivity(MessageFactory.text(WELCOME_TEXT.toString()))
                     .thenApply(resourceResponse -> null));
             }
         }
         return CompletableFuture.completedFuture(null);
     }
 
+    /**
+     * Load attachment from file.
+     * @return the welcome adaptive card
+     */
     private static Attachment createAdaptiveCardAttachment() {
         // combine path for cross platform support
         try {
-            Path path = Paths.get(".", "Cards", "welcomeCard.json");
+            Path path = Paths.get(".", "cards", "welcomeCard.json");
             BufferedReader reader = Files.newBufferedReader(path);
             String adaptiveCard = reader.readLine();
-            Attachment attachment = new Attachment();
-            attachment.setContentType("application/vnd.microsoft.card.adaptive");
             ObjectMapper mapper = new ObjectMapper();
-            attachment.setContent(mapper.readValue(adaptiveCard, String.class));
-            return attachment;
+            return new Attachment() {
+                {
+                    setContentType("application/vnd.microsoft.card.adaptive");
+                    setContent(mapper.readValue(adaptiveCard, String.class));
+                }
+            };
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
     }
 
+    /**
+     * Checks whether the utterance from the user is requesting a language change.
+     * In a production bot, we would use the Microsoft Text Translation API language
+     * detection feature, along with detecting language names.
+     * For the purpose of the sample, we just assume that the user requests language
+     * changes by responding with the language code through the suggested action presented
+     * above or by typing it.
+     * @param utterance utterance the current turn utterance.
+     * @return the utterance.
+     */
     private static boolean isLanguageChangeRequested(String utterance) {
-        if (utterance == null || utterance.equals("")) {
+        if (utterance == null || utterance.isEmpty()) {
             return false;
         }
         utterance = utterance.toLowerCase().trim();

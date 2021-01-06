@@ -33,6 +33,7 @@ public class MultiLingualBot extends ActivityHandler {
     private static final String WELCOME_TEXT =
         new StringBuilder("This bot will introduce you to translation middleware. ")
         .append("Say 'hi' to get started.").toString();
+
     private static final String ENGLISH_ENGLISH = "en";
     private static final String ENGLISH_SPANISH = "es";
     private static final String SPANISH_ENGLISH = "in";
@@ -47,11 +48,12 @@ public class MultiLingualBot extends ActivityHandler {
      */
     public MultiLingualBot(UserState withUserState) {
         if (withUserState != null) {
-            userState = withUserState;
+            this.userState = withUserState;
         } else {
             throw new IllegalArgumentException("userState");
         }
-        languagePreference = userState.createProperty("LanguagePreference");
+
+        this.languagePreference = userState.createProperty("LanguagePreference");
     }
 
     /**
@@ -86,7 +88,7 @@ public class MultiLingualBot extends ActivityHandler {
             // If Spanish was selected by the user, the reply below will actually be shown in spanish to the user.
             return languagePreference.set(turnContext, lang)
                 .thenCompose(task -> {
-                    Activity reply = MessageFactory.text(String.format("Your current language code is: %1$s", lang));
+                    Activity reply = MessageFactory.text(String.format("Your current language code is: %s", lang));
                     return turnContext.sendActivity(reply);
                 })
                 // Save the user profile updates into the user state.
@@ -111,8 +113,12 @@ public class MultiLingualBot extends ActivityHandler {
                 }
             };
             List<CardAction> actions = new ArrayList<>(Arrays.asList(esAction, enAction));
-            SuggestedActions suggestedActions = new SuggestedActions();
-            suggestedActions.setActions(actions);
+            SuggestedActions suggestedActions = new SuggestedActions() {
+                {
+                    setActions(actions);
+                }
+            };
+            reply.setSuggestedActions(suggestedActions);
             return turnContext.sendActivity(reply).thenApply(resourceResponse -> null);
         }
     }
@@ -165,10 +171,11 @@ public class MultiLingualBot extends ActivityHandler {
      * @param utterance utterance the current turn utterance.
      * @return the utterance.
      */
-    private static boolean isLanguageChangeRequested(String utterance) {
+    private static Boolean isLanguageChangeRequested(String utterance) {
         if (utterance == null || utterance.isEmpty()) {
             return false;
         }
+
         utterance = utterance.toLowerCase().trim();
         return utterance.equals(ENGLISH_SPANISH) || utterance.equals(ENGLISH_ENGLISH)
             || utterance.equals(SPANISH_SPANISH) || utterance.equals(SPANISH_ENGLISH);

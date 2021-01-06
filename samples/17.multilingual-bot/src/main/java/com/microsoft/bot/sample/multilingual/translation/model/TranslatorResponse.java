@@ -9,23 +9,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Array of translated results from Translator API v3.
  */
-public class TranslationResponse {
+public class TranslatorResponse {
     @JsonProperty("translations")
-    private List<TranslationResult> translations;
+    private List<TranslatorResult> translations;
 
     /**
      * Gets the translation results.
-     * @return A list of {@link TranslationResult}
+     * @return A list of {@link TranslatorResult}
      */
-    public List<TranslationResult> getTranslations() {
+    public List<TranslatorResult> getTranslations() {
         return this.translations;
     }
 
     /**
      * Sets the translation results.
-     * @param withTranslations A list of {@link TranslationResult}
+     * @param withTranslations A list of {@link TranslatorResult}
      */
-    public void setTranslations(List<TranslationResult> withTranslations) {
+    public void setTranslations(List<TranslatorResult> withTranslations) {
         this.translations = withTranslations;
     }
 }

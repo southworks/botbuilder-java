@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Translation result from Translator API v3.
  */
-public class TranslationResult {
+public class TranslatorResult {
     @JsonProperty("text")
     private String text;
     @JsonProperty("to")

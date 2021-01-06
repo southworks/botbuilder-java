@@ -3,6 +3,9 @@
 
 package com.microsoft.bot.sample.multilingual;
 
+import com.microsoft.bot.builder.ConversationState;
+import com.microsoft.bot.builder.Storage;
+import com.microsoft.bot.builder.UserState;
 import com.microsoft.bot.integration.AdapterWithErrorHandler;
 import com.microsoft.bot.integration.BotFrameworkHttpAdapter;
 import com.microsoft.bot.integration.Configuration;
@@ -43,6 +46,13 @@ public class Application extends BotDependencyConfiguration {
      */
     @Override
     public BotFrameworkHttpAdapter getBotFrameworkHttpAdaptor(Configuration configuration) {
-        return new AdapterWithErrorHandler(configuration);
+        Storage storage = this.getStorage();
+        ConversationState conversationState = this.getConversationState(storage);
+        UserState userState = this.getUserState(storage);
+        MicrosoftTranslator translator = new MicrosoftTranslator(configuration);
+
+        BotFrameworkHttpAdapter adapter = new AdapterWithErrorHandler(configuration, conversationState);
+        adapter.use(new TranslationMiddleware(translator, userState));
+        return adapter;
     }
 }

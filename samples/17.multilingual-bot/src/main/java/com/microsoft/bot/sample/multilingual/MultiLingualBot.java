@@ -30,9 +30,9 @@ import java.util.concurrent.CompletableFuture;
  * here https://docs.microsoft.com/en-us/azure/cognitive-services/translator/translator-info-overview.
  */
 public class MultiLingualBot extends ActivityHandler {
-    private static final StringBuilder WELCOME_TEXT =
+    private static final String WELCOME_TEXT =
         new StringBuilder("This bot will introduce you to translation middleware. ")
-        .append("Say 'hi' to get started.");
+        .append("Say 'hi' to get started.").toString();
     private static final String ENGLISH_ENGLISH = "en";
     private static final String ENGLISH_SPANISH = "es";
     private static final String SPANISH_ENGLISH = "in";
@@ -49,7 +49,7 @@ public class MultiLingualBot extends ActivityHandler {
         if (withUserState != null) {
             userState = withUserState;
         } else {
-            throw new NullPointerException("userState");
+            throw new IllegalArgumentException("userState");
         }
         languagePreference = userState.createProperty("LanguagePreference");
     }
@@ -74,7 +74,7 @@ public class MultiLingualBot extends ActivityHandler {
      */
     @Override
     protected CompletableFuture<Void> onMessageActivity(TurnContext turnContext) {
-        if (this.isLanguageChangeRequested(turnContext.getActivity().getText())) {
+        if (MultiLingualBot.isLanguageChangeRequested(turnContext.getActivity().getText())) {
             String currentLang = turnContext.getActivity().getText().toLowerCase();
             String lang = currentLang.equals(ENGLISH_ENGLISH) || currentLang.equals(SPANISH_ENGLISH)
                 ? ENGLISH_ENGLISH : ENGLISH_SPANISH;
@@ -84,9 +84,12 @@ public class MultiLingualBot extends ActivityHandler {
             // The translation middleware will catch this setting and translate both ways to the user's
             // selected language.
             // If Spanish was selected by the user, the reply below will actually be shown in spanish to the user.
-            Activity reply = MessageFactory.text(String.format("Your current language code is: %1$s", lang));
             return languagePreference.set(turnContext, lang)
-                .thenCompose(task -> turnContext.sendActivity(reply))
+                .thenCompose(task -> {
+                    Activity reply = MessageFactory.text(String.format("Your current language code is: %1$s", lang));
+                    return turnContext.sendActivity(reply);
+                })
+                // Save the user profile updates into the user state.
                 .thenCompose(task -> userState.saveChanges(turnContext, false));
         } else {
             // Show the user the possible options for language. If the user chooses a different language
@@ -119,10 +122,10 @@ public class MultiLingualBot extends ActivityHandler {
             // Greet anyone that was not the target (recipient) of this message.
             // To learn more about Adaptive Cards, see https://aka.ms/msbot-adaptivecards for more details.
             if (member.getId() != turnContext.getActivity().getRecipient().getId()) {
-                Attachment welcomeCard = createAdaptiveCardAttachment();
+                Attachment welcomeCard = MultiLingualBot.createAdaptiveCardAttachment();
                 Activity response = MessageFactory.attachment(welcomeCard);
                 return turnContext.sendActivity(response)
-                    .thenCompose(task -> turnContext.sendActivity(MessageFactory.text(WELCOME_TEXT.toString()))
+                    .thenCompose(task -> turnContext.sendActivity(MessageFactory.text(WELCOME_TEXT))
                     .thenApply(resourceResponse -> null));
             }
         }

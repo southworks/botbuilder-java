@@ -51,8 +51,6 @@ public class Application extends BotDependencyConfiguration {
     public BotFrameworkHttpAdapter getBotFrameworkHttpAdaptor(Configuration configuration) {
         Storage storage = this.getStorage();
         ConversationState conversationState = this.getConversationState(storage);
-        UserState userState = this.getUserState(storage);
-        MicrosoftTranslator translator = new MicrosoftTranslator(configuration);
 
         BotFrameworkHttpAdapter adapter = new AdapterWithErrorHandler(configuration, conversationState);
         TranslationMiddleware translationMiddleware = this.getTranslationMiddleware();
@@ -78,7 +76,8 @@ public class Application extends BotDependencyConfiguration {
     public TranslationMiddleware getTranslationMiddleware() {
         Storage storage = this.getStorage();
         UserState userState = this.getUserState(storage);
-        return new TranslationMiddleware(this.getMicrosoftTranslator(), userState);
+        MicrosoftTranslator microsoftTranslator = this.getMicrosoftTranslator();
+        return new TranslationMiddleware(microsoftTranslator, userState);
     }
 
     /**

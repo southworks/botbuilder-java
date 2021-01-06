@@ -3,12 +3,15 @@
 
 package com.microsoft.bot.sample.multilingual.translation.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Translation result from Translator API v3.
  */
 public class TranslationResult {
+    @JsonProperty("text")
     private String text;
-
+    @JsonProperty("to")
     private String to;
 
     /**

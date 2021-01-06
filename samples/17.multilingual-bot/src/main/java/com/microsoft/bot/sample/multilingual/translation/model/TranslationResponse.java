@@ -23,9 +23,9 @@ public class TranslationResponse {
 
     /**
      * Sets the translation results.
-     * @param translationResults A list of {@link TranslationResult}
+     * @param withTranslation A list of {@link TranslationResult}
      */
     public void setTranslations(List<TranslationResult> withTranslation) {
-        this.translations = translationResults;
+        this.translations = withTranslation;
     }
 }

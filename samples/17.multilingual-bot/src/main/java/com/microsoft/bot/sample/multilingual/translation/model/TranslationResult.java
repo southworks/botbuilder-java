@@ -11,7 +11,6 @@ public class TranslationResult {
 
     private String to;
 
-
     /**
      * Gets the translation result text.
      * @return Translation result.

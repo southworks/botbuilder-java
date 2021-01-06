@@ -3,11 +3,10 @@
 
 package com.microsoft.bot.sample.multilingual.translation;
 
-import java.awt.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
-
+import java.util.stream.Collectors;
 import com.microsoft.bot.builder.Middleware;
 import com.microsoft.bot.builder.NextDelegate;
 import com.microsoft.bot.builder.StatePropertyAccessor;
@@ -55,7 +54,7 @@ public class TranslationMiddleware implements Middleware  {
         return this.shouldTranslate(turnContext).thenCompose(translate -> {
             if (translate) {
                 if (turnContext.getActivity().getType() == ActivityTypes.MESSAGE) {
-                    this.translator.translate(turnContext.getActivity().getText(), TranslationSettings.getDefaultLanguage()).thenApply(text -> {
+                    return this.translator.translate(turnContext.getActivity().getText(), TranslationSettings.getDefaultLanguage()).thenApply(text -> {
                         turnContext.getActivity().setText(text);
                     });
                 }
@@ -64,48 +63,51 @@ public class TranslationMiddleware implements Middleware  {
             }
         }).thenCompose(task -> {
             turnContext.onSendActivities((newContext, activities, nextSend) -> {
-                return this.languageStateProperty.get(turnContext, () -> TranslationSettings.getDefaultLanguage()).thenApply(userLanguage -> {
-                    Boolean shouldTranslate = userLanguage != TranslationSettings.getDefaultLanguage();
+                return this.languageStateProperty.get(turnContext, () -> TranslationSettings.getDefaultLanguage()).thenCompose(userLanguage -> {
+                    Boolean shouldTranslate = !userLanguage.equals(TranslationSettings.getDefaultLanguage());
 
                     // Translate messages sent to the user to user language
                     if (shouldTranslate) {
                         ArrayList<CompletableFuture<Void>> tasks = new ArrayList<CompletableFuture<Void>>();
-
-                        for (Activity activity : activities.stream().filter(a -> a.getType() == ActivityTypes.MESSAGE)) {
-                        //     tasks.add(this.translateMessageActivity(activity, userLanguage));
+                        for (Activity activity : activities.stream().filter(a -> a.getType() == ActivityTypes.MESSAGE).collect(Collectors.toList())) {
+                            tasks.add(this.translateMessageActivity(activity, userLanguage));
                         }
 
-                    //     if (Arrays.asList(tasks).isEmpty()) {
-                    //         CompletableFuture.allOf(tasks);
-                    //     }
+                        if (Arrays.asList(tasks).isEmpty()) {
+                            CompletableFuture.allOf(tasks.toArray(new CompletableFuture[tasks.size()]));
+                        }
 
-                        // return nextSend.get();
+                        return nextSend.get();
                     }
+
+                    return CompletableFuture.completedFuture(null);
                 });
             });
 
-            // turnContext.onUpdateActivity((newContext, activity, nextUpdate) -> {
-            //     return this.languageStateProperty.get(turnContext, () -> TranslationSettings.getDefaultLanguage()).thenApply(userLanguage -> {
-            //         Boolean shouldTranslate = userLanguage != TranslationSettings.getDefaultLanguage();
+            turnContext.onUpdateActivity((newContext, activity, nextUpdate) -> {
+                return this.languageStateProperty.get(turnContext, () -> TranslationSettings.getDefaultLanguage()).thenCompose(userLanguage -> {
+                    Boolean shouldTranslate = !userLanguage.equals(TranslationSettings.getDefaultLanguage());
 
-            //         // Translate messages sent to the user to user language
-            //         if (activity.getType() == ActivityTypes.MESSAGE) {
-            //             if (shouldTranslate) {
-            //                 this.translateMessageActivity(activity, targetLocale);
-            //             }
-            //         }
+                    // Translate messages sent to the user to user language
+                    if (activity.getType() == ActivityTypes.MESSAGE) {
+                        if (shouldTranslate) {
+                            this.translateMessageActivity(activity, userLanguage);
+                        }
+                    }
 
+                    return nextUpdate.get();
+                });
+            });
 
-            //         return nextUpdate.get();
-            //     });
-            // });
             return CompletableFuture.completedFuture(null);
         });
     }
 
     private CompletableFuture<Void> translateMessageActivity(Activity activity, String targetLocale) {
         if (activity.getType() == ActivityTypes.MESSAGE) {
-            activity.setText(this.translator.translate(activity.getText(), targetLocale));
+            return this.translator.translate(activity.getText(), TranslationSettings.getDefaultLanguage()).thenApply(text -> {
+                activity.setText(text);
+            });
         }
     }
 
@@ -114,7 +116,7 @@ public class TranslationMiddleware implements Middleware  {
             if (userLanguage == null) {
                 userLanguage = TranslationSettings.getDefaultLanguage();
             }
-            return userLanguage != TranslationSettings.getDefaultLanguage();
+            return !userLanguage.equals(TranslationSettings.getDefaultLanguage());
         });
     }
 }

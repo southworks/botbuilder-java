@@ -11,6 +11,8 @@ import com.microsoft.bot.integration.BotFrameworkHttpAdapter;
 import com.microsoft.bot.integration.Configuration;
 import com.microsoft.bot.integration.spring.BotController;
 import com.microsoft.bot.integration.spring.BotDependencyConfiguration;
+import com.microsoft.bot.sample.multilingual.translation.TranslationMiddleware;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
@@ -54,5 +56,34 @@ public class Application extends BotDependencyConfiguration {
         BotFrameworkHttpAdapter adapter = new AdapterWithErrorHandler(configuration, conversationState);
         adapter.use(new TranslationMiddleware(translator, userState));
         return adapter;
+    }
+
+    /**
+     * Create the Microsoft Translator responsible for making calls to the Cognitive Services translation service.
+     * @return MicrosoftTranslator
+     */
+    public MicrosoftTranslator getMicrosoftTranslator() {
+        Configuration configuration = this.getConfiguration();
+        return new MicrosoftTranslator(configuration);
+    }
+
+    /**
+     * Create the Translation Middleware that will be added to the middleware pipeline in the AdapterWithErrorHandler.
+     * @return TranslationMiddleware
+     */
+    public TranslationMiddleware getTranslationMiddleware() {
+        Storage storage = this.getStorage();
+        UserState userState = this.getUserState(storage);
+        return new TranslationMiddleware(this.getMicrosoftTranslator(), userState);
+    }
+
+    /**
+     * Create the multilingual bot.
+     * @return MultiLingualBot
+     */
+    public MultiLingualBot getMultilingualBot() {
+        Storage storage = this.getStorage();
+        UserState userState = this.getUserState(storage);
+        return new MultiLingualBot(userState);
     }
 }

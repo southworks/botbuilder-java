@@ -47,8 +47,8 @@ public class Application extends BotDependencyConfiguration {
     @Override
     public BotFrameworkHttpAdapter getBotFrameworkHttpAdaptor(Configuration configuration) {
         Storage storage = this.getStorage();
-        ConversationState conversationState = new ConversationState(storage);
-        UserState userState = new UserState(storage);
+        ConversationState conversationState = this.getConversationState(storage);
+        UserState userState = this.getUserState(storage);
         MicrosoftTranslator translator = new MicrosoftTranslator(configuration);
 
         BotFrameworkHttpAdapter adapter = new AdapterWithErrorHandler(configuration, conversationState);

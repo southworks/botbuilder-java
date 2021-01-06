@@ -32,7 +32,7 @@ The API uses the most modern neural machine translation technology, as well as o
 
 - From the root of this project folder:
   - Build the sample using `mvn package`
-  - Run it by using `java -jar .\target\bot-proactive-sample.jar`
+  - Run it by using `java -jar .\target\bot-multilingual-sample.jar`
 
 ## Testing the bot using Bot Framework Emulator
 

@@ -15,6 +15,7 @@ import com.microsoft.bot.sample.multilingual.translation.TranslationMiddleware;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -54,16 +55,18 @@ public class Application extends BotDependencyConfiguration {
         MicrosoftTranslator translator = new MicrosoftTranslator(configuration);
 
         BotFrameworkHttpAdapter adapter = new AdapterWithErrorHandler(configuration, conversationState);
-        adapter.use(new TranslationMiddleware(translator, userState));
+        TranslationMiddleware translationMiddleware = this.getTranslationMiddleware();
+        adapter.use(translationMiddleware);
         return adapter;
     }
 
     /**
      * Create the Microsoft Translator responsible for making calls to the Cognitive Services translation service.
+     * @param configuration The Configuration object to use.
      * @return MicrosoftTranslator
      */
-    public MicrosoftTranslator getMicrosoftTranslator() {
-        Configuration configuration = this.getConfiguration();
+    @Bean
+    public MicrosoftTranslator getMicrosoftTranslator(Configuration configuration) {
         return new MicrosoftTranslator(configuration);
     }
 
@@ -71,6 +74,7 @@ public class Application extends BotDependencyConfiguration {
      * Create the Translation Middleware that will be added to the middleware pipeline in the AdapterWithErrorHandler.
      * @return TranslationMiddleware
      */
+    @Bean
     public TranslationMiddleware getTranslationMiddleware() {
         Storage storage = this.getStorage();
         UserState userState = this.getUserState(storage);
@@ -81,6 +85,7 @@ public class Application extends BotDependencyConfiguration {
      * Create the multilingual bot.
      * @return MultiLingualBot
      */
+    @Bean
     public MultiLingualBot getMultilingualBot() {
         Storage storage = this.getStorage();
         UserState userState = this.getUserState(storage);

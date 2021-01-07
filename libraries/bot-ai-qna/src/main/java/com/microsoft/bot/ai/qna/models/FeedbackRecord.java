@@ -14,7 +14,7 @@ public class FeedbackRecod {
     private String userQuestion;
 
     @JsonProperty("qnaId")
-    private String qnaId;
+    private Integer qnaId;
 
     /**
      * Gets the feedback recod's user ID.
@@ -28,8 +28,8 @@ public class FeedbackRecod {
      * Sets the feedback recod's user ID.
      * @param userId The user ID.
      */
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setUserId(String withUserId) {
+        this.userId = withUserId;
     }
 
     /**
@@ -44,15 +44,15 @@ public class FeedbackRecod {
      * Sets question asked by the user.
      * @param userQuestion The user question.
      */
-    public void setUserQuestion(String userQuestion) {
-        this.userQuestion = userQuestion;
+    public void setUserQuestion(String withUserQuestion) {
+        this.userQuestion = withUserQuestion;
     }
 
     /**
      * Gets the QnA ID.
      * @return The QnA ID.
      */
-    public String getQnaId() {
+    public Integer getQnaId() {
         return this.qnaId;
     }
 
@@ -60,7 +60,7 @@ public class FeedbackRecod {
      * Sets the QnA ID.
      * @param qnaId The QnA ID.
      */
-    public void setQnaId(String qnaId) {
-        this.qnaId = qnaId;
+    public void setQnaId(Integer withQnaId) {
+        this.qnaId = withQnaId;
     }
 }

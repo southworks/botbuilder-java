@@ -3,6 +3,8 @@
 
 package com.microsoft.bot.ai.qna.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Active learning feedback records.
  */

@@ -14,7 +14,7 @@ public class FeedbackRecod {
     private String qnaId;
 
     /**
-     * Gets the user ID.
+     * Gets the feedback recod's user ID.
      * @return The user ID.
      */
     public String getUserId() {
@@ -22,7 +22,7 @@ public class FeedbackRecod {
     }
 
     /**
-     * Sets the user ID.
+     * Sets the feedback recod's user ID.
      * @param userId The user ID.
      */
     public void setUserId(String userId) {
@@ -30,7 +30,7 @@ public class FeedbackRecod {
     }
 
     /**
-     * Gets the user question.
+     * Gets the question asked by the user.
      * @return The user question.
      */
     public String getUserQuestion() {
@@ -38,7 +38,7 @@ public class FeedbackRecod {
     }
 
     /**
-     * Sets the user question.
+     * Sets question asked by the user.
      * @param userQuestion The user question.
      */
     public void setUserQuestion(String userQuestion) {

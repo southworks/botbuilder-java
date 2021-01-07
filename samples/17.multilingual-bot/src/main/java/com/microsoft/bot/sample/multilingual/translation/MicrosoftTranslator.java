@@ -46,7 +46,7 @@ public class MicrosoftTranslator {
 
     /**
      * Helper method to translate text to a specified language.
-     * @param text Text Text that will be translated.
+     * @param text Text that will be translated.
      * @param targetLocale targetLocale Two character language code, e.g. "en", "es".
      * @return The first translation result
      */

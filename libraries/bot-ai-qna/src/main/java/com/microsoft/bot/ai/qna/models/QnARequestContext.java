@@ -25,7 +25,7 @@ public class QnARequestContext {
     }
 
     /**
-     * Sets the previous QnA Id that was returned
+     * Sets the previous QnA Id that was returned.
      * @param withPreviousQnAId The previous QnA Id.
      */
     public void setPreviousQnAId(Integer withPreviousQnAId) {

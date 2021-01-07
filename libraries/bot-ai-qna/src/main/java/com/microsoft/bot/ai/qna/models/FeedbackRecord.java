@@ -3,10 +3,11 @@
 
 package com.microsoft.bot.ai.qna.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Active learning feedback record.
  */
-public class FeedbackRecod {
+public class FeedbackRecord {
     @JsonProperty("userId")
     private String userId;
 

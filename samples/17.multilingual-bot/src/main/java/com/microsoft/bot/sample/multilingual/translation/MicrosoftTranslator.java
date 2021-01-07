@@ -54,15 +54,17 @@ public class MicrosoftTranslator {
         return CompletableFuture.supplyAsync(() -> {
             // From Cognitive Services translation documentation:
             // https://docs.microsoft.com/en-us/azure/cognitive-services/Translator/quickstart-translator?tabs=java
-            String json = String.format("[{ \"Text\": \"%s\" }]", text);
+            String body = String.format("[{ \"Text\": \"%s\" }]", text);
 
-            String uri =
-                MicrosoftTranslator.HOST + MicrosoftTranslator.PATH + MicrosoftTranslator.URI_PARAMS + targetLocale;
+            StringBuilder uri = new StringBuilder(MicrosoftTranslator.HOST)
+                .append(MicrosoftTranslator.PATH)
+                .append(MicrosoftTranslator.URI_PARAMS)
+                .append(targetLocale);
 
-            RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), json);
+            RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), body);
 
             Request request = new Request.Builder()
-                .url(uri)
+                .url(uri.toString())
                 .header("Ocp-Apim-Subscription-Key", MicrosoftTranslator.key)
                 .post(requestBody)
                 .build();
@@ -71,9 +73,11 @@ public class MicrosoftTranslator {
                 Response response = MicrosoftTranslator.httpClient.newCall(request).execute();
 
                 if (!response.isSuccessful()) {
-                    String message =  String.format("The call to the translation service returned HTTP status code %s",
-                                        response.code() + ".");
-                    throw new Exception(message);
+                    StringBuilder message =
+                        new StringBuilder("The call to the translation service returned HTTP status code %s")
+                        .append(response.code())
+                        .append(".");
+                    throw new Exception(message.toString());
                 }
 
                 ObjectMapper objectMapper = new ObjectMapper();

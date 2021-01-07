@@ -26,7 +26,7 @@ public class FeedbackRecod {
 
     /**
      * Sets the feedback recod's user ID.
-     * @param userId The user ID.
+     * @param withUserId The user ID.
      */
     public void setUserId(String withUserId) {
         this.userId = withUserId;
@@ -42,7 +42,7 @@ public class FeedbackRecod {
 
     /**
      * Sets question asked by the user.
-     * @param userQuestion The user question.
+     * @param withUserQuestion The user question.
      */
     public void setUserQuestion(String withUserQuestion) {
         this.userQuestion = withUserQuestion;
@@ -58,7 +58,7 @@ public class FeedbackRecod {
 
     /**
      * Sets the QnA ID.
-     * @param qnaId The QnA ID.
+     * @param withQnaId The QnA ID.
      */
     public void setQnaId(Integer withQnaId) {
         this.qnaId = withQnaId;

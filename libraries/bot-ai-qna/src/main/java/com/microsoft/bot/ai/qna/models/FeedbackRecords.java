@@ -8,21 +8,21 @@ package com.microsoft.bot.ai.qna.models;
  */
 public class FeedbackRecords {
     @JsonProperty("feedbackRecords")
-    private String[] records;
+    private FeedbackRecord[] records;
 
     /**
      * Gets the list of feedback records.
      * @return List of {@link FeedbackRecord}.
      */
-    public String[] getRecords() {
+    public FeedbackRecord[] getRecords() {
         return this.records;
     }
 
     /**
      * Sets the list of feedback records.
-     * @param records List of {@link FeedbackRecord}.
+     * @param withRecords List of {@link FeedbackRecord}.
      */
-    public void setRecords(String[] records) {
-        this.records = records;
+    public void setRecords(FeedbackRecord[] withRecords) {
+        this.records = withRecords;
     }
 }

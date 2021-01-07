@@ -56,15 +56,15 @@ public class MicrosoftTranslator {
             // https://docs.microsoft.com/en-us/azure/cognitive-services/Translator/quickstart-translator?tabs=java
             String body = String.format("[{ \"Text\": \"%s\" }]", text);
 
-            StringBuilder uri = new StringBuilder(MicrosoftTranslator.HOST)
+            String uri = new StringBuilder(MicrosoftTranslator.HOST)
                 .append(MicrosoftTranslator.PATH)
                 .append(MicrosoftTranslator.URI_PARAMS)
-                .append(targetLocale);
+                .append(targetLocale).toString();
 
             RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), body);
 
             Request request = new Request.Builder()
-                .url(uri.toString())
+                .url(uri)
                 .header("Ocp-Apim-Subscription-Key", MicrosoftTranslator.key)
                 .post(requestBody)
                 .build();
@@ -73,11 +73,10 @@ public class MicrosoftTranslator {
                 Response response = MicrosoftTranslator.httpClient.newCall(request).execute();
 
                 if (!response.isSuccessful()) {
-                    StringBuilder message =
-                        new StringBuilder("The call to the translation service returned HTTP status code %s")
+                    String message = new StringBuilder("The call to the translation service returned HTTP status code ")
                         .append(response.code())
-                        .append(".");
-                    throw new Exception(message.toString());
+                        .append(".").toString();
+                    throw new Exception(message);
                 }
 
                 ObjectMapper objectMapper = new ObjectMapper();

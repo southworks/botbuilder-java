@@ -3,6 +3,9 @@
 
 package com.microsoft.bot.ai.qna.models;
 
+/**
+ * Active learning feedback record.
+ */
 public class FeedbackRecod {
     @JsonProperty("userId")
     private String userId;

@@ -3,8 +3,6 @@
 
 package com.microsoft.bot.ai.qna.models;
 
-import java.util.ArrayList;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -13,13 +11,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class QnAResponseContext {
 
     @JsonProperty("prompts")
-    private ArrayList<QnAMakerPrompt> prompts;
+    private QnAMakerPrompt[] prompts;
 
     /**
      * Gets the prompts collection of related prompts.
      * @return The QnA prompts array.
      */
-    public ArrayList<QnAMakerPrompt> getPrompts() {
+    public QnAMakerPrompt[] getPrompts() {
         return this.prompts;
     }
 
@@ -27,7 +25,7 @@ public class QnAResponseContext {
      * Sets the prompts collection of related prompts.
      * @param withPrompts The QnA prompts array.
      */
-    public void setPrompts(ArrayList<QnAMakerPrompt> withPrompts) {
+    public void setPrompts(QnAMakerPrompt[] withPrompts) {
         this.prompts = withPrompts;
     }
 }

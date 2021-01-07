@@ -3,8 +3,6 @@
 
 package com.microsoft.bot.ai.qna.models;
 
-import java.util.ArrayList;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -13,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class QueryResult {
 
     @JsonProperty("questions")
-    private ArrayList<String> questions;
+    private String[] questions;
 
     @JsonProperty("answer")
     private String answer;
@@ -22,7 +20,7 @@ public class QueryResult {
     private Float score;
 
     @JsonProperty("metadata")
-    private ArrayList<Metadata> metadata;
+    private Metadata[] metadata;
 
     @JsonProperty("source")
     private String source;
@@ -37,7 +35,7 @@ public class QueryResult {
      * Gets the list of questions indexed in the QnA Service for the given answer.
      * @return The list of questions indexed in the QnA Service for the given answer.
      */
-    public ArrayList<String> getQuestion() {
+    public String[] getQuestion() {
         return this.questions;
     }
 
@@ -45,7 +43,7 @@ public class QueryResult {
      * Sets the list of questions indexed in the QnA Service for the given answer.
      * @param withQuestions The list of questions indexed in the QnA Service for the given answer.
      */
-    public void setQuestions(ArrayList<String> withQuestions) {
+    public void setQuestions(String[] withQuestions) {
         this.questions = withQuestions;
     }
 
@@ -89,7 +87,7 @@ public class QueryResult {
      * Gets metadata that is associated with the answer.
      * @return Metadata that is associated with the answer.
      */
-    public ArrayList<Metadata> getMetadata() {
+    public Metadata[] getMetadata() {
         return this.metadata;
     }
 
@@ -97,7 +95,7 @@ public class QueryResult {
      * Sets metadata that is associated with the answer.
      * @param withMetadata Metadata that is associated with the answer.
      */
-    public void setMetadata(ArrayList<Metadata> withMetadata) {
+    public void setMetadata(Metadata[] withMetadata) {
         this.metadata = withMetadata;
     }
 

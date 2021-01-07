@@ -8,17 +8,18 @@ import java.io.StringReader;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.bot.integration.Configuration;
 import com.microsoft.bot.sample.multilingual.translation.model.TranslatorResponse;
-
-import org.slf4j.LoggerFactory;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.slf4j.LoggerFactory;
 
 /**
  * A helper class wrapper for the Microsoft Translator API.
@@ -29,6 +30,7 @@ public class MicrosoftTranslator {
     private static final String URI_PARAMS = "&to=";
 
     private static OkHttpClient httpClient = new OkHttpClient();
+
     private static String key;
 
     /**

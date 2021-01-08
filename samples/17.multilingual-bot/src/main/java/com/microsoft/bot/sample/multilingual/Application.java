@@ -13,7 +13,6 @@ import com.microsoft.bot.integration.spring.BotController;
 import com.microsoft.bot.integration.spring.BotDependencyConfiguration;
 import com.microsoft.bot.sample.multilingual.translation.MicrosoftTranslator;
 import com.microsoft.bot.sample.multilingual.translation.TranslationMiddleware;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -71,6 +70,7 @@ public class Application extends BotDependencyConfiguration {
 
     /**
      * Create the Translation Middleware that will be added to the middleware pipeline in the AdapterWithErrorHandler.
+     * @param configuration The Configuration object to use.
      * @return TranslationMiddleware
      */
     @Bean

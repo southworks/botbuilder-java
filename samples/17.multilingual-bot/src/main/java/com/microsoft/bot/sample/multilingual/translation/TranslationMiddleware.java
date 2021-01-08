@@ -99,7 +99,7 @@ public class TranslationMiddleware implements Middleware  {
                 });
             });
 
-            return CompletableFuture.completedFuture(null);
+            return next.next();
         });
     }
 

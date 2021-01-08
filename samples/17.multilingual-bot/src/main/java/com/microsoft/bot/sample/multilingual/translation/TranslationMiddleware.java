@@ -108,7 +108,7 @@ public class TranslationMiddleware implements Middleware  {
 
     private CompletableFuture<Void> translateMessageActivity(Activity activity, String targetLocale) {
         if (activity.getType() == ActivityTypes.MESSAGE) {
-            translator.translate(activity.getText(), TranslationSettings.DEFAULT_LANGUAGE).thenApply(text -> {
+            this.translator.translate(activity.getText(), TranslationSettings.DEFAULT_LANGUAGE).thenApply(text -> {
                 activity.setText(text);
                 return CompletableFuture.completedFuture(null);
             });

@@ -1,15 +1,19 @@
 {
     "$schema": "https://schemas.botframework.com/schemas/component/v1.0/component.schema",
-    "$role": "implements(Microsoft.IDialog)",
-    "title": "QnAMaker dialog",
-    "description": "Dialog which uses QnAMAker knowledge base to answer questions.",
+    "$role": "implements(Microsoft.IRecognizer)",
+    "title": "QnAMaker recognizer",
+    "description": "Recognizer for generating QnAMatch intents from a KB.",
     "type": "object",
-    "additionalProperties": false,
     "properties": {
+        "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Optional unique id using with RecognizerSet."
+        },
         "knowledgeBaseId": {
             "$ref": "schema:#/definitions/stringExpression",
             "title": "KnowledgeBase Id",
-            "description": "KnowledgeBase Id of your QnA Maker KnowledgeBase.",
+            "description": "Knowledge base Id of your QnA Maker knowledge base.",
             "default": "=settings.qna.knowledgebaseid"
         },
         "endpointKey": {
@@ -27,35 +31,11 @@
                 "https://yourserver.azurewebsites.net/qnamaker"
             ]
         },
-        "noAnswer": {
-            "$kind": "Microsoft.IActivityTemplate",
-            "title": "Fallback answer",
-            "description": "Default answer to return when none found in KB.",
-            "default": "Sorry, I did not find an answer."
-        },
         "threshold": {
             "$ref": "schema:#/definitions/numberExpression",
             "title": "Threshold",
             "description": "Threshold score to filter results.",
             "default": 0.3
-        },
-        "activeLearningCardTitle": {
-            "$ref": "schema:#/definitions/stringExpression",
-            "title": "Active learning card title",
-            "description": "Title for active learning suggestions card.",
-            "default": "Did you mean:"
-        },
-        "cardNoMatchText": {
-            "$ref": "schema:#/definitions/stringExpression",
-            "title": "Card no match text",
-            "description": "Text for no match option.",
-            "default": "None of the above."
-        },
-        "cardNoMatchResponse": {
-            "$kind": "Microsoft.IActivityTemplate",
-            "title": "Card no match response",
-            "description": "Custom response when no match option was selected.",
-            "default": "Thanks for the feedback."
         },
         "strictFilters": {
             "$ref": "schema:#/definitions/arrayExpression",
@@ -63,19 +43,19 @@
             "description": "Metadata filters to use when calling the QnA Maker KB.",
             "items": {
                 "type": "object",
-                "title": "Metadata filter",
-                "description": "Metadata filter.",
+                "title": "Metadata filters",
+                "description": "Metadata filters to use when querying QnA Maker KB.",
                 "properties": {
                     "name": {
                         "type": "string",
                         "title": "Name",
-                        "description": "Name of filter property.",
+                        "description": "Name to filter on.",
                         "maximum": 100
                     },
                     "value": {
                         "type": "string",
                         "title": "Value",
-                        "description": "Value to filter on.",
+                        "description": "Value to restrict filter.",
                         "maximum": 100
                     }
                 }
@@ -88,19 +68,22 @@
             "default": 3
         },
         "isTest": {
-            "type": "boolean",
-            "title": "IsTest",
+            "$ref": "schema:#/definitions/booleanExpression",
+            "title": "Use test environment",
             "description": "True, if pointing to Test environment, else false.",
-            "default": false
+            "examples": [
+                true,
+                "=f(x)"
+            ]
         },
         "rankerType": {
-            "$ref": "schema:#/definitions/stringExpression",
             "title": "Ranker type",
             "description": "Type of Ranker.",
             "oneOf": [
                 {
-                    "title": "Standard ranker",
-                    "description": "Standard ranker types.",
+                    "type": "string",
+                    "title": "Ranker type",
+                    "description": "Type of Ranker.",
                     "enum": [
                         "default",
                         "questionOnly",
@@ -120,7 +103,7 @@
             "oneOf": [
                 {
                     "title": "Join operator",
-                    "description": "Value of Join Operator to be used as conjunction with Strict Filter values.",
+                    "description": "Value of Join Operator to be used as onjuction with Strict Filter values.",
                     "enum": [
                         "AND",
                         "OR"
@@ -131,6 +114,48 @@
                     "$ref": "schema:#/definitions/equalsExpression"
                 }
             ]
+        },
+        "includeDialogNameInMetadata": {
+            "$ref": "schema:#/definitions/booleanExpression",
+            "title": "Include dialog name",
+            "description": "When set to false, the dialog name will not be passed to QnAMaker. (default) is true",
+            "default": true,
+            "examples": [
+                true,
+                "=f(x)"
+            ]
+        },
+        "metadata": {
+            "$ref": "schema:#/definitions/arrayExpression",
+            "title": "Metadata filters",
+            "description": "Metadata filters to use when calling the QnA Maker KB.",
+            "items": {
+                "type": "object",
+                "title": "Metadata filter",
+                "description": "Metadata filter to use when calling the QnA Maker KB.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "Name of value to test."
+                    },
+                    "value": {
+                        "type": "string",
+                        "title": "Value",
+                        "description": "Value to filter against."
+                    }
+                }
+            }
+        },
+        "context": {
+            "$ref": "schema:#/definitions/objectExpression",
+            "title": "QnA request context",
+            "description": "Context to use for ranking."
+        },
+        "qnaId": {
+            "$ref": "schema:#/definitions/integerExpression",
+            "title": "QnA Id",
+            "description": "A number or expression which is the QnAId to paass to QnAMaker API."
         }
     },
     "required": [

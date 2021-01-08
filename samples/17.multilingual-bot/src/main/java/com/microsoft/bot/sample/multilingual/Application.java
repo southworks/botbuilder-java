@@ -13,6 +13,7 @@ import com.microsoft.bot.integration.spring.BotController;
 import com.microsoft.bot.integration.spring.BotDependencyConfiguration;
 import com.microsoft.bot.sample.multilingual.translation.MicrosoftTranslator;
 import com.microsoft.bot.sample.multilingual.translation.TranslationMiddleware;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;

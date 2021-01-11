@@ -4,7 +4,6 @@
 package com.microsoft.bot.ai.qna.utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.microsoft.bot.ai.qna.models.QueryResult;

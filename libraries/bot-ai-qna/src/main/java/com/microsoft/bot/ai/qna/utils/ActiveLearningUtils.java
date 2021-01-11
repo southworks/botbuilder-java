@@ -3,10 +3,10 @@
 
 package com.microsoft.bot.ai.qna.utils;
 
+import com.microsoft.bot.ai.qna.models.QueryResult;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.microsoft.bot.ai.qna.models.QueryResult;
 
 /**
  * Active learning helper class.
@@ -29,6 +29,7 @@ public class ActiveLearningUtils {
 
     /**
      * Gets maximum Score For Low Score Variation.
+     *
      * @return Maximum Score For Low Score Variation.
      */
     public Float getMaximumScoreForLowScoreVariation() {
@@ -37,7 +38,9 @@ public class ActiveLearningUtils {
 
     /**
      * Sets maximum Score For Low Score Variation.
-     * @param maximumScoreForLowScoreVariation Maximum Score For Low Score Variation.
+     *
+     * @param maximumScoreForLowScoreVariation Maximum Score For Low Score
+     *                                         Variation.
      */
     public void setMaximumScoreForLowScoreVariation(Float maximumScoreForLowScoreVariation) {
         ActiveLearningUtils.MAXIMUM_SCORE_FOR_LOW_SCORE_VARIATION = maximumScoreForLowScoreVariation;
@@ -45,6 +48,7 @@ public class ActiveLearningUtils {
 
     /**
      * Gets minimum Score For Low Score Variation.
+     *
      * @return Minimum Score For Low Score Variation.
      */
     public Float getMinimumScoreForLowScoreVariation() {
@@ -53,7 +57,9 @@ public class ActiveLearningUtils {
 
     /**
      * Sets minimum Score For Low Score Variation.
-     * @param minimumScoreForLowScoreVariation Minimum Score For Low Score Variation.
+     *
+     * @param minimumScoreForLowScoreVariation Minimum Score For Low Score
+     *                                         Variation.
      */
     public void setMinimumScoreForLowScoreVariation(Float minimumScoreForLowScoreVariation) {
         ActiveLearningUtils.MINIMUM_SCORE_FOR_LOW_SCORE_VARIATION = minimumScoreForLowScoreVariation;
@@ -61,13 +67,14 @@ public class ActiveLearningUtils {
 
     /**
      * Returns list of qnaSearch results which have low score variation.
+     *
      * @param qnaSearchResults List of QnaSearch results.
      * @return List of filtered qnaSearch results.
      */
     public static List<QueryResult> getLowScoreVariation(List<QueryResult> qnaSearchResults) {
         List<QueryResult> filteredQnaSearchResult = new ArrayList<QueryResult>();
 
-        if (qnaSearchResults.isEmpty()) {
+        if (qnaSearchResults == null || isEqnaSearchResults.isEmpty()) {
             return filteredQnaSearchResult;
         }
 
@@ -87,8 +94,11 @@ public class ActiveLearningUtils {
             filteredQnaSearchResult.add(qnaSearchResults.get(0));
 
             for (int i = 1; i < qnaSearchResults.size(); i++) {
-                if (ActiveLearningUtils.includeForClustering(prevScore, qnaSearchResults.get(i).getScore() * 100, ActiveLearningUtils.PREVIOUS_LOW_SCORE_VARIATION_MULTIPLIER) &&
-                    ActiveLearningUtils.includeForClustering(topAnswerScore, qnaSearchResults.get(i).getScore() * 100, ActiveLearningUtils.MAX_LOW_SCORE_VARIATION_MULTIPLIER)) {
+                if (ActiveLearningUtils.includeForClustering(prevScore, qnaSearchResults.get(i).getScore() * 100,
+                        ActiveLearningUtils.PREVIOUS_LOW_SCORE_VARIATION_MULTIPLIER)
+                        && ActiveLearningUtils.includeForClustering(topAnswerScore,
+                                qnaSearchResults.get(i).getScore() * 100,
+                                ActiveLearningUtils.MAX_LOW_SCORE_VARIATION_MULTIPLIER)) {
                     prevScore = qnaSearchResults.get(i).getScore() * 100;
                     filteredQnaSearchResult.add(qnaSearchResults.get(i));
                 }

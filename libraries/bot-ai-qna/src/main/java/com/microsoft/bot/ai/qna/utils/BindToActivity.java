@@ -3,11 +3,11 @@
 
 package com.microsoft.bot.ai.qna.utils;
 
+import com.microsoft.bot.schema.Activity;
+
 import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
-
-import com.microsoft.bot.schema.Activity;
 
 public class BindToActivity implements ITemplate<Activity> {
     private Activity activity;
@@ -21,7 +21,7 @@ public class BindToActivity implements ITemplate<Activity> {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return String.format("%s", this.activity.getText());
     }
 }

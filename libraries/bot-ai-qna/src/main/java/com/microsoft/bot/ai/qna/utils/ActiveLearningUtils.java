@@ -74,7 +74,7 @@ public class ActiveLearningUtils {
     public static List<QueryResult> getLowScoreVariation(List<QueryResult> qnaSearchResults) {
         List<QueryResult> filteredQnaSearchResult = new ArrayList<QueryResult>();
 
-        if (qnaSearchResults == null || isEqnaSearchResults.isEmpty()) {
+        if (qnaSearchResults == null || qnaSearchResults.isEmpty()) {
             return filteredQnaSearchResult;
         }
 

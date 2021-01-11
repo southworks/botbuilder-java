@@ -7,13 +7,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.common.base.Strings;
 import com.microsoft.bot.ai.qna.models.QueryResult;
 import com.microsoft.bot.schema.ActionTypes;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.Attachment;
 import com.microsoft.bot.schema.CardAction;
 import com.microsoft.bot.schema.HeroCard;
+
+import com.google.common.base.Strings;
 
 /**
  * Message activity card builder for QnAMaker dialogs.
@@ -32,11 +33,11 @@ public class QnACardBuilder {
             throw new IllegalArgumentException("suggestionsList");
         }
 
-        if (Strings.isNullOrEmpty(cardTitle)) {
+        if (cardTitle == null) {
             throw new IllegalArgumentException("cardTitle");
         }
 
-        if (Strings.isNullOrEmpty(cardNoMatchText)) {
+        if (cardNoMatchText == null) {
             throw new IllegalArgumentException("cardNoMatchText");
         }
 
@@ -90,7 +91,7 @@ public class QnACardBuilder {
             throw new IllegalArgumentException("result");
         }
 
-        if (Strings.isNullOrEmpty(cardNoMatchText)) {
+        if (cardNoMatchText == null) {
             throw new IllegalArgumentException("cardNoMatchText");
         }
 

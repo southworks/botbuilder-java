@@ -3,10 +3,10 @@
 
 package com.microsoft.bot.ai.qna.utils;
 
-import java.util.concurrent.CompletableFuture;
-
 import com.microsoft.bot.ai.qna.models.FeedbackRecords;
 import com.microsoft.bot.rest.serializer.JacksonAdapter;
+
+import java.util.concurrent.CompletableFuture;
 
 import okhttp3.OkHttpClient;
 

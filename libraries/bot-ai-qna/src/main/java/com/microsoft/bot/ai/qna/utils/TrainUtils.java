@@ -8,24 +8,19 @@ import com.microsoft.bot.restclient.serializer.JacksonAdapter;
 
 import java.util.concurrent.CompletableFuture;
 
-import okhttp3.OkHttpClient;
-
 /**
  * Helper class for train API.
  */
 public class TrainUtils {
-    private OkHttpClient httpClient;
     private QnAMakerEndpoint endpoint;
 
     /**
      * Initializes a new instance of the {@link TrainUtils} class.
      *
      * @param withEndpoint   QnA Maker endpoint details.
-     * @param withHttpClient Http client.
      */
-    public TrainUtils(QnAMakerEndpoint withEndpoint, OkHttpClient withHttpClient) {
+    public TrainUtils(QnAMakerEndpoint withEndpoint) {
         this.endpoint = withEndpoint;
-        this.httpClient = withHttpClient;
     }
 
     /**
@@ -54,7 +49,7 @@ public class TrainUtils {
         JacksonAdapter jacksonAdapter = new JacksonAdapter();
         String jsonRequest = jacksonAdapter.serialize(feedbackRecords);
 
-        HttpRequestUtils httpRequestHelper = new HttpRequestUtils(this.httpClient);
-        httpRequestHelper.executeHttpRequest(requestUrl, jsonRequest, this.endpoint).thenApply(response -> null);
+        HttpRequestUtils httpRequestHelper = new HttpRequestUtils();
+        return httpRequestHelper.executeHttpRequest(requestUrl, jsonRequest, this.endpoint);
     }
 }

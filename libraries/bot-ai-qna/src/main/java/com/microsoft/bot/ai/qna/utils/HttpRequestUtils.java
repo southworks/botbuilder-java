@@ -3,30 +3,30 @@
 
 package com.microsoft.bot.ai.qna.utils;
 
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
+import com.microsoft.bot.connector.UserAgent;
+
+import org.slf4j.LoggerFactory;
+
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.Request.Builder;
 
 /**
  * Helper for HTTP requests.
  */
 public class HttpRequestUtils {
-    private static ProductInfoHeaderValue BOT_BUILDER_INFO;
-    private static ProductInfoHeaderValue PLATFORM_INFO;
-
-    private OkHttpClient httpClient;
 
     /**
      * Initializes a new instance of the {@link HttpRequestUtils} class.
-     *
-     * @param withHttpClient Http client.
      */
-    public HttpRequestUtils(OkHttpClient withHttpClient) {
-        this.httpClient = withHttpClient;
-        this.updateBotBuilderAndPlatformInfo();
+    public HttpRequestUtils() {
+
     }
 
     /**
@@ -51,15 +51,34 @@ public class HttpRequestUtils {
             throw new IllegalArgumentException("endpoint");
         }
 
-        try (String string = new String()) {
+        return CompletableFuture.supplyAsync(() -> {
+            RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payloadBody);
+            OkHttpClient client = new OkHttpClient();
+            String endpointKey = StringBuilder("EndpointKey ", endpoint.getEndpointKey());
 
-        }
-    }
+            Request request = new Request.Builder()
+                .url(requestUrl)
+                .header("Authorization", endpointKey)
+                .header("Ocp-Apim-Subscription-Key", endpointKey)
+                .header("User-Agent", UserAgent.value())
+                .post(requestBody)
+                .build();
 
-    private static void setHeaders(Request request, QnAMakerEndpoint endpoint) {
-    }
+            Response response;
+            try {
+                response = client.newCall(request).execute();
+                if (!response.isSuccessful()) {
+                    String message = new StringBuilder("The call to the translation service returned HTTP status code ")
+                        .append(response.code())
+                        .append(".").toString();
+                    throw new Exception(message);
+                }
+            } catch (Exception e) {
+                LoggerFactory.getLogger(HttpRequestUtils.class).error("findPackages", e);
+                throw new CompletionException(e);
+            }
 
-    private void updateBotBuilderAndPlatformInfo() {
-
+            return response;
+        });
     }
 }

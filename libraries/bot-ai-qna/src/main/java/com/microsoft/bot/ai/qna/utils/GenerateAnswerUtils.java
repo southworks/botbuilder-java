@@ -14,21 +14,16 @@ import com.microsoft.bot.ai.qna.models.QueryResults;
 import com.microsoft.bot.ai.qna.models.RankerTypes;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.TurnContext;
-import com.microsoft.bot.rest.serializer.JacksonAdapter;
+import com.microsoft.bot.restclient.serializer.JacksonAdapter;
 import com.microsoft.bot.schema.Activity;
 
-import org.w3c.dom.ranges.RangeException;
-
 import net.minidev.json.JSONObject;
-import okhttp3.OkHttpClient;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 /**
  * Helper class for Generate Answer API.
  */
 public class GenerateAnswerUtils {
-    private OkHttpClient httpClient;
     private BotTelemetryClient telemetryClient;
     private QnAMakerEndpoint endpoint;
     private QnAMakerOptions options;
@@ -39,16 +34,14 @@ public class GenerateAnswerUtils {
      * @param withTelemetryClient Telemetry client.
      * @param withEndpoint        QnA Maker endpoint details.
      * @param withOptions         QnA Maker options.
-     * @param withHttpClient      Http client.
      */
     public GenerateAnswerUtils(BotTelemetryClient withTelemetryClient, QnAMakerEndpoint withEndpoint,
-            QnAMakerOptions withOptions, OkHttpClient withHttpClient) {
+            QnAMakerOptions withOptions) {
         this.telemetryClient = withTelemetryClient;
         this.endpoint = withEndpoint;
 
         this.options = withOptions != null ? withOptions : new QnAMakerOptions();
         GenerateAnswerUtils.validateOptions(this.options);
-        this.httpClient = withHttpClient;
     }
 
     /**
@@ -222,7 +215,7 @@ public class GenerateAnswerUtils {
             }
         });
 
-        HttpRequestutils httpRequestHelper = new HttpRequestUtils(this.httpClient);
+        HttpRequestutils httpRequestHelper = new HttpRequestUtils();
         return httpRequestHelper.executeHttpRequest(requestUrl, jsonRequest, this.endpoint).thenCompose(response -> {
             return GenerateAnswerUtils.formatQnAResult(response, options);
         });

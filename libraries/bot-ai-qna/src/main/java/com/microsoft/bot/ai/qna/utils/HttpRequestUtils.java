@@ -3,7 +3,6 @@
 
 package com.microsoft.bot.ai.qna.utils;
 
-import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 

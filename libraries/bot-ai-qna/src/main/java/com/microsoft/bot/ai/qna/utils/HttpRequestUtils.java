@@ -20,14 +20,6 @@ import okhttp3.Response;
  * Helper for HTTP requests.
  */
 public class HttpRequestUtils {
-
-    /**
-     * Initializes a new instance of the {@link HttpRequestUtils} class.
-     */
-    public HttpRequestUtils() {
-
-    }
-
     /**
      * Execute Http request.
      *

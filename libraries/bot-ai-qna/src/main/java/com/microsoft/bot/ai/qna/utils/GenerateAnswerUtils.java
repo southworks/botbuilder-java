@@ -131,7 +131,7 @@ public class GenerateAnswerUtils {
     }
 
     private static void validateOptions(QnAMakerOptions options) {
-        if (options.getScoreThreshold == 0) {
+        if (options.getScoreThreshold() == 0) {
             options.setScoreThreshold(0.3f);
         }
 
@@ -153,7 +153,7 @@ public class GenerateAnswerUtils {
                     options.getTop());
         }
 
-        if (options.getStrictFilters == null) {
+        if (options.getStrictFilters() == null) {
             options.setStrictFilters(new ArrayList<Metadata>());
         }
 
@@ -176,7 +176,7 @@ public class GenerateAnswerUtils {
 
         if (queryOptions != null) {
             if (queryOptions.getScoreThreshold() != hydratedOptions.getScoreThreshold()
-                    && queryOptions.getScoreThreshold != 0) {
+                    && queryOptions.getScoreThreshold() != 0) {
                 hydratedOptions.setScoreThreshold(queryOptions.getScoreThreshold());
             }
 

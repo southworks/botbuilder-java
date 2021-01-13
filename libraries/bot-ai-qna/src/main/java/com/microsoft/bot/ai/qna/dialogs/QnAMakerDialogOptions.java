@@ -9,7 +9,7 @@ package com.microsoft.bot.ai.qna.dialogs;
 public class QnAMakerDialogOptions {
     private QnAMakerOptions qnaMakerOptions;
 
-    private QnADialogResponseOptions responseOptions
+    private QnADialogResponseOptions responseOptions;
 
     /**
      * Gets the options for the QnAMaker service.

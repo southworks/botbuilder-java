@@ -76,13 +76,6 @@ public class QnAMakerEndpoint {
 
     /**
      * Initializes a new instance of the {@link QnAMakerEndpoint} class.
-     */
-    public QnAMakerEndpoint() {
-
-    }
-
-    /**
-     * Initializes a new instance of the {@link QnAMakerEndpoint} class.
      *
      * @param service QnA service details from configuration.
      */

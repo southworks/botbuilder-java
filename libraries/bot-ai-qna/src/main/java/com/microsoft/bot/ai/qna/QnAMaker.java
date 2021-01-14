@@ -36,30 +36,26 @@ import org.apache.commons.lang3.StringUtils;
 // TODO this class need: QnAMakerEndpoint, QnAMakerOptions, QnAMakerService
 public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
 
-    /**
-     * The name of the QnAMaker class.
-     */
-    public static final String QNA_MAKER_NAME = "QnaMaker";
-
-    /**
-     * The type used when logging QnA Maker trace.
-     */
-    public static final String QNA_MAKER_TRACE_TYPE = "https://www.qnamaker.ai/schemas/trace";
-
-    /**
-     * The label used when logging QnA Maker trace.
-     */
-    public static final String QNA_MAKER_TRACE_LABEL = "QnAMaker Trace";
-
     private QnAMakerEndpoint endpoint;
-
     private GenerateAnswerUtils generateAnswerHelper;
     private TrainUtils activeLearningTrainHelper;
-
     private static OkHttpClient defaultHttpClient = new OkHttpClient();
     private boolean logPersonalInformation;
     @JsonIgnore
     private BotTelemetryClient telemetryClient;
+
+    /**
+     * The name of the QnAMaker class.
+     */
+    public static final String QNA_MAKER_NAME = "QnAMaker";
+    /**
+     * The type used when logging QnA Maker trace.
+     */
+    public static final String QNA_MAKER_TRACE_TYPE = "https://www.qnamaker.ai/schemas/trace";
+    /**
+     * The label used when logging QnA Maker trace.
+     */
+    public static final String QNA_MAKER_TRACE_LABEL = "QnAMaker Trace";
 
     /**
      * Initializes a new instance of the QnAMaker class.

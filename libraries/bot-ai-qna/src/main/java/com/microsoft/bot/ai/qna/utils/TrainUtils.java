@@ -7,7 +7,7 @@ import com.microsoft.bot.ai.qna.QnAMakerEndpoint;
 import com.microsoft.bot.ai.qna.models.FeedbackRecords;
 import com.microsoft.bot.rest.serializer.JacksonAdapter;
 
-
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -19,7 +19,7 @@ public class TrainUtils {
     /**
      * Initializes a new instance of the {@link TrainUtils} class.
      *
-     * @param withEndpoint   QnA Maker endpoint details.
+     * @param withEndpoint QnA Maker endpoint details.
      */
     public TrainUtils(QnAMakerEndpoint withEndpoint) {
         this.endpoint = withEndpoint;
@@ -31,7 +31,7 @@ public class TrainUtils {
      * @param feedbackRecords Feedback record list.
      * @return A Task representing the asynchronous operation.
      */
-    public CompletableFuture<Void> callTrain(FeedbackRecords feedbackRecords) {
+    public CompletableFuture<Void> callTrain(FeedbackRecords feedbackRecords) throws IOException {
         if (feedbackRecords == null) {
             throw new IllegalArgumentException("feedbackRecords: Feedback records cannot be null.");
         }
@@ -41,10 +41,10 @@ public class TrainUtils {
         }
 
         // Call train
-        this.queryTrain(feedbackRecords);
+        return this.queryTrain(feedbackRecords);
     }
 
-    private CompletableFuture<Void> queryTrain(FeedbackRecords feedbackRecords) {
+    private CompletableFuture<Void> queryTrain(FeedbackRecords feedbackRecords) throws IOException {
         String requestUrl = String.format("%1$s/knowledgebases/%2$s/train", this.endpoint.getHost(),
                 this.endpoint.getKnowledgeBaseId());
 

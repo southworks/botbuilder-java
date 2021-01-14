@@ -46,23 +46,18 @@ public class HttpRequestUtils {
         return CompletableFuture.supplyAsync(() -> {
             RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payloadBody);
             OkHttpClient client = new OkHttpClient();
-            String endpointKey = StringBuilder("EndpointKey ", endpoint.getEndpointKey());
+            String endpointKey = String.format("%s", endpoint.getEndpointKey());
 
-            Request request = new Request.Builder()
-                .url(requestUrl)
-                .header("Authorization", endpointKey)
-                .header("Ocp-Apim-Subscription-Key", endpointKey)
-                .header("User-Agent", UserAgent.value())
-                .post(requestBody)
-                .build();
+            Request request = new Request.Builder().url(requestUrl).header("Authorization", endpointKey)
+                    .header("Ocp-Apim-Subscription-Key", endpointKey).header("User-Agent", UserAgent.value())
+                    .post(requestBody).build();
 
             Response response;
             try {
                 response = client.newCall(request).execute();
                 if (!response.isSuccessful()) {
                     String message = new StringBuilder("The call to the translation service returned HTTP status code ")
-                        .append(response.code())
-                        .append(".").toString();
+                            .append(response.code()).append(".").toString();
                     throw new Exception(message);
                 }
             } catch (Exception e) {

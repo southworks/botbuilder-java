@@ -6,14 +6,13 @@ package com.microsoft.bot.ai.qna.utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.microsoft.bot.ai.qna.dialogs.QnAMakerPrompt;
 import com.microsoft.bot.ai.qna.models.QueryResult;
 import com.microsoft.bot.schema.ActionTypes;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.Attachment;
 import com.microsoft.bot.schema.CardAction;
 import com.microsoft.bot.schema.HeroCard;
-
-import com.google.common.base.Strings;
 
 /**
  * Message activity card builder for QnAMaker dialogs.

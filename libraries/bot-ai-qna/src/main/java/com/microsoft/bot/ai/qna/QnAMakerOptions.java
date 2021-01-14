@@ -172,7 +172,7 @@ public class QnAMakerOptions {
      * @return A value indicating whether to call test or prod environment of
      *         knowledge base.
      */
-    public Boolean getTest() {
+    public Boolean getIsTest() {
         return isTest;
     }
 
@@ -183,7 +183,7 @@ public class QnAMakerOptions {
      * @param withIsTest A value indicating whether to call test or prod environment
      *                   of knowledge base.
      */
-    public void setTest(Boolean withIsTest) {
+    public void setIsTest(Boolean withIsTest) {
         isTest = withIsTest;
     }
 

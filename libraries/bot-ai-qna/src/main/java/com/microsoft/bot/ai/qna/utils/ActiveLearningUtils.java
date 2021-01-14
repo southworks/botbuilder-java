@@ -12,9 +12,8 @@ import java.util.List;
  * Active learning helper class.
  */
 public class ActiveLearningUtils {
-
     /**
-     * Previous Low Score Variation Multiplier.
+     * Previous Low Score Variation Multiplier.ActiveLearningUtils
      */
     private static final Float PREVIOUS_LOW_SCORE_VARIATION_MULTIPLIER = 0.7f;
 
@@ -32,7 +31,7 @@ public class ActiveLearningUtils {
      *
      * @return Maximum Score For Low Score Variation.
      */
-    public Float getMaximumScoreForLowScoreVariation() {
+    public static Float getMaximumScoreForLowScoreVariation() {
         return ActiveLearningUtils.MAXIMUM_SCORE_FOR_LOW_SCORE_VARIATION;
     }
 
@@ -42,7 +41,7 @@ public class ActiveLearningUtils {
      * @param maximumScoreForLowScoreVariation Maximum Score For Low Score
      *                                         Variation.
      */
-    public void setMaximumScoreForLowScoreVariation(Float maximumScoreForLowScoreVariation) {
+    public static void setMaximumScoreForLowScoreVariation(Float maximumScoreForLowScoreVariation) {
         ActiveLearningUtils.MAXIMUM_SCORE_FOR_LOW_SCORE_VARIATION = maximumScoreForLowScoreVariation;
     }
 
@@ -51,7 +50,7 @@ public class ActiveLearningUtils {
      *
      * @return Minimum Score For Low Score Variation.
      */
-    public Float getMinimumScoreForLowScoreVariation() {
+    public static Float getMinimumScoreForLowScoreVariation() {
         return ActiveLearningUtils.MINIMUM_SCORE_FOR_LOW_SCORE_VARIATION;
     }
 
@@ -61,7 +60,7 @@ public class ActiveLearningUtils {
      * @param minimumScoreForLowScoreVariation Minimum Score For Low Score
      *                                         Variation.
      */
-    public void setMinimumScoreForLowScoreVariation(Float minimumScoreForLowScoreVariation) {
+    public static void setMinimumScoreForLowScoreVariation(Float minimumScoreForLowScoreVariation) {
         ActiveLearningUtils.MINIMUM_SCORE_FOR_LOW_SCORE_VARIATION = minimumScoreForLowScoreVariation;
     }
 

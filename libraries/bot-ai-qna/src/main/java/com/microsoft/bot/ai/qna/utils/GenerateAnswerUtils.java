@@ -3,11 +3,12 @@
 
 package com.microsoft.bot.ai.qna.utils;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 import com.microsoft.bot.ai.qna.QnAMakerEndpoint;
+import com.microsoft.bot.ai.qna.QnAMakerOptions;
 import com.microsoft.bot.ai.qna.models.Metadata;
 import com.microsoft.bot.ai.qna.models.QnAMakerTraceInfo;
 import com.microsoft.bot.ai.qna.models.QueryResult;
@@ -15,11 +16,12 @@ import com.microsoft.bot.ai.qna.models.QueryResults;
 import com.microsoft.bot.ai.qna.models.RankerTypes;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.TurnContext;
-import com.microsoft.bot.restclient.serializer.JacksonAdapter;
+import com.microsoft.bot.rest.serializer.JacksonAdapter;
 import com.microsoft.bot.schema.Activity;
 
 import net.minidev.json.JSONObject;
 import okhttp3.Response;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper class for Generate Answer API.
@@ -76,7 +78,7 @@ public class GenerateAnswerUtils {
      */
     @Deprecated
     public CompletableFuture<QueryResult[]> getAnswers(TurnContext turnContext, Activity messageActivity,
-            QnAMakerOptions options) {
+            QnAMakerOptions options) throws IOException {
         return this.getAnswersRaw(turnContext, messageActivity, options).thenApply(result -> result.getAnswers());
     }
 
@@ -92,7 +94,7 @@ public class GenerateAnswerUtils {
      *         ranking score.
      */
     public CompletableFuture<QueryResults> getAnswersRaw(TurnContext turnContext, Activity messageActivity,
-            QnAMakerOptions options) {
+            QnAMakerOptions options) throws IOException {
         if (turnContext == null) {
             throw new IllegalArgumentException("turnContext");
         }
@@ -109,22 +111,23 @@ public class GenerateAnswerUtils {
         QnAMakerOptions hydratedOptions = this.hydrateOptions(options);
         GenerateAnswerUtils.validateOptions(hydratedOptions);
 
-        return this.queryQnAService(messageActivity, hydratedOptions).thenCompose(result -> {
+        return this.queryQnaService(messageActivity, hydratedOptions).thenCompose(result -> {
             this.emitTraceInfo(turnContext, messageActivity, result.getAnswers(), hydratedOptions);
             return CompletableFuture.completedFuture(result);
         });
     }
 
-    private static CompletableFuture<QueryResults> formatQnAResult(Response response, QnAMakerOptions options) {
-        String jsonResponse = response.body().string();
+    private static CompletableFuture<QueryResults> formatQnAResult(Response response, QnAMakerOptions options)
+            throws IOException {
+        String jsonResponse = null;
         JacksonAdapter jacksonAdapter = new JacksonAdapter();
+        QueryResults results = null;
 
-        QueryResults results = jacksonAdapter.deserialize(jsonResponse, QueryResults.class);
-
+        jsonResponse = response.body().string();
+        results = jacksonAdapter.deserialize(jsonResponse, QueryResults.class);
         for (QueryResult answer : results.getAnswers()) {
             answer.setScore(answer.getScore() / 100);
         }
-
         results.setAnswers((QueryResult[]) Arrays.asList(results.getAnswers()).stream()
                 .filter(answer -> answer.getScore() > options.getScoreThreshold()).toArray());
 
@@ -146,16 +149,15 @@ public class GenerateAnswerUtils {
         }
 
         if (options.getTimeout() == 0.0d) {
-            options.setTimeout(100000);
+            options.setTimeout(100000d);
         }
 
         if (options.getTop() < 1) {
-            throw new IllegalArgumentException("options: The %s property should be an integer greater than 0",
-                    options.getTop());
+            throw new IllegalArgumentException("options: The top property should be an integer greater than 0");
         }
 
         if (options.getStrictFilters() == null) {
-            options.setStrictFilters(new ArrayList<Metadata>());
+            options.setStrictFilters(new Metadata[0]);
         }
 
         if (options.getRankerType() == null) {
@@ -170,9 +172,11 @@ public class GenerateAnswerUtils {
      * @param queryOptions The options for the QnA Maker knowledge base.
      * @return Return modified options for the QnA Maker knowledge base.
      */
-    private QnAMakerOptions hydrateOptions(QnAMakerOptions queryOptions) {
+    private QnAMakerOptions hydrateOptions(QnAMakerOptions queryOptions) throws IOException {
         JacksonAdapter jacksonAdapter = new JacksonAdapter();
-        QnAMakerOptions hydratedOptions = jacksonAdapter.deserialize(jacksonAdapter.serialize(queryOptions),
+        QnAMakerOptions hydratedOptions = null;
+
+        hydratedOptions = jacksonAdapter.<QnAMakerOptions>deserialize(jacksonAdapter.serialize(queryOptions),
                 QnAMakerOptions.class);
 
         if (queryOptions != null) {
@@ -196,13 +200,18 @@ public class GenerateAnswerUtils {
                     : RankerTypes.DEFAULT_RANKER_TYPE);
             hydratedOptions.setStrictFiltersJoinOperator(queryOptions.getStrictFiltersJoinOperator());
         }
+
+        return hydratedOptions;
     }
 
-    private CompletableFuture<QueryResults> queryQnaService(Activity messageActivity, QnAMakerOptions options) {
+    private CompletableFuture<QueryResults> queryQnaService(Activity messageActivity, QnAMakerOptions options)
+            throws IOException {
         String requestUrl = String.format("%1$s/knowledgebases/%2$s/generateanswer", this.endpoint.getHost(),
                 this.endpoint.getKnowledgeBaseId());
         JacksonAdapter jacksonAdapter = new JacksonAdapter();
-        String jsonRequest = jacksonAdapter.serialize(new JSONObject() {
+        String jsonRequest = null;
+
+        jsonRequest = jacksonAdapter.serialize(new JSONObject() {
             {
                 put("question", messageActivity.getText());
                 put("top", options.getTop());
@@ -210,25 +219,31 @@ public class GenerateAnswerUtils {
                 put("scoreThreshold", options.getScoreThreshold());
                 put("context", options.getContext());
                 put("qnaId", options.getQnAId());
-                put("isTest", options.getRankerType());
+                put("isTest", options.getIsTest());
                 put("rankerType", options.getRankerType());
                 put("StrictFiltersCompoundOperationType", options.getStrictFiltersJoinOperator());
             }
         });
 
-        HttpRequestutils httpRequestHelper = new HttpRequestUtils();
+        HttpRequestUtils httpRequestHelper = new HttpRequestUtils();
         return httpRequestHelper.executeHttpRequest(requestUrl, jsonRequest, this.endpoint).thenCompose(response -> {
-            return GenerateAnswerUtils.formatQnAResult(response, options);
+            try {
+                return GenerateAnswerUtils.formatQnAResult(response, options);
+            } catch (IOException e) {
+                LoggerFactory.getLogger(GenerateAnswerUtils.class).error("QueryQnAService", e);
+                return CompletableFuture.completedFuture(null);
+            }
         });
     }
 
     private CompletableFuture<Void> emitTraceInfo(TurnContext turnContext, Activity messageActivity,
             QueryResult[] result, QnAMakerOptions options) {
+        String knowledgeBaseId = this.endpoint.getKnowledgeBaseId();
         QnAMakerTraceInfo traceInfo = new QnAMakerTraceInfo() {
             {
                 setMessage(messageActivity);
                 setQueryResults(result);
-                setKnowledgeBaseId(this.endpoint.getKnowledgeBaseId());
+                setKnowledgeBaseId(knowledgeBaseId);
                 setScoreThreshold(options.getScoreThreshold());
                 setTop(options.getTop());
                 setStrictFilters(options.getStrictFilters());

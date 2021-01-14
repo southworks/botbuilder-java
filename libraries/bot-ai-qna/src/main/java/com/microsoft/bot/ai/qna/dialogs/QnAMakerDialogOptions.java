@@ -3,6 +3,9 @@
 
 package com.microsoft.bot.ai.qna.dialogs;
 
+import com.microsoft.bot.ai.qna.QnADialogResponseOptions;
+import com.microsoft.bot.ai.qna.QnAMakerOptions;
+
 /**
  * Defines Dialog Options for QnAMakerDialog.
  */

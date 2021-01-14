@@ -12,7 +12,7 @@ public class QnAMakerPrompt {
     private static final Integer DEFAULT_DISPLAY_ORDER = 0;
 
     @JsonProperty("displayOrder")
-    private Integer displayOrder = DEFAULT_DISPLAY_ORDER;
+    private Integer displayOrder = QnAMakerPrompt.DEFAULT_DISPLAY_ORDER;
 
     @JsonProperty("qnaId")
     private Integer qnaId;
@@ -42,8 +42,8 @@ public class QnAMakerPrompt {
     }
 
     /**
-     * Gets or sets qna id corresponding to the prompt - if QnaId is present, QnADTO
-     * object is ignored.
+     * Gets qna id corresponding to the prompt - if QnaId is present, QnADTO object
+     * is ignored.
      *
      * @return QnA Id.
      */

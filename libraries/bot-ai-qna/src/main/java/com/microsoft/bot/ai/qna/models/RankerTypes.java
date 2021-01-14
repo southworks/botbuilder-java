@@ -7,7 +7,6 @@ package com.microsoft.bot.ai.qna.models;
  * Enumeration of types of ranking.
  */
 public class RankerTypes {
-
     /**
      * Default Ranker Behaviour. i.e. Ranking based on Questions and Answer.
      */

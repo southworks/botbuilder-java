@@ -20,6 +20,7 @@ public class FeedbackRecord {
 
     /**
      * Gets the feedback recod's user ID.
+     *
      * @return The user ID.
      */
     public String getUserId() {
@@ -28,6 +29,7 @@ public class FeedbackRecord {
 
     /**
      * Sets the feedback recod's user ID.
+     *
      * @param withUserId The user ID.
      */
     public void setUserId(String withUserId) {
@@ -36,6 +38,7 @@ public class FeedbackRecord {
 
     /**
      * Gets the question asked by the user.
+     *
      * @return The user question.
      */
     public String getUserQuestion() {
@@ -44,6 +47,7 @@ public class FeedbackRecord {
 
     /**
      * Sets question asked by the user.
+     *
      * @param withUserQuestion The user question.
      */
     public void setUserQuestion(String withUserQuestion) {
@@ -52,6 +56,7 @@ public class FeedbackRecord {
 
     /**
      * Gets the QnA ID.
+     *
      * @return The QnA ID.
      */
     public Integer getQnaId() {
@@ -60,6 +65,7 @@ public class FeedbackRecord {
 
     /**
      * Sets the QnA ID.
+     *
      * @param withQnaId The QnA ID.
      */
     public void setQnaId(Integer withQnaId) {

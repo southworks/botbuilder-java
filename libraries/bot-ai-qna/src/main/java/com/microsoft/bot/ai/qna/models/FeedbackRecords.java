@@ -14,6 +14,7 @@ public class FeedbackRecords {
 
     /**
      * Gets the list of feedback records.
+     *
      * @return List of {@link FeedbackRecord}.
      */
     public FeedbackRecord[] getRecords() {
@@ -22,6 +23,7 @@ public class FeedbackRecords {
 
     /**
      * Sets the list of feedback records.
+     *
      * @param withRecords List of {@link FeedbackRecord}.
      */
     public void setRecords(FeedbackRecord[] withRecords) {

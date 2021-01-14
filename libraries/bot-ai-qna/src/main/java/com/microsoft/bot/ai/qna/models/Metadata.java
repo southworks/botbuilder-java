@@ -10,9 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Represents the Metadata object sent as part of QnA Maker requests.
  */
-
 public class Metadata implements Serializable {
-
     @JsonProperty("name")
     private String name;
 
@@ -21,6 +19,7 @@ public class Metadata implements Serializable {
 
     /**
      * Gets the name for the Metadata property.
+     *
      * @return A string.
      */
     public String getName() {
@@ -29,6 +28,7 @@ public class Metadata implements Serializable {
 
     /**
      * Sets the name for the Metadata property.
+     *
      * @param withName A string.
      */
     public void setName(String withName) {
@@ -37,6 +37,7 @@ public class Metadata implements Serializable {
 
     /**
      * Gets the value for the Metadata property.
+     *
      * @return A string.
      */
     public String getValue() {
@@ -44,7 +45,8 @@ public class Metadata implements Serializable {
     }
 
     /**
-     * Gets the value for the Metadata property.
+     * Sets the value for the Metadata property.
+     *
      * @param withValue A string.
      */
     public void setValue(String withValue) {

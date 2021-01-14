@@ -8,10 +8,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.microsoft.bot.schema.Activity;
 
 /**
- * This class represents all the trace info that we collect from the QnAMaker Middleware.
+ * This class represents all the trace info that we collect from the QnAMaker
+ * Middleware.
  */
 public class QnAMakerTraceInfo {
-
     @JsonProperty("message")
     private Activity message;
 
@@ -48,6 +48,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Gets message which instigated the query to QnAMaker.
+     *
      * @return Message which instigated the query to QnAMaker.
      */
     public Activity getMessage() {
@@ -56,6 +57,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Sets message which instigated the query to QnAMaker.
+     *
      * @param withMessage Message which instigated the query to QnAMaker.
      */
     public void setMessage(Activity withMessage) {
@@ -64,6 +66,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Gets results that QnAMaker returned.
+     *
      * @return Results that QnAMaker returned.
      */
     public QueryResult[] getQueryResults() {
@@ -72,6 +75,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Sets results that QnAMaker returned.
+     *
      * @param withQueryResult Results that QnAMaker returned.
      */
     public void setQueryResults(QueryResult[] withQueryResult) {
@@ -80,6 +84,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Gets iD of the Knowledgebase that is being used.
+     *
      * @return ID of the Knowledgebase that is being used.
      */
     public String getKnowledgeBaseId() {
@@ -88,6 +93,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Sets iD of the Knowledgebase that is being used.
+     *
      * @param withKnowledgeBaseId ID of the Knowledgebase that is being used.
      */
     public void setKnowledgeBaseId(String withKnowledgeBaseId) {
@@ -95,9 +101,9 @@ public class QnAMakerTraceInfo {
     }
 
     /**
-     * Gets the minimum score threshold, used to filter returned results.
-     * Scores are normalized to the range of 0.0 to 1.0
-     * before filtering.
+     * Gets the minimum score threshold, used to filter returned results. Scores are
+     * normalized to the range of 0.0 to 1.0 before filtering.
+     *
      * @return The minimum score threshold, used to filter returned results.
      */
     public Float getScoreThreshold() {
@@ -105,10 +111,11 @@ public class QnAMakerTraceInfo {
     }
 
     /**
-     * Sets the minimum score threshold, used to filter returned results.
-     * Scores are normalized to the range of 0.0 to 1.0
-     * before filtering
-     * @param withScoreThreshold The minimum score threshold, used to filter returned results.
+     * Sets the minimum score threshold, used to filter returned results. Scores are
+     * normalized to the range of 0.0 to 1.0 before filtering
+     *
+     * @param withScoreThreshold The minimum score threshold, used to filter
+     *                           returned results.
      */
     public void setScoreThreshold(Float withScoreThreshold) {
         this.scoreThreshold = withScoreThreshold;
@@ -116,6 +123,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Gets number of ranked results that are asked to be returned.
+     *
      * @return Number of ranked results that are asked to be returned.
      */
     public Integer getTop() {
@@ -124,6 +132,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Sets number of ranked results that are asked to be returned.
+     *
      * @param withTop Number of ranked results that are asked to be returned.
      */
     public void setTop(Integer withTop) {
@@ -132,6 +141,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Gets the filters used to return answers that have the specified metadata.
+     *
      * @return The filters used to return answers that have the specified metadata.
      */
     public Metadata[] getStrictFilters() {
@@ -140,7 +150,9 @@ public class QnAMakerTraceInfo {
 
     /**
      * Sets the filters used to return answers that have the specified metadata.
-     * @param withStrictFilters The filters used to return answers that have the specified metadata.
+     *
+     * @param withStrictFilters The filters used to return answers that have the
+     *                          specified metadata.
      */
     public void setStrictFilters(Metadata[] withStrictFilters) {
         this.strictFilters = withStrictFilters;
@@ -148,6 +160,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Gets context for multi-turn responses.
+     *
      * @return The context from which the QnA was extracted.
      */
     public QnARequestContext getContext() {
@@ -156,6 +169,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Sets context for multi-turn responses.
+     *
      * @param withContext The context from which the QnA was extracted.
      */
     public void setContext(QnARequestContext withContext) {
@@ -164,6 +178,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Gets QnA Id of the current question asked.
+     *
      * @return Id of the current question asked.
      */
     public Integer getQnAId() {
@@ -172,6 +187,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Sets QnA Id of the current question asked.
+     *
      * @param withQnAId Id of the current question asked.
      */
     public void setQnAId(Integer withQnAId) {
@@ -179,16 +195,22 @@ public class QnAMakerTraceInfo {
     }
 
     /**
-     * Gets a value indicating whether gets or sets environment of knowledgebase to be called.
-     * @return A value indicating whether to call test or prod environment of knowledgebase.
+     * Gets a value indicating whether gets or sets environment of knowledgebase to
+     * be called.
+     *
+     * @return A value indicating whether to call test or prod environment of
+     *         knowledgebase.
      */
     public Boolean getIsTest() {
         return this.isTest;
     }
 
     /**
-     * Sets a value indicating whether gets or sets environment of knowledgebase to be called.
-     * @param withIsTest A value indicating whether to call test or prod environment of knowledgebase.
+     * Sets a value indicating whether gets or sets environment of knowledgebase to
+     * be called.
+     *
+     * @param withIsTest A value indicating whether to call test or prod environment
+     *                   of knowledgebase.
      */
     public void setIsTest(Boolean withIsTest) {
         this.isTest = withIsTest;
@@ -196,6 +218,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Gets ranker Types.
+     *
      * @return Ranker Types.
      */
     public String getRankerType() {
@@ -204,6 +227,7 @@ public class QnAMakerTraceInfo {
 
     /**
      * Sets ranker Types.
+     *
      * @param withRankerType Ranker Types.
      */
     public void setRankerType(String withRankerType) {
@@ -211,7 +235,9 @@ public class QnAMakerTraceInfo {
     }
 
     /**
-     * Gets the {@link Metadata} collection to be sent when calling QnA Maker to boost results.
+     * Gets the {@link Metadata} collection to be sent when calling QnA Maker to
+     * boost results.
+     *
      * @return An array of {@link Metadata}.
      */
     public Metadata[] getMetadataBoost() {
@@ -219,7 +245,9 @@ public class QnAMakerTraceInfo {
     }
 
     /**
-     * Sets the {@link Metadata} collection to be sent when calling QnA Maker to boost results.
+     * Sets the {@link Metadata} collection to be sent when calling QnA Maker to
+     * boost results.
+     *
      * @param withMetadataBoost An array of {@link Metadata}.
      */
     public void setMetadataBoost(Metadata[] withMetadataBoost) {

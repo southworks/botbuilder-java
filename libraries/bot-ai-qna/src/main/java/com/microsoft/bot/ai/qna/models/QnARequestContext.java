@@ -6,10 +6,10 @@ package com.microsoft.bot.ai.qna.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * The context associated with QnA.  Used to mark if the current prompt is relevant with a previous question or not.
+ * The context associated with QnA. Used to mark if the current prompt is
+ * relevant with a previous question or not.
  */
 public class QnARequestContext {
-
     @JsonProperty("previousQnAId")
     private Integer previousQnAId;
 
@@ -18,6 +18,7 @@ public class QnARequestContext {
 
     /**
      * Gets the previous QnA Id that was returned.
+     *
      * @return The previous QnA Id.
      */
     public Integer getPreviousQnAId() {
@@ -26,6 +27,7 @@ public class QnARequestContext {
 
     /**
      * Sets the previous QnA Id that was returned.
+     *
      * @param withPreviousQnAId The previous QnA Id.
      */
     public void setPreviousQnAId(Integer withPreviousQnAId) {
@@ -34,6 +36,7 @@ public class QnARequestContext {
 
     /**
      * Gets the previous user query/question.
+     *
      * @return The previous user query.
      */
     public String getPreviousUserQuery() {
@@ -42,6 +45,7 @@ public class QnARequestContext {
 
     /**
      * Sets the previous user query/question.
+     *
      * @param withPreviousUserQuery The previous user query.
      */
     public void setPreviousUserQuery(String withPreviousUserQuery) {

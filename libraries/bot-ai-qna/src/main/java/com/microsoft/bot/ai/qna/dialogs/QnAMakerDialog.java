@@ -3,12 +3,13 @@
 
 package com.microsoft.bot.ai.qna.dialogs;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
-import javax.print.attribute.standard.DialogTypeSelection;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -24,7 +25,6 @@ import com.microsoft.bot.ai.qna.utils.QnACardBuilder;
 import com.microsoft.bot.builder.MessageFactory;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityTypes;
-import com.nimbusds.oauth2.sdk.Message;
 
 import okhttp3.OkHttpClient;
 
@@ -353,7 +353,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      *         knowledge base or an expression which evaluates to the QnA Maker
      *         metadata.
      */
-    public ArrayExpresion<Metadata> getStrictFilters() {
+    public ArrayExpression<Metadata> getStrictFilters() {
         return this.strictFilters;
     }
 
@@ -365,7 +365,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      *                          queries to the knowledge base or an expression which
      *                          evaluates to the QnA Maker metadata.
      */
-    public void setStrictFilters(ArrayExpresion<Metadata> withStrictFilters) {
+    public void setStrictFilters(ArrayExpression<Metadata> withStrictFilters) {
         this.strictFilters = withStrictFilters;
     }
 
@@ -376,7 +376,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @return The flag to indicate in personal information should be logged in
      *         telemetry.
      */
-    public BoolExpresion getLogPersonalInformation() {
+    public BoolExpression getLogPersonalInformation() {
         return this.logPersonalInformation;
     }
 
@@ -387,7 +387,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @param withLogPersonalInformation The flag to indicate in personal
      *                                   information should be logged in telemetry.
      */
-    public void setLogPersonalInformation(BoolExpresion withLogPersonalInformation) {
+    public void setLogPersonalInformation(BoolExpression withLogPersonalInformation) {
         this.logPersonalInformation = withLogPersonalInformation;
     }
 
@@ -397,7 +397,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @return A value indicating whether to call test or prod environment of knowledge base.
      */
     public Boolean getIsTest() {
-        return this.isTest
+        return this.isTest;
     }
 
     /**
@@ -772,7 +772,7 @@ public class QnAMakerDialog extends WaterfallDialog {
         QnAMakerDialogOptions dialogOptions = ObjectPath.getPathValue(stepContext.getActiveDialog().getState(),
                 OPTIONS);
         String reply = stepContext.getContext().getActivity().getText();
-        if (reply.compareToIgnoreCase(dialogOptions.getResponseOptions().getCardNoMatchText())) {
+        if (reply.compareToIgnoreCase(dialogOptions.getResponseOptions().getCardNoMatchText()) == 0) {
             Activity activity = dialogOptions.getResponseOptions().getCardNoMatchResponse();
             if (activity == null) {
                 stepContext.getContext().sendActivity(DEFAULT_CARD_NO_MATCH_RESPONSE).join();
@@ -814,7 +814,7 @@ public class QnAMakerDialog extends WaterfallDialog {
         // -Check if previous context is present, if yes then put it with the query
         // -Check for id if query is present in reverse index.
         Map<String, Integer> previousContextData = ObjectPath.getPathValue(dc.getActiveDialog().getState(),
-                QNA_CONTEXT_DATA, new Map<String, Integer>());
+                QNA_CONTEXT_DATA, new HashMap<String, Integer>());
         Integer previousQnAId = ObjectPathj.getPathValue(dc.getActiveDialog().getState(), PREVIOUS_QNA_ID, 0);
 
         if (previousQnAId > 0) {
@@ -927,7 +927,7 @@ public class QnAMakerDialog extends WaterfallDialog {
                 return this.getQnAMakerClient(stepContext).thenCompose(qnaClient -> {
                     return qnaClient.callTrain(feedbackRecords);
                 }).thenCompose(task -> stepContext.next(new ArrayList<QueryResult>(){{ qnaResult }}));
-            } else if (reply.compareToIgnoreCase(dialogOptions.getResponseOptions().getCardNoMatchText())) {
+            } else if (reply.compareToIgnoreCase(dialogOptions.getResponseOptions().getCardNoMatchText()) == 0) {
                 Activity activity = dialogOptions.getResponseOptions().getCardNoMatchResponse();
                 if (activity == null) {
                     stepContext.getContext().sendActivity(DEFAULT_CARD_NO_MATCH_RESPONSE).join();

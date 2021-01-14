@@ -17,7 +17,6 @@ import com.microsoft.bot.ai.qna.models.QueryResult;
 import com.microsoft.bot.builder.IntentScore;
 import com.microsoft.bot.builder.Recognizer;
 import com.microsoft.bot.builder.RecognizerResult;
-import com.microsoft.bot.builder.TurnContext;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.Pair;
 import net.minidev.json.JSONObject;
@@ -398,7 +397,7 @@ public class QnAMakerRecognizer implements Recognizer {
         }
 
         // if there is $qna.metadata set add to filters
-        List<Metadata> externalMetadata = Metadata.getValue(dialogContext.getState());
+        List<Metadata> externalMetadata = this.metadata.getValue(dialogContext.getState());
         if (externalMetadata != null) {
             filters.addAll(externalMetadata);
         }

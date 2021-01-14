@@ -3,8 +3,10 @@
 
 package com.microsoft.bot.ai.qna.utils;
 
+import com.microsoft.bot.ai.qna.QnAMakerEndpoint;
 import com.microsoft.bot.ai.qna.models.FeedbackRecords;
-import com.microsoft.bot.restclient.serializer.JacksonAdapter;
+import com.microsoft.bot.rest.serializer.JacksonAdapter;
+
 
 import java.util.concurrent.CompletableFuture;
 
@@ -50,6 +52,6 @@ public class TrainUtils {
         String jsonRequest = jacksonAdapter.serialize(feedbackRecords);
 
         HttpRequestUtils httpRequestHelper = new HttpRequestUtils();
-        return httpRequestHelper.executeHttpRequest(requestUrl, jsonRequest, this.endpoint);
+        return httpRequestHelper.executeHttpRequest(requestUrl, jsonRequest, this.endpoint).thenApply(result -> null);
     }
 }

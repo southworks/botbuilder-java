@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.microsoft.bot.ai.qna.IQnAMakerClient;
+import com.microsoft.bot.ai.qna.QnAMakerEndpoint;
 import com.microsoft.bot.ai.qna.models.Metadata;
 import com.microsoft.bot.ai.qna.models.QnARequestContext;
 import com.microsoft.bot.ai.qna.models.QueryResult;
@@ -132,16 +133,6 @@ public class QnAMakerDialog extends WaterfallDialog {
      */
     public String getKind() {
         return this.kind;
-    }
-
-    /**
-     * The declarative name for this type. Used by the framework to serialize and
-     * deserialize an instance of this type to JSON.
-     *
-     * @param withKind Kind of a QnADialog.
-     */
-    public void setKind(String withKind) {
-        this.kind = withKind;
     }
 
     /**

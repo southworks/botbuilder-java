@@ -67,34 +67,40 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      * @param withLogPersonalInformation Set to true to include personally identifiable information in telemetry events.
      */
     public QnAMaker(QnAMakerEndpoint withEndpoint, QnAMakerOptions options, OkHttpClient httpClient,
-                    BotTelemetryClient withTelemetryClient, boolean withLogPersonalInformation) {
+                    BotTelemetryClient withTelemetryClient, Boolean withLogPersonalInformation) {
+        if (withLogPersonalInformation != null) {
+            withLogPersonalInformation = false;
+        }
+
         if (withEndpoint == null) {
-            throw new IllegalArgumentException(endpoint.getKnowledgeBaseId());
-        } else {
-          endpoint = withEndpoint;
+            throw new IllegalArgumentException("endpoint");
         }
-        if (Strings.isNullOrEmpty(endpoint.getHost())) {
-            throw new IllegalArgumentException(endpoint.getHost());
+
+        this.endpoint = withEndpoint;
+        if (Strings.isNullOrEmpty(this.endpoint.getKnowledgeBaseId())) {
+            throw new IllegalArgumentException("KnowledgeBaseId");
         }
-        if (Strings.isNullOrEmpty(endpoint.getEndpointKey())) {
-            throw new IllegalArgumentException(endpoint.getEndpointKey());
+        if (Strings.isNullOrEmpty(this.endpoint.getHost())) {
+            throw new IllegalArgumentException("Host");
         }
-        if (endpoint.getHost().endsWith("v2.0") || endpoint.getHost().endsWith("v3.0")) {
+        if (Strings.isNullOrEmpty(this.endpoint.getEndpointKey())) {
+            throw new IllegalArgumentException("EndpointKey");
+        }
+        if (this.endpoint.getHost().endsWith("v2.0") || this.endpoint.getHost().endsWith("v3.0")) {
             throw new UnsupportedOperationException("v2.0 and v3.0 of QnA Maker service"
                + " is no longer supported in the QnA Maker.");
         }
         if (httpClient == null) {
             httpClient = getDefaultHttpClient();
         }
-        if (telemetryClient == null) {
-            telemetryClient = new NullBotTelemetryClient();
-        } else {
-            telemetryClient = withTelemetryClient;
+        if (this.telemetryClient == null) {
+            this.telemetryClient = new NullBotTelemetryClient();
         }
+        this.telemetryClient = withTelemetryClient;
 
-        logPersonalInformation = withLogPersonalInformation;
+        this.logPersonalInformation = withLogPersonalInformation;
 
-        this.generateAnswerHelper = new GenerateAnswerUtils(telemetryClient, endpoint, options);
+        this.generateAnswerHelper = new GenerateAnswerUtils(this.telemetryClient, endpoint, options);
         this.activeLearningTrainHelper = new TrainUtils(endpoint);
     }
 
@@ -150,7 +156,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      * otherwise the properties will be filtered.
      */
     public Boolean getLogPersonalInformation() {
-        return logPersonalInformation;
+        return this.logPersonalInformation;
     }
 
     /**
@@ -158,7 +164,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      * @return {@link BotTelemetryClient} being used to log events.
      */
     public BotTelemetryClient getTelemetryClient() {
-        return telemetryClient;
+        return this.telemetryClient;
     }
 
     /**
@@ -279,7 +285,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
         Map<String, String> properties = new HashMap<>();
         Map<String, Double> metrics = new HashMap<>();
 
-        properties.put(QnATelemetryConstants.KNOWLEDGE_BASE_ID_PROPERTY, endpoint.getKnowledgeBaseId());
+        properties.put(QnATelemetryConstants.KNOWLEDGE_BASE_ID_PROPERTY, this.endpoint.getKnowledgeBaseId());
 
         String text = turnContext.getActivity().getText();
         String userName = turnContext.getActivity().getFrom().getName();

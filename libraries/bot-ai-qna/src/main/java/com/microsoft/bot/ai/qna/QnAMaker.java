@@ -33,13 +33,11 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * Provides access to a QnA Maker knowledge base.
  */
-// TODO this class need: QnAMakerEndpoint, QnAMakerOptions, QnAMakerService
 public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
-
     private QnAMakerEndpoint endpoint;
     private GenerateAnswerUtils generateAnswerHelper;
     private TrainUtils activeLearningTrainHelper;
-    private static OkHttpClient defaultHttpClient = new OkHttpClient();
+    private static OkHttpClient DEFAULT_HTTP_CLIENT = new OkHttpClient();
     private boolean logPersonalInformation;
     @JsonIgnore
     private BotTelemetryClient telemetryClient;
@@ -91,7 +89,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
                + " is no longer supported in the QnA Maker.");
         }
         if (httpClient == null) {
-            httpClient = getDefaultHttpClient();
+            httpClient = QnAMaker.DEFAULT_HTTP_CLIENT;
         }
         if (this.telemetryClient == null) {
             this.telemetryClient = new NullBotTelemetryClient();
@@ -117,36 +115,11 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
     }
 
     /**
-     * Initializes a new instance of the {@link QnAMaker} class.
-     * @param service QnA service details from configuration.
-     * @param options The options for the QnA Maker knowledge base.
-     * @param httpClient An alternate client with which to talk to QnAMaker.
-     *                   If null, a default client is used for this instance.
-     * @param withTelemetryClient The IBotTelemetryClient used for logging telemetry events.
-     * @param withLogPersonalInformation Set to true to include personally identifiable information in telemetry events.
-     */
-    public QnAMaker(QnAMakerService service, QnAMakerOptions options, OkHttpClient httpClient,
-                    BotTelemetryClient withTelemetryClient, boolean withLogPersonalInformation) {
-        this(new QnAMakerEndpoint(service), options, httpClient, withTelemetryClient, withLogPersonalInformation);
-    }
-
-    /**
-     * Initializes a new instance of the {@link QnAMaker} class.
-     * @param service QnA service details from configuration.
-     * @param options The options for the QnA Maker knowledge base.
-     * @param httpClient An alternate client with which to talk to QnAMaker.
-     *                   If null, a default client is used for this instance.
-     */
-    public QnAMaker(QnAMakerService service, @Nullable QnAMakerOptions options, @Nullable OkHttpClient httpClient) {
-        this (new QnAMakerEndpoint(service), options, httpClient, null);
-    }
-
-    /**
      * Gets the {@link OkHttpClient} to be used when calling the QnA Maker API.
      * @return A instance of {@link OkHttpClient}
      */
     public static OkHttpClient getDefaultHttpClient() {
-        return defaultHttpClient;
+        return QnAMaker.DEFAULT_HTTP_CLIENT;
     }
 
     /**
@@ -334,6 +307,4 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
 
         return CompletableFuture.completedFuture(new Pair(telemetryProperties, telemetryMetrics));
     }
-
-
 }

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
+import com.microsoft.bot.ai.qna.QnAMakerEndpoint;
 import com.microsoft.bot.ai.qna.models.Metadata;
 import com.microsoft.bot.ai.qna.models.QnAMakerTraceInfo;
 import com.microsoft.bot.ai.qna.models.QueryResult;

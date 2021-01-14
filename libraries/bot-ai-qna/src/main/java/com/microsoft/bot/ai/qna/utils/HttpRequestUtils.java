@@ -6,6 +6,7 @@ package com.microsoft.bot.ai.qna.utils;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+import com.microsoft.bot.ai.qna.QnAMakerEndpoint;
 import com.microsoft.bot.connector.UserAgent;
 
 import org.slf4j.LoggerFactory;

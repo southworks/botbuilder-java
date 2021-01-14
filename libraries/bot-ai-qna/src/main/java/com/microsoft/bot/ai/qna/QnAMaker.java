@@ -113,7 +113,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      */
     public QnAMaker(QnAMakerEndpoint withEndpoint, @Nullable QnAMakerOptions options,
                     @Nullable OkHttpClient httpClient) {
-        new QnAMaker(withEndpoint, options, httpClient, null, false);
+        this(withEndpoint, options, httpClient, null, false);
     }
 
     /**
@@ -127,8 +127,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      */
     public QnAMaker(QnAMakerService service, QnAMakerOptions options, OkHttpClient httpClient,
                     BotTelemetryClient withTelemetryClient, boolean withLogPersonalInformation) {
-        new QnAMaker(new QnAMakerEndpoint(service), options, httpClient,
-            withTelemetryClient, withLogPersonalInformation);
+        this(new QnAMakerEndpoint(service), options, httpClient, withTelemetryClient, withLogPersonalInformation);
     }
 
     /**
@@ -139,7 +138,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      *                   If null, a default client is used for this instance.
      */
     public QnAMaker(QnAMakerService service, @Nullable QnAMakerOptions options, @Nullable OkHttpClient httpClient) {
-        new QnAMaker(new QnAMakerEndpoint(service), options, httpClient, null);
+        this (new QnAMakerEndpoint(service), options, httpClient, null);
     }
 
     /**

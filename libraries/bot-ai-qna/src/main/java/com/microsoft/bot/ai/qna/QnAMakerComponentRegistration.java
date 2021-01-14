@@ -8,7 +8,8 @@ import com.microsoft.bot.ai.qna.dialogs.QnAMakerDialog;
 /**
  * Class which contains registration of components for QnAMaker.
  */
-// TODO: This class needs the missing ComponentRegistration class and
+// TODO: This class needs the missing ComponentRegistration and Declarative
+// classes and
 // IComponentDeclarativeTypes interface
 public class QnAMakerComponentRegistration extends ComponentRegistration implements IComponentDeclarativeTypes {
     /**
@@ -17,16 +18,20 @@ public class QnAMakerComponentRegistration extends ComponentRegistration impleme
      * @return enumeration of DeclarativeTypes.
      */
     public DeclarativeType[] getDeclarativeTypes(ResourceExplorer resourceExplorer) {
+        String qnaMakerDialogKind = QnAMakerDialog.getKind();
+        String qnaMakerDialogClassname = QnAMakerDialog.class.getName();
+        String qnaMakerRecognizerKind = QnAMakerRecognizer.getKind();
+        String qnaMakerRecognizerClassname = QnAMakerRecognizer.class.getName();
         DeclarativeType[] declarativeTypes = {
             // Dialogs
             new DeclarativeType(){
-                setKind(QnAMakerDialog.getKind());
-                setType(QnAMakerDialog.getClass().getName());
+                setKind(qnaMakerDialogKind);
+                setType(qnaMakerDialogClassname);
             },
             // Recognizers
             new DeclarativeType(){
-                setKind(QnAMakerRecognizer.getKind());
-                setType(QnAMakerRecognizer.getClass().getName());
+                setKind(qnaMakerRecognizerKind);
+                setType(qnaMakerRecognizerClassname);
             }
         };
 

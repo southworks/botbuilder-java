@@ -76,12 +76,8 @@ public class QnAMakerEndpoint {
 
     /**
      * Initializes a new instance of the {@link QnAMakerEndpoint} class.
-     *
-     * @param service QnA service details from configuration.
      */
-    public QnAMakerEndpoint(QnAMakerService service) {
-        this.knowledgeBaseId = service.getKbId();
-        this.endpointKey = service.getEndpointKey();
-        this.host = service.getHostname();
+    public QnAMakerEndpoint() {
+
     }
 }

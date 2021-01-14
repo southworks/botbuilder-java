@@ -206,20 +206,19 @@ public class QnAMakerOptions {
     }
 
     /**
-     * Gets {@link StrictFilters} join operator.
+     * Gets Strict Filters join operator.
      *
-     * @return A value used for join operation of StrictFilters
-     *         {@link StrictFilters}.
+     * @return A value indicating choice for Strict Filters Join Operation.
      */
     public JoinOperator getStrictFiltersJoinOperator() {
         return strictFiltersJoinOperator;
     }
 
     /**
-     * Sets {@link StrictFilters} join operator.
+     * Sets Strict Filters join operator.
      *
-     * @param strictFiltersJoinOperator A value used for join operation of
-     *                                  StrictFilters {@link StrictFilters}.
+     * @param withStrictFiltersJoinOperator A value indicating choice for Strict
+     *                                      Filters Join Operation.
      */
     public void setStrictFiltersJoinOperator(JoinOperator withStrictFiltersJoinOperator) {
         this.strictFiltersJoinOperator = withStrictFiltersJoinOperator;

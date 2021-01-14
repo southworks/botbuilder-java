@@ -37,18 +37,25 @@ public interface IQnAMakerClient {
 
     /**
      * Generates an answer from the knowledge base.
-     * @param turnContext The Turn Context that contains the user question to be queried against your knowledge base.
-     * @param options The options for the QnA Maker knowledge base. If null, constructor option is used for this instance.
-     * @param telemetryProperties Additional properties to be logged to telemetry with the QnaMessage event.
-     * @param telemetryMetrics Additional metrics to be logged to telemetry with the QnaMessage event.
-     * @return A list of answers for the user query, sorted in decreasing order of ranking score.
+     *
+     * @param turnContext         The Turn Context that contains the user question
+     *                            to be queried against your knowledge base.
+     * @param options             The options for the QnA Maker knowledge base. If
+     *                            null, constructor option is used for this
+     *                            instance.
+     * @param telemetryProperties Additional properties to be logged to telemetry
+     *                            with the QnaMessage event.
+     * @param telemetryMetrics    Additional metrics to be logged to telemetry with
+     *                            the QnaMessage event.
+     * @return A list of answers for the user query, sorted in decreasing order of
+     *         ranking score.
      */
     CompletableFuture<QueryResults> getAnswersRaw(TurnContext turnContext, QnAMakerOptions options,
             @Nullable Map<String, String> telemetryProperties, @Nullable Map<String, Double> telemetryMetrics);
 
-
     /**
      * Filters the ambiguous question for active learning.
+     *
      * @param queryResults User query output.
      * @return Filtered array of ambiguous question.
      */
@@ -56,6 +63,7 @@ public interface IQnAMakerClient {
 
     /**
      * Send feedback to the knowledge base.
+     *
      * @param feedbackRecords Feedback records.
      * @return A Task representing the asynchronous operation.
      */

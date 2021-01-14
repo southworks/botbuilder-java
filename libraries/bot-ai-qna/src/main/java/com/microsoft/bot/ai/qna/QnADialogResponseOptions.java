@@ -9,7 +9,6 @@ import com.microsoft.bot.schema.Activity;
  * QnA dialog response options class.
  */
 public class QnADialogResponseOptions {
-
     private String activeLearningCardTitle;
     private String cardNoMatchText;
     private Activity noAnswer;
@@ -17,6 +16,7 @@ public class QnADialogResponseOptions {
 
     /**
      * Gets the active learning card title.
+     *
      * @return The active learning card title
      */
     public String getActiveLearningCardTitle() {
@@ -25,7 +25,8 @@ public class QnADialogResponseOptions {
 
     /**
      * Sets the active learning card title.
-     * @param withActiveLearningCardTitle The specified active learning card title.
+     *
+     * @param withActiveLearningCardTitle The active learning card title.
      */
     public void setActiveLearningCardTitle(String withActiveLearningCardTitle) {
         this.activeLearningCardTitle = withActiveLearningCardTitle;
@@ -33,6 +34,7 @@ public class QnADialogResponseOptions {
 
     /**
      * Gets the card no match text.
+     *
      * @return The card no match text.
      */
     public String getCardNoMatchText() {
@@ -41,7 +43,8 @@ public class QnADialogResponseOptions {
 
     /**
      * Sets the card no match text.
-     * @param withCardNoMatchText The specified card no match text.
+     *
+     * @param withCardNoMatchText The card no match text.
      */
     public void setCardNoMatchText(String withCardNoMatchText) {
         this.cardNoMatchText = withCardNoMatchText;
@@ -49,6 +52,7 @@ public class QnADialogResponseOptions {
 
     /**
      * Gets the no answer activity.
+     *
      * @return The no answer activity.
      */
     public Activity getNoAnswer() {
@@ -57,7 +61,8 @@ public class QnADialogResponseOptions {
 
     /**
      * Sets the no answer activity.
-     * @param withNoAnswer The specified no answer activity.
+     *
+     * @param withNoAnswer The no answer activity.
      */
     public void setNoAnswer(Activity withNoAnswer) {
         this.noAnswer = withNoAnswer;
@@ -65,6 +70,7 @@ public class QnADialogResponseOptions {
 
     /**
      * Gets the card no match response.
+     *
      * @return The card no match response.
      */
     public Activity getCardNoMatchResponse() {
@@ -73,7 +79,8 @@ public class QnADialogResponseOptions {
 
     /**
      * Sets the card no match response.
-     * @param withCardNoMatchResponse The specified card no match response.
+     *
+     * @param withCardNoMatchResponse The card no match response.
      */
     public void setCardNoMatchResponse(Activity withCardNoMatchResponse) {
         this.cardNoMatchResponse = withCardNoMatchResponse;

@@ -18,14 +18,19 @@ import javax.annotation.Nullable;
 public interface ITelemetryQnAMaker {
 
     /**
-     * Gets a value indicating whether determines whether to log personal information that came from the user.
-     * @return If true, will log personal information into the IBotTelemetryClient.TrackEvent method;
-     *         otherwise the properties will be filtered.
+     * Gets a value indicating whether determines whether to log personal
+     * information that came from the user.
+     *
+     * @return If true, will log personal information into the
+     *         IBotTelemetryClient.TrackEvent method; otherwise the properties will
+     *         be filtered.
      */
     Boolean getLogPersonalInformation();
 
     /**
-     * Gets the currently configured {@link BotTelemetryClient} that logs the QnaMessage event.
+     * Gets the currently configured {@link BotTelemetryClient} that logs the
+     * QnaMessage event.
+     *
      * @return The {@link BotTelemetryClient} being used to log events.
      */
     BotTelemetryClient getTelemetryClient();
@@ -45,9 +50,6 @@ public interface ITelemetryQnAMaker {
      * @return A list of answers for the user query, sorted in decreasing order of
      *         ranking score.
      */
-    CompletableFuture<QueryResult[]> getAnswers(
-        TurnContext turnContext,
-        QnAMakerOptions options,
-        Map<String, String> telemetryProperties,
-        @Nullable Map<String, Double> telemetryMetrics);
+    CompletableFuture<QueryResult[]> getAnswers(TurnContext turnContext, QnAMakerOptions options,
+            Map<String, String> telemetryProperties, @Nullable Map<String, Double> telemetryMetrics);
 }

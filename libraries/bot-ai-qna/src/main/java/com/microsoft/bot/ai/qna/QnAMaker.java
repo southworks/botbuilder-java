@@ -3,6 +3,7 @@
 
 package com.microsoft.bot.ai.qna;
 
+import com.microsoft.bot.ai.qna.QnAMakerOptions;
 import com.microsoft.bot.ai.qna.models.FeedbackRecords;
 import com.microsoft.bot.ai.qna.models.QueryResult;
 import com.microsoft.bot.ai.qna.models.QueryResults;
@@ -147,7 +148,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      * @return A list of answers for the user query, sorted in decreasing order of ranking score.
      */
     public CompletableFuture<QueryResult[]> getAnswers(TurnContext turnContext, @Nullable QnAMakerOptions options) {
-        return getAnswers(turnContext, options, null, null);
+        return this.getAnswers(turnContext, options, null, null);
     }
 
     /**
@@ -197,9 +198,9 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
             throw new IllegalArgumentException("Null or empty text");
         }
 
-        return this.generateAnswerHelper.getAnswersRaw(turnContext, messageActivity, options).thenApply(result -> {
-            onQnaResult(result.getAnswers(), turnContext, telemetryProperties, telemetryMetrics);
-            return result;
+        return this.generateAnswerHelper.getAnswersRaw(turnContext, messageActivity, options).thenCompose(result -> {
+            this.onQnaResults(result.getAnswers(), turnContext, telemetryProperties, telemetryMetrics);
+            return CompletableFuture.completedFuture(result);
         });
     }
 
@@ -209,7 +210,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      * @return Filtered array of ambiguous question.
      */
     public QueryResult[] getLowScoreVariation(QueryResult[] queryResult) {
-        return ActiveLearningUtils.getLowScoreVariation(Arrays.asList(queryResult)).toArray(queryResult);
+        return (QueryResult[]) ActiveLearningUtils.getLowScoreVariation(Arrays.asList(queryResult)).toArray();
     }
 
     /**
@@ -229,7 +230,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      * @param telemetryMetrics Additional metrics to be logged to telemetry with the LuisResult event.
      * @return A Task representing the work to be executed.
      */
-    protected CompletableFuture<Void> onQnaResult(QueryResult[] queryResults, TurnContext turnContext,
+    protected CompletableFuture<Void> onQnaResults(QueryResult[] queryResults, TurnContext turnContext,
                                                   @Nullable Map<String, String> telemetryProperties,
                                                   @Nullable Map<String, Double> telemetryMetrics) {
         return fillQnAEvent(queryResults, turnContext, telemetryProperties, telemetryMetrics).thenAccept(eventData -> {
@@ -253,9 +254,9 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
     protected CompletableFuture<Pair<Map<String, String>, Map<String, Double>>> fillQnAEvent(QueryResult[] queryResults,
                                                                                              TurnContext turnContext,
                                                                                              @Nullable Map<String, String> telemetryProperties,
-                                                                                             @Nullable Map<String, Double> telemetryMetrics) {
-        Map<String, String> properties = new HashMap<>();
-        Map<String, Double> metrics = new HashMap<>();
+                                                                                             @Nullable Map<String, Double> telemetryMetrics) throws IOException {
+        Map<String, String> properties = new HashMap<String, String>();
+        Map<String, Double> metrics = new HashMap<String, Double>();
 
         properties.put(QnATelemetryConstants.KNOWLEDGE_BASE_ID_PROPERTY, this.endpoint.getKnowledgeBaseId());
 
@@ -264,11 +265,11 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
 
         // Use the LogPersonalInformation flag to toggle logging PII data, text and user name are common examples
         if (this.logPersonalInformation) {
-            if (!StringUtils.isWhitespace(text)) {
+            if (text != null && !StringUtils.isWhitespace(text)) {
                 properties.put(QnATelemetryConstants.QUESTION_ID_PROPERTY, text);
             }
 
-            if (!StringUtils.isWhitespace(userName)) {
+            if (userName != null && !StringUtils.isWhitespace(userName)) {
                 properties.put(QnATelemetryConstants.USERNAME_PROPERTY, userName);
             }
         }
@@ -277,12 +278,8 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
         if (queryResults.length > 0) {
             JacksonAdapter jacksonAdapter = new JacksonAdapter();
             QueryResult queryResult = queryResults[0];
-            try {
-                properties.put(QnATelemetryConstants.MATCHED_QUESTION_PROPERTY,
-                    jacksonAdapter.serialize(queryResult.getQuestion()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            properties.put(QnATelemetryConstants.MATCHED_QUESTION_PROPERTY,
+                jacksonAdapter.serialize(queryResult.getQuestion()));
             properties.put(QnATelemetryConstants.QUESTION_ID_PROPERTY, queryResult.getId().toString());
             properties.put(QnATelemetryConstants.ANSWER_PROPERTY, queryResult.getAnswer());
             metrics.put(QnATelemetryConstants.SCORE_PROPERTY, queryResult.getScore().doubleValue());
@@ -297,14 +294,14 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
         // Additional Properties can override "stock" properties.
         if (telemetryProperties != null) {
             telemetryProperties.putAll(properties);
-
         }
-
         // Additional Metrics can override "stock" metrics.
         if (telemetryMetrics != null) {
             telemetryMetrics.putAll(metrics);
         }
 
+        telemetryProperties = telemetryProperties != null ? telemetryProperties : properties;
+        telemetryMetrics = telemetryMetrics != null ? telemetryMetrics : metrics;
         return CompletableFuture.completedFuture(new Pair(telemetryProperties, telemetryMetrics));
     }
 }

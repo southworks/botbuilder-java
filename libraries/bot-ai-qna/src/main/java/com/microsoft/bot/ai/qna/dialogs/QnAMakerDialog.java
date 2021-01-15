@@ -4,17 +4,30 @@
 package com.microsoft.bot.ai.qna.dialogs;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
-import javax.management.Query;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.microsoft.bot.ai.qna.*;
-import com.microsoft.bot.ai.qna.models.*;
+import com.microsoft.bot.ai.qna.IQnAMakerClient;
+import com.microsoft.bot.ai.qna.QnADialogResponseOptions;
+import com.microsoft.bot.ai.qna.QnAMaker;
+import com.microsoft.bot.ai.qna.QnAMakerEndpoint;
+import com.microsoft.bot.ai.qna.QnAMakerOptions;
+import com.microsoft.bot.ai.qna.models.FeedbackRecord;
+import com.microsoft.bot.ai.qna.models.FeedbackRecords;
+import com.microsoft.bot.ai.qna.models.Metadata;
+import com.microsoft.bot.ai.qna.models.QnARequestContext;
+import com.microsoft.bot.ai.qna.models.QueryResult;
+import com.microsoft.bot.ai.qna.models.QueryResults;
+import com.microsoft.bot.ai.qna.models.RankerTypes;
 import com.microsoft.bot.ai.qna.utils.ActiveLearningUtils;
 import com.microsoft.bot.ai.qna.utils.BindToActivity;
 import com.microsoft.bot.ai.qna.utils.QnACardBuilder;

@@ -8,7 +8,7 @@ import com.microsoft.bot.ai.qna.dialogs.QnAMakerDialog;
 /**
  * Class which contains registration of components for QnAMaker.
  */
-// TODO: This class needs the missing ComponentRegistration and Declarative
+// TODO: missing ComponentRegistration, DeclarativeType, ResourceExplorer
 // classes and
 // IComponentDeclarativeTypes interface
 public class QnAMakerComponentRegistration extends ComponentRegistration implements IComponentDeclarativeTypes {

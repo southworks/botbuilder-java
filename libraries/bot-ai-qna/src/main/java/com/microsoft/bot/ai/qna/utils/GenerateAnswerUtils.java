@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
+import com.microsoft.bot.ai.qna.QnAMaker;
 import com.microsoft.bot.ai.qna.QnAMakerEndpoint;
 import com.microsoft.bot.ai.qna.QnAMakerOptions;
 import com.microsoft.bot.ai.qna.models.Metadata;
@@ -94,7 +95,7 @@ public class GenerateAnswerUtils {
      *         ranking score.
      */
     public CompletableFuture<QueryResults> getAnswersRaw(TurnContext turnContext, Activity messageActivity,
-            QnAMakerOptions options) throws IOException {
+            QnAMakerOptions options) {
         if (turnContext == null) {
             throw new IllegalArgumentException("turnContext");
         }
@@ -111,10 +112,15 @@ public class GenerateAnswerUtils {
         QnAMakerOptions hydratedOptions = this.hydrateOptions(options);
         GenerateAnswerUtils.validateOptions(hydratedOptions);
 
-        return this.queryQnaService(messageActivity, hydratedOptions).thenCompose(result -> {
-            this.emitTraceInfo(turnContext, messageActivity, result.getAnswers(), hydratedOptions);
-            return CompletableFuture.completedFuture(result);
-        });
+        try {
+            return this.queryQnaService(messageActivity, hydratedOptions).thenCompose(result -> {
+                this.emitTraceInfo(turnContext, messageActivity, result.getAnswers(), hydratedOptions);
+                return CompletableFuture.completedFuture(result);
+            });
+        } catch (IOException e) {
+            LoggerFactory.getLogger(GenerateAnswerUtils.class).error("getANswersRaw");
+            return CompletableFuture.completedFuture(null);
+        }
     }
 
     private static CompletableFuture<QueryResults> formatQnAResult(Response response, QnAMakerOptions options)
@@ -172,12 +178,16 @@ public class GenerateAnswerUtils {
      * @param queryOptions The options for the QnA Maker knowledge base.
      * @return Return modified options for the QnA Maker knowledge base.
      */
-    private QnAMakerOptions hydrateOptions(QnAMakerOptions queryOptions) throws IOException {
+    private QnAMakerOptions hydrateOptions(QnAMakerOptions queryOptions) {
         JacksonAdapter jacksonAdapter = new JacksonAdapter();
         QnAMakerOptions hydratedOptions = null;
 
-        hydratedOptions = jacksonAdapter.<QnAMakerOptions>deserialize(jacksonAdapter.serialize(queryOptions),
-                QnAMakerOptions.class);
+        try {
+            hydratedOptions = jacksonAdapter.<QnAMakerOptions>deserialize(jacksonAdapter.serialize(queryOptions),
+                    QnAMakerOptions.class);
+        } catch (IOException e) {
+            LoggerFactory.getLogger(GenerateAnswerUtils.class).error("hydrateOptions");
+        }
 
         if (queryOptions != null) {
             if (queryOptions.getScoreThreshold() != hydratedOptions.getScoreThreshold()
@@ -253,7 +263,7 @@ public class GenerateAnswerUtils {
                 setRankerType(options.getRankerType());
             }
         };
-        Activity traceActivity = Activity.createTraceActivity(QnAMaker.QNA_MAKER_NAME, QnAMaker.QNA_MAKER_TRACE_INFO,
+        Activity traceActivity = Activity.createTraceActivity(QnAMaker.QNA_MAKER_NAME, QnAMaker.QNA_MAKER_TRACE_TYPE,
                 traceInfo, QnAMaker.QNA_MAKER_TRACE_LABEL);
         return turnContext.sendActivity(traceActivity).thenApply(response -> null);
     }

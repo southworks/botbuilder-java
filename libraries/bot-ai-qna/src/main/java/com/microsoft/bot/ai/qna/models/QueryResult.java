@@ -36,7 +36,7 @@ public class QueryResult {
      * @return The list of questions indexed in the QnA Service for the given
      *         answer.
      */
-    public String[] getQuestion() {
+    public String[] getQuestions() {
         return this.questions;
     }
 

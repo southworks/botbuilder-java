@@ -3,6 +3,7 @@
 
 package com.microsoft.bot.ai.qna;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -67,5 +68,5 @@ public interface IQnAMakerClient {
      * @param feedbackRecords Feedback records.
      * @return A Task representing the asynchronous operation.
      */
-    CompletableFuture<Void> callTrain(FeedbackRecords feedbackRecords);
+    CompletableFuture<Void> callTrain(FeedbackRecords feedbackRecords) throws IOException;
 }

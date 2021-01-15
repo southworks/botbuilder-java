@@ -25,8 +25,8 @@ import okhttp3.OkHttpClient;
 /**
  * IRecognizer implementation which uses QnAMaker KB to identify intents.
  */
-// TODO: This class needs the missing StringExpression,
-// IntExpression, BoolExpression, ArrayExpression, ObjectExpression,
+// TODO: missing StringExpression, IntExpression, BoolExpression,
+// ArrayExpression, ObjectExpression,
 // DialogContext classes
 public class QnAMakerRecognizer implements Recognizer {
     private static final String INTENT_PREFIX = "intent=";
@@ -437,10 +437,10 @@ public class QnAMakerRecognizer implements Recognizer {
                         recognizerResult.setIntents(intents);
                     } else {
                         Map<String, IntentScore> intents = recognizerResult.getIntents();
-                        QueryResult finalTopAnswer1 = topAnswer;
+                        QueryResult finalTopAnswer = topAnswer;
                         intents.put(this.qnaMatchIntent, new IntentScore() {
                             {
-                                setScore(finalTopAnswer1.getScore());
+                                setScore(finalTopAnswer.getScore());
                             }
                         });
                     }

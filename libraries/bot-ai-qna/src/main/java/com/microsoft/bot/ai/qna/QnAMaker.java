@@ -3,7 +3,6 @@
 
 package com.microsoft.bot.ai.qna;
 
-import com.microsoft.bot.ai.qna.QnAMakerOptions;
 import com.microsoft.bot.ai.qna.models.FeedbackRecords;
 import com.microsoft.bot.ai.qna.models.QueryResult;
 import com.microsoft.bot.ai.qna.models.QueryResults;
@@ -188,22 +187,27 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
 
     /**
      * Generates an answer from the knowledge base.
-     * @param turnContext The Turn Context that contains the user question to be queried against your knowledge base.
-     * @param options The options for the QnA Maker knowledge base.
-     *                If null, constructor option is used for this instance.
-     * @param telemetryProperties Additional properties to be logged to telemetry with the QnaMessage event.
-     * @param telemetryMetrics Additional metrics to be logged to telemetry with the QnaMessage event.
-     * @return A list of answers for the user query, sorted in decreasing order of ranking score.
+     *
+     * @param turnContext         The Turn Context that contains the user question
+     *                            to be queried against your knowledge base.
+     * @param options             The options for the QnA Maker knowledge base. If
+     *                            null, constructor option is used for this
+     *                            instance.
+     * @param telemetryProperties Additional properties to be logged to telemetry
+     *                            with the QnaMessage event.
+     * @param telemetryMetrics    Additional metrics to be logged to telemetry with
+     *                            the QnaMessage event.
+     * @return A list of answers for the user query, sorted in decreasing order of
+     *         ranking score.
      */
     public CompletableFuture<QueryResults> getAnswersRaw(TurnContext turnContext, QnAMakerOptions options,
-                                                              @Nullable Map<String, String> telemetryProperties,
-                                                              @Nullable Map<String, Double> telemetryMetrics) {
+            @Nullable Map<String, String> telemetryProperties, @Nullable Map<String, Double> telemetryMetrics) {
         if (turnContext == null) {
             throw new IllegalArgumentException("turnContext");
         }
         if (turnContext.getActivity() == null) {
-            throw new IllegalArgumentException(String.format("The %1$s property for %2$s can't be null.",
-                "Activity", "turnContext"));
+            throw new IllegalArgumentException(
+                    String.format("The %1$s property for %2$s can't be null.", "Activity", "turnContext"));
         }
         Activity messageActivity = turnContext.getActivity();
         if (messageActivity == null || messageActivity.getType() != ActivityTypes.MESSAGE) {
@@ -216,9 +220,9 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
 
         return this.generateAnswerHelper.getAnswersRaw(turnContext, messageActivity, options).thenCompose(result -> {
             try {
-                this.onQnaResults(result.getAnswers(), turnContext, telemetryProperties, telemetryMetrics)
+                this.onQnaResults(result.getAnswers(), turnContext, telemetryProperties, telemetryMetrics);
             } catch (IOException e) {
-                LoggerFactory.getLogger(QnAMaker.class).error("getAnswerRaw");
+                LoggerFactory.getLogger(QnAMaker.class).error("getAnswersRaw");
             }
             return CompletableFuture.completedFuture(result);
         });
@@ -240,7 +244,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      * @param feedbackRecords Feedback records.
      * @return Representing the asynchronous operation.
      */
-    public CompletableFuture<Void> callTrain(FeedbackRecords feedbackRecords) {
+    public CompletableFuture<Void> callTrain(FeedbackRecords feedbackRecords) throws IOException {
         return this.activeLearningTrainHelper.callTrain(feedbackRecords);
     }
 
@@ -308,7 +312,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
             JacksonAdapter jacksonAdapter = new JacksonAdapter();
             QueryResult queryResult = queryResults[0];
             properties.put(QnATelemetryConstants.MATCHED_QUESTION_PROPERTY,
-                    jacksonAdapter.serialize(queryResult.getQuestion()));
+                    jacksonAdapter.serialize(queryResult.getQuestions()));
             properties.put(QnATelemetryConstants.QUESTION_ID_PROPERTY, queryResult.getId().toString());
             properties.put(QnATelemetryConstants.ANSWER_PROPERTY, queryResult.getAnswer());
             metrics.put(QnATelemetryConstants.SCORE_PROPERTY, queryResult.getScore().doubleValue());

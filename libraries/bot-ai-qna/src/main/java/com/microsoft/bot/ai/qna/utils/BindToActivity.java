@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
-// TODO: This class requires the missing ITemplate and DialogContext
+// TODO: missing ITemplate interface and DialogContext class
 public class BindToActivity implements ITemplate<Activity> {
     private Activity activity;
 

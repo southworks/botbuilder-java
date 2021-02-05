@@ -55,44 +55,44 @@ public class QnAMakerDialog extends WaterfallDialog {
     private OkHttpClient httpClient;
 
     @JsonProperty("knowledgeBaseId")
-    private StringExpression knowledgeBaseId;
+    private String knowledgeBaseId;
 
     @JsonProperty("hostName")
-    private StringExpression hostName;
+    private String hostName;
 
     @JsonProperty("endpointKey")
-    private StringExpression endpointKey;
+    private String endpointKey;
 
     @JsonProperty("threshold")
-    private NumberExpression threshold = DEFAULT_THRESHOLD;
+    private Float threshold = DEFAULT_THRESHOLD;
 
     @JsonProperty("top")
-    private IntExpression top = DEFAULT_TOP_N;
+    private Integer top = DEFAULT_TOP_N;
 
     @JsonProperty("noAnswer")
     private ITemplate<Activity> noAnswer = new BindToActivity(MessageFactory.text(DEFAULT_NO_ANSWER));
 
     @JsonProperty("activeLearningCardTitle")
-    private StringExpression activeLearningCardTitle;
+    private String activeLearningCardTitle;
 
     @JsonProperty("cardNoMatchText")
-    private StringExpression cardNoMatchText;
+    private String cardNoMatchText;
 
     @JsonProperty("cardNoMatchResponse")
     private ITemplate<Activity> cardNoMatchResponse = new BindToActivity(
             MessageFactory.text(DEFAULT_CARD_NO_MATCH_RESPONSE));
 
     @JsonProperty("strictFilters")
-    private ArrayExpression<Metadata> strictFilters;
+    private Metadata[] strictFilters;
 
     @JsonProperty("logPersonalInformation")
-    private BoolExpression logPersonalInformation = "=settings.telemetry.logPersonalInformation";
+    private Boolean logPersonalInformation = false;
 
     @JsonProperty("isTest")
     private Boolean isTest;
 
     @JsonProperty("rankerType")
-    private StringExpression rankerType = new StringExpression(RankerTypes.DEFAULT_RANKER_TYPE);
+    private String rankerType = RankerTypes.DEFAULT_RANKER_TYPE;
 
     /**
      * The path for storing and retrieving QnA Maker context data. This represents
@@ -172,7 +172,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @return The knowledge base ID or an expression which evaluates to the
      *         knowledge base ID.
      */
-    public StringExpression getKnowledgeBaseId() {
+    public String getKnowledgeBaseId() {
         return this.knowledgeBaseId;
     }
 
@@ -182,7 +182,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @param withKnowledgeBaseId The knowledge base ID or an expression which
      *                            evaluates to the knowledge base ID.
      */
-    public void setKnowledgeBaseId(StringExpression withKnowledgeBaseId) {
+    public void setKnowledgeBaseId(String withKnowledgeBaseId) {
         this.knowledgeBaseId = withKnowledgeBaseId;
     }
 
@@ -192,7 +192,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @return The QnA Maker host URL or an expression which evaluates to the host
      *         URL.
      */
-    public StringExpression getHostName() {
+    public String getHostName() {
         return this.hostName;
     }
 
@@ -202,8 +202,8 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @param withHostName The QnA Maker host URL or an expression which evaluates
      *                     to the host URL.
      */
-    public void setHostName(StringExpression withHostName) {
-        this.hostname = withHostName;
+    public void setHostName(String withHostName) {
+        this.hostName = withHostName;
     }
 
     /**
@@ -212,7 +212,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @return The QnA Maker endpoint key to use or an expression which evaluates to
      *         the endpoint key.
      */
-    public StringExpression getEndpointKey() {
+    public String getEndpointKey() {
         return this.endpointKey;
     }
 
@@ -222,7 +222,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @param withEndpointKey The QnA Maker endpoint key to use or an expression
      *                        which evaluates to the endpoint key.
      */
-    public void setEndpointKey(StringExpression withEndpointKey) {
+    public void setEndpointKey(String withEndpointKey) {
         this.endpointKey = withEndpointKey;
     }
 
@@ -232,7 +232,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @return The threshold for answers returned or an expression which evaluates
      *         to the threshold.
      */
-    public NumberExpression getThreshold() {
+    public Float getThreshold() {
         return this.threshold;
     }
 
@@ -242,7 +242,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @param withThreshold The threshold for answers returned or an expression
      *                      which evaluates to the threshold.
      */
-    public void setThreshold(NumberExpression withThreshold) {
+    public void setThreshold(Float withThreshold) {
         this.threshold = withThreshold;
     }
 
@@ -252,7 +252,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @return The maximum number of answers to return from the knowledge base or an
      *         expression which evaluates to the maximum number to return.
      */
-    public IntExpression getTop() {
+    public Integer getTop() {
         return this.top;
     }
 
@@ -263,7 +263,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      *                base or an expression which evaluates to the maximum number to
      *                return.
      */
-    public void setTop(IntExpression withTop) {
+    public void setTop(Integer withTop) {
         this.top = withTop;
     }
 
@@ -293,7 +293,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @return The path card title to use when showing active learning options to
      *         the user or an expression which evaluates to the card title.
      */
-    public StringExpression getActiveLearningCardTitle() {
+    public String getActiveLearningCardTitle() {
         return this.activeLearningCardTitle;
     }
 
@@ -306,7 +306,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      *                                    expression which evaluates to the card
      *                                    title.
      */
-    public void setActiveLearningCardTitle(StringExpression withActiveLearningCardTitle) {
+    public void setActiveLearningCardTitle(String withActiveLearningCardTitle) {
         this.activeLearningCardTitle = withActiveLearningCardTitle;
     }
 
@@ -317,7 +317,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @return The button text to use with active learning options or an expression
      *         which evaluates to the button text.
      */
-    public StringExpression getCardNoMatchText() {
+    public String getCardNoMatchText() {
         return this.cardNoMatchText;
     }
 
@@ -329,7 +329,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      *                            options or an expression which evaluates to the
      *                            button text.
      */
-    public void setCardNoMatchText(StringExpression withCardNoMatchText) {
+    public void setCardNoMatchText(String withCardNoMatchText) {
         this.cardNoMatchText = withCardNoMatchText;
     }
 
@@ -364,7 +364,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      *         knowledge base or an expression which evaluates to the QnA Maker
      *         metadata.
      */
-    public ArrayExpression<Metadata> getStrictFilters() {
+    public Metadata[] getStrictFilters() {
         return this.strictFilters;
     }
 
@@ -376,7 +376,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      *                          queries to the knowledge base or an expression which
      *                          evaluates to the QnA Maker metadata.
      */
-    public void setStrictFilters(ArrayExpression<Metadata> withStrictFilters) {
+    public void setStrictFilters(Metadata[] withStrictFilters) {
         this.strictFilters = withStrictFilters;
     }
 
@@ -387,7 +387,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @return The flag to indicate in personal information should be logged in
      *         telemetry.
      */
-    public BoolExpression getLogPersonalInformation() {
+    public Boolean getLogPersonalInformation() {
         return this.logPersonalInformation;
     }
 
@@ -398,7 +398,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @param withLogPersonalInformation The flag to indicate in personal
      *                                   information should be logged in telemetry.
      */
-    public void setLogPersonalInformation(BoolExpression withLogPersonalInformation) {
+    public void setLogPersonalInformation(Boolean withLogPersonalInformation) {
         this.logPersonalInformation = withLogPersonalInformation;
     }
 
@@ -430,7 +430,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @return The QnA Maker ranker type to use or an expression which evaluates to
      *         the ranker type.
      */
-    public StringExpression getRankerType() {
+    public String getRankerType() {
         return this.rankerType;
     }
 
@@ -440,7 +440,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @param withRankerType The QnA Maker ranker type to use or an expression which
      *                       evaluates to the ranker type.
      */
-    public void setRankerType(StringExpression withRankerType) {
+    public void setRankerType(String withRankerType) {
         this.rankerType = withRankerType;
     }
 
@@ -720,14 +720,14 @@ public class QnAMakerDialog extends WaterfallDialog {
 
         QnAMakerEndpoint endpoint = new QnAMakerEndpoint() {
             {
-                setEndpointKey(endpointKey.getValue(dc.getState()));
-                setHost(hostName.getValue(dc.getState()));
-                setKnowledgeBaseId(knowledgeBaseId.getValue(dc.getState()));
+                setEndpointKey(endpointKey);
+                setHost(hostName);
+                setKnowledgeBaseId(knowledgeBaseId);
             }
         };
 
         return this.getQnAMakerOptions(dc).thenApply(options -> new QnAMaker(endpoint, options, httpClient,
-                this.telemetryClient, this.logPersonalInformation.getValue(dc.getState())));
+                this.telemetryClient, this.logPersonalInformation));
     }
 
     /**
@@ -742,12 +742,12 @@ public class QnAMakerDialog extends WaterfallDialog {
     protected CompletableFuture<QnAMakerOptions> getQnAMakerOptions(DialogContext dc) {
         return CompletableFuture.completedFuture(new QnAMakerOptions() {
             {
-                setScoreThreshold(threshold.getValue(dc.getState()));
-                setStrictFilters(strictFilters.getValue(dc.getState()).toArray());
-                setTop(top.getValue(dc.getState()));
+                setScoreThreshold(threshold);
+                setStrictFilters(strictFilters);
+                setTop(top);
                 setContext(new QnARequestContext());
                 setQnAId(0);
-                setRankerType(rankerType.getValue(dc.getState()));
+                setRankerType(rankerType);
                 setIsTest(isTest);
             }
         });
@@ -764,11 +764,11 @@ public class QnAMakerDialog extends WaterfallDialog {
         return CompletableFuture.completedFuture(new QnADialogResponseOptions() {
             {
                 setNoAnswer(noAnswer.bind(dc, dc.getState()).join());
-                setActiveLearningCardTitle(activeLearningCardTitle.getValue(dc.getState()) != null
-                        ? activeLearningCardTitle.getValue(dc.getState())
+                setActiveLearningCardTitle(activeLearningCardTitle != null
+                        ? activeLearningCardTitle
                         : DEFAULT_CARD_TITLE);
                 setCardNoMatchText(
-                        cardNoMatchText.getValue(dc.getState()) != null ? cardNoMatchText.getValue(dc.getState())
+                        cardNoMatchText != null ? cardNoMatchText
                                 : DEFAULT_CARD_NO_MATCH_TEXT);
                 setCardNoMatchResponse(cardNoMatchResponse.bind(dc).join());
             }

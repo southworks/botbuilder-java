@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
+import com.microsoft.bot.ai.qna.models.QnARequestContext;
 import com.microsoft.bot.ai.qna.models.RankerTypes;
 import com.microsoft.bot.ai.qna.models.Metadata;
 import com.microsoft.bot.ai.qna.models.QueryResult;
@@ -32,53 +33,53 @@ public class QnAMakerRecognizer implements Recognizer {
     private static final String INTENT_PREFIX = "intent=";
 
     @JsonProperty("knowledgeBaseId")
-    private StringExpression knowledgeBaseId;
+    private String knowledgeBaseId;
 
     @JsonProperty("hostname")
-    private StringExpression hostName;
+    private String hostName;
 
     @JsonProperty("endpointKey")
-    private StringExpression endpointKey;
+    private String endpointKey;
 
     @JsonProperty("top")
-    private IntegerExpression top = 3;
+    private Integer top = 3;
 
     @JsonProperty("threshold")
-    private NumberExpresion threshold = 0.3f;
+    private Float threshold = 0.3f;
 
     @JsonProperty("isTest")
     private Boolean isTest;
 
     @JsonProperty("rankerType")
-    private StringExpression rankerType = RankerTypes.DEFAULT_RANKER_TYPE;
+    private String rankerType = RankerTypes.DEFAULT_RANKER_TYPE;
 
     @JsonProperty("strictFiltersJoinOperator")
     private JoinOperator strictFiltersJoinOperator;
 
     @JsonProperty("includeDialogNameInMetadata")
-    private BoolExpression includeDialogNameInMetadata = true;
+    private Boolean includeDialogNameInMetadata = true;
 
     @JsonProperty("metadata")
-    private ArrayExpression<Metadata> metadata;
+    private List<Metadata> metadata;
 
     @JsonProperty("context")
-    private ObjectExpression<QnARequestContext> context;
+    private QnARequestContext context;
 
     @JsonProperty("qnaId")
-    private IntExpression qnaId = 0;
+    private Integer qnaId = 0;
 
     @JsonIgnore
     private OkHttpClient httpClient;
 
     @JsonProperty("logPersonalInformation")
-    private BoolExpression logPersonalInformation = "=settings.telemetry.logPersonalInformation";
+    private Boolean logPersonalInformation = false;
 
     /**
      * Gets the KnowledgeBase Id of your QnA Maker KnowledgeBase.
      *
      * @return The knowledgebase Id.
      */
-    public StringExpression getKnowledgeBaseId() {
+    public String getKnowledgeBaseId() {
         return knowledgeBaseId;
     }
 
@@ -87,7 +88,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @param withKnowledgeBaseId The knowledgebase Id.
      */
-    public void setKnowledgeBaseId(StringExpression withKnowledgeBaseId) {
+    public void setKnowledgeBaseId(String withKnowledgeBaseId) {
         this.knowledgeBaseId = withKnowledgeBaseId;
     }
 
@@ -96,7 +97,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @return The host name of the QnA Maker knowledgebase.
      */
-    public StringExpression getHostName() {
+    public String getHostName() {
         return hostName;
     }
 
@@ -105,7 +106,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @param withHostName The host name of the QnA Maker knowledgebase.
      */
-    public void setHostName(StringExpression withHostName) {
+    public void setHostName(String withHostName) {
         this.hostName = withHostName;
     }
 
@@ -114,7 +115,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @return The endpoint key for the QnA service.
      */
-    public StringExpression getEndpointKey() {
+    public String getEndpointKey() {
         return endpointKey;
     }
 
@@ -123,7 +124,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @param withEndpointKey The endpoint key for the QnA service.
      */
-    public void setEndpointKey(StringExpression withEndpointKey) {
+    public void setEndpointKey(String withEndpointKey) {
         this.endpointKey = withEndpointKey;
     }
 
@@ -132,7 +133,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @return The number of results you want.
      */
-    public IntegerExpression getTop() {
+    public Integer getTop() {
         return top;
     }
 
@@ -141,7 +142,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @param withTop The number of results you want.
      */
-    public void setTop(IntegerExpression withTop) {
+    public void setTop(Integer withTop) {
         this.top = withTop;
     }
 
@@ -150,7 +151,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @return The threshold for the results.
      */
-    public NumberExpresion getThreshold() {
+    public Float getThreshold() {
         return threshold;
     }
 
@@ -159,7 +160,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @param withThreshold The threshold for the results.
      */
-    public void setThreshold(NumberExpresion withThreshold) {
+    public void setThreshold(Float withThreshold) {
         this.threshold = withThreshold;
     }
 
@@ -190,7 +191,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @return The desired RankerType.
      */
-    public StringExpression getRankerType() {
+    public String getRankerType() {
         return rankerType;
     }
 
@@ -199,7 +200,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @param withRankerType The desired RankerType.
      */
-    public void setRankerType(StringExpression withRankerType) {
+    public void setRankerType(String withRankerType) {
         this.rankerType = withRankerType;
     }
 
@@ -227,7 +228,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @return A bool or boolean expression.
      */
-    public BoolExpression getIncludeDialogNameInMetadata() {
+    public Boolean getIncludeDialogNameInMetadata() {
         return includeDialogNameInMetadata;
     }
 
@@ -236,7 +237,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @param withIncludeDialogNameInMetadata A bool or boolean expression.
      */
-    public void setIncludeDialogNameInMetadata(BoolExpression withIncludeDialogNameInMetadata) {
+    public void setIncludeDialogNameInMetadata(Boolean withIncludeDialogNameInMetadata) {
         this.includeDialogNameInMetadata = withIncludeDialogNameInMetadata;
     }
 
@@ -245,7 +246,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @return An expression to evaluate for pairs of metadata.
      */
-    public ArrayExpression<Metadata> getMetadata() {
+    public List<Metadata> getMetadata() {
         return metadata;
     }
 
@@ -254,7 +255,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @param withMetadata An expression to evaluate for pairs of metadata.
      */
-    public void setMetadata(ArrayExpression<Metadata> withMetadata) {
+    public void setMetadata(List<Metadata> withMetadata) {
         this.metadata = withMetadata;
     }
 
@@ -263,7 +264,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @return An expression to evaluate to QnARequestContext to pass as context.
      */
-    public ObjectExpression<QnARequestContext> getContext() {
+    public QnARequestContext getContext() {
         return context;
     }
 
@@ -273,7 +274,7 @@ public class QnAMakerRecognizer implements Recognizer {
      * @param withContext An expression to evaluate to QnARequestContext to pass as
      *                    context.
      */
-    public void setContext(ObjectExpression<QnARequestContext> withContext) {
+    public void setContext(QnARequestContext withContext) {
         this.context = withContext;
     }
 
@@ -282,7 +283,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @return The expression or number.
      */
-    public IntExpression getQnaId() {
+    public Integer getQnaId() {
         return qnaId;
     }
 
@@ -291,7 +292,7 @@ public class QnAMakerRecognizer implements Recognizer {
      *
      * @param withQnaId The expression or number.
      */
-    public void setQnaId(IntExpression withQnaId) {
+    public void setQnaId(Integer withQnaId) {
         this.qnaId = withQnaId;
     }
 
@@ -320,7 +321,7 @@ public class QnAMakerRecognizer implements Recognizer {
      * @return The flag to indicate in personal information should be logged in
      *         telemetry.
      */
-    public BoolExpression getLogPersonalInformation() {
+    public Boolean getLogPersonalInformation() {
         return logPersonalInformation;
     }
 
@@ -331,7 +332,7 @@ public class QnAMakerRecognizer implements Recognizer {
      * @param withLogPersonalInformation The flag to indicate in personal
      *                                   information should be logged in telemetry.
      */
-    public void setLogPersonalInformation(BoolExpression withLogPersonalInformation) {
+    public void setLogPersonalInformation(Boolean withLogPersonalInformation) {
         this.logPersonalInformation = withLogPersonalInformation;
     }
 
@@ -387,7 +388,7 @@ public class QnAMakerRecognizer implements Recognizer {
         }
 
         List<Metadata> filters = new ArrayList<Metadata>();
-        if (this.includeDialogNameInMetadata.getValue(dialogContext.getState())) {
+        if (this.includeDialogNameInMetadata) {
             filters.add(new Metadata() {
                 {
                     setName("dialogName");
@@ -397,7 +398,7 @@ public class QnAMakerRecognizer implements Recognizer {
         }
 
         // if there is $qna.metadata set add to filters
-        List<Metadata> externalMetadata = this.metadata.getValue(dialogContext.getState());
+        List<Metadata> externalMetadata = this.metadata;
         if (externalMetadata != null) {
             filters.addAll(externalMetadata);
         }
@@ -406,12 +407,12 @@ public class QnAMakerRecognizer implements Recognizer {
         return this.getQnAMakerClient(dialogContext).thenCompose(qnaClient -> {
             return qnaClient.getAnswers(dialogContext.getContext(), new QnAMakerOptions() {
                 {
-                    setContext(context.getValue(dialogContext.getState()));
-                    setScoreThreshold(threshold.getValue(dialogContext.getState()));
+                    setContext(context);
+                    setScoreThreshold(threshold);
                     setStrictFilters((Metadata[]) filters.toArray());
-                    setTop(top.getValue(dialogContext.getState()));
-                    setQnAId(qnaId.getValue(dialogContext.getState()));
-                    setRankerType(rankerType.getValue(dialogContext.getState()));
+                    setTop(top);
+                    setQnAId(qnaId);
+                    setRankerType(rankerType);
                     setIsTest(isTest);
                     setStrictFiltersJoinOperator(strictFiltersJoinOperator);
                 }
@@ -495,10 +496,10 @@ public class QnAMakerRecognizer implements Recognizer {
             httpClient = this.httpClient;
         }
 
-        Pair endpointPair = this.endpointKey.tryGetValue(dc.getState());
-        Pair hostNamePair = this.hostName.tryGetValue(dc.getState());
-        Pair knowledgeBaseIdPair = this.knowledgeBaseId.tryGetValue(dc.getState());
-        Pair logPersonalInformationPair = this.logPersonalInformation.tryGetValue(dc.getState());
+        Pair endpointPair = new Pair(this.endpointKey, "");
+        Pair hostNamePair = new Pair(this.hostName, "");
+        Pair knowledgeBaseIdPair = new Pair(this.knowledgeBaseId, "");
+        Pair logPersonalInformationPair = new Pair(this.logPersonalInformation, null);
 
         if (endpointPair.getLeft() == null) {
             throw new IllegalStateException(String.format("Unable to get a value for %1$s from state. %2$s",

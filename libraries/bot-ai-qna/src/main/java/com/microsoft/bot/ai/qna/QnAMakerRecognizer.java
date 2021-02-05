@@ -496,9 +496,9 @@ public class QnAMakerRecognizer implements Recognizer {
             httpClient = this.httpClient;
         }
 
-        Pair endpointPair = new Pair(this.endpointKey, "");
-        Pair hostNamePair = new Pair(this.hostName, "");
-        Pair knowledgeBaseIdPair = new Pair(this.knowledgeBaseId, "");
+        Pair endpointPair = new Pair(this.endpointKey, null);
+        Pair hostNamePair = new Pair(this.hostName, null);
+        Pair knowledgeBaseIdPair = new Pair(this.knowledgeBaseId, null);
         Pair logPersonalInformationPair = new Pair(this.logPersonalInformation, null);
 
         if (endpointPair.getLeft() == null) {

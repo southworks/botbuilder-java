@@ -17,7 +17,7 @@ import com.microsoft.bot.ai.qna.models.QueryResults;
 import com.microsoft.bot.ai.qna.models.RankerTypes;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.TurnContext;
-import com.microsoft.bot.rest.serializer.JacksonAdapter;
+import com.microsoft.bot.restclient.serializer.JacksonAdapter;
 import com.microsoft.bot.schema.Activity;
 
 import net.minidev.json.JSONObject;

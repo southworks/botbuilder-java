@@ -3,6 +3,7 @@
 
 package com.microsoft.bot.ai.qna.utils;
 
+import com.microsoft.bot.dialogs.DialogContext;
 import com.microsoft.bot.schema.Activity;
 
 import java.util.concurrent.CompletableFuture;
@@ -10,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 
 // TODO: missing ITemplate interface and DialogContext class
-public class BindToActivity implements ITemplate<Activity> {
+public class BindToActivity {
     private Activity activity;
 
     public BindToActivity(Activity withActivity) {

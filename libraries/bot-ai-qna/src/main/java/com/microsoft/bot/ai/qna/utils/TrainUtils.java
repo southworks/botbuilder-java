@@ -5,7 +5,7 @@ package com.microsoft.bot.ai.qna.utils;
 
 import com.microsoft.bot.ai.qna.QnAMakerEndpoint;
 import com.microsoft.bot.ai.qna.models.FeedbackRecords;
-import com.microsoft.bot.rest.serializer.JacksonAdapter;
+import com.microsoft.bot.restclient.serializer.JacksonAdapter;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;

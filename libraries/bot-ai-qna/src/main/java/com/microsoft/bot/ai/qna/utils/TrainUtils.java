@@ -30,6 +30,7 @@ public class TrainUtils {
      *
      * @param feedbackRecords Feedback record list.
      * @return A Task representing the asynchronous operation.
+     * @throws IOException IOException
      */
     public CompletableFuture<Void> callTrain(FeedbackRecords feedbackRecords) throws IOException {
         if (feedbackRecords == null) {

@@ -10,19 +10,34 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
-// TODO: missing ITemplate interface and DialogContext class
+/**
+ * Class to bind activities.
+ */
 public class BindToActivity {
     private Activity activity;
 
+    /**
+     * Construct to bind an Activity.
+     * @param withActivity activity to bind.
+     */
     public BindToActivity(Activity withActivity) {
         this.activity = withActivity;
     }
 
+    /**
+     *
+     * @param context The context.
+     * @param data The data.
+     * @return The activity.
+     */
     public CompletableFuture<Activity> bind(DialogContext context, @Nullable Object data) {
         return CompletableFuture.completedFuture(this.activity);
     }
 
-    @Override
+    /**
+     * Get the activity text.
+     * @return The activity text.
+     */
     public String toString() {
         return String.format("%s", this.activity.getText());
     }

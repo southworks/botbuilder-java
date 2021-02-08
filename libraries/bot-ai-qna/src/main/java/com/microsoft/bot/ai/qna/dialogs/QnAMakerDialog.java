@@ -141,6 +141,7 @@ public class QnAMakerDialog extends WaterfallDialog {
     private static final String DEFAULT_CARD_TITLE = "Did you mean:";
     private static final String DEFAULT_CARD_NO_MATCH_TEXT = "None of the above.";
     private static final String DEFAULT_CARD_NO_MATCH_RESPONSE = "Thanks for the feedback.";
+    private static final Integer PERCENTAGE_DIVISOR = 100;
 
     /**
      * The declarative name for this type. Used by the framework to serialize and
@@ -488,11 +489,12 @@ public class QnAMakerDialog extends WaterfallDialog {
      *                                    to the line number in the source file at
      *                                    which the method is called.
      */
+    @SuppressWarnings("checkstyle:ParameterNumber")
     public QnAMakerDialog(String dialogId, String withKnowledgeBaseId, String withEndpointKey, String withHostName,
-            @Nullable Activity withNoAnswer, Float withThreshold, String withActiveLearningCardTitle,
-            String withCardNoMatchText, Integer withTop, @Nullable Activity withCardNoMatchResponse,
-            @Nullable Metadata[] withStrictFilters, @Nullable OkHttpClient withHttpClient, String sourceFilePath,
-            Integer sourceLineNumber) {
+                          @Nullable Activity withNoAnswer, Float withThreshold, String withActiveLearningCardTitle,
+                          String withCardNoMatchText, Integer withTop, @Nullable Activity withCardNoMatchResponse,
+                          @Nullable Metadata[] withStrictFilters, @Nullable OkHttpClient withHttpClient,
+                          String sourceFilePath, Integer sourceLineNumber) {
         super(dialogId, null);
         sourceFilePath = sourceFilePath != null ? sourceFilePath : "";
         sourceLineNumber = sourceLineNumber != null ? sourceLineNumber : 0;
@@ -566,11 +568,13 @@ public class QnAMakerDialog extends WaterfallDialog {
      *                                    to the line number in the source file at
      *                                    which the method is called.
      */
+    @SuppressWarnings("checkstyle:ParameterNumber")
     public QnAMakerDialog(String withKnowledgeBaseId, String withEndpointKey, String withHostName,
-            @Nullable Activity withNoAnswer, Float withThreshold, String withActiveLearningCardTitle,
-            String withCardNoMatchText, Integer withTop, @Nullable Activity withCardNoMatchResponse,
-            @Nullable Metadata[] withStrictFilters, @Nullable OkHttpClient withHttpClient, String sourceFilePath,
-            Integer sourceLineNumber) {
+                          @Nullable Activity withNoAnswer, Float withThreshold, String withActiveLearningCardTitle,
+                          String withCardNoMatchText, Integer withTop, @Nullable Activity withCardNoMatchResponse,
+                          @Nullable Metadata[] withStrictFilters,
+                          @Nullable OkHttpClient withHttpClient, String sourceFilePath,
+                          Integer sourceLineNumber) {
         this(QnAMakerDialog.class.getName(), withKnowledgeBaseId, withEndpointKey, withHostName, withNoAnswer,
                 withThreshold, withActiveLearningCardTitle, withCardNoMatchText, withTop, withCardNoMatchResponse,
                 withStrictFilters, withHttpClient, sourceFilePath, sourceLineNumber);
@@ -716,11 +720,6 @@ public class QnAMakerDialog extends WaterfallDialog {
             return CompletableFuture.completedFuture(qnaClient);
         }
 
-        OkHttpClient httpClient = dc.getContext().getTurnState().get(OkHttpClient.class);
-        if (httpClient == null) {
-            httpClient = this.httpClient;
-        }
-
         QnAMakerEndpoint endpoint = new QnAMakerEndpoint() {
             {
                 setEndpointKey(endpointKey);
@@ -729,8 +728,7 @@ public class QnAMakerDialog extends WaterfallDialog {
             }
         };
 
-        OkHttpClient finalHttpClient = httpClient;
-        return this.getQnAMakerOptions(dc).thenApply(options -> new QnAMaker(endpoint, options, finalHttpClient,
+        return this.getQnAMakerOptions(dc).thenApply(options -> new QnAMaker(endpoint, options,
                 this.getTelemetryClient(), this.logPersonalInformation));
     }
 
@@ -885,7 +883,7 @@ public class QnAMakerDialog extends WaterfallDialog {
             // MaximumScoreForLowScoreVariation is the score above which no need to check
             // for feedback.
             if (response.getAnswers().length != 0 && response.getAnswers()[0]
-                    .getScore() <= (ActiveLearningUtils.getMaximumScoreForLowScoreVariation() / 100)) {
+                    .getScore() <= (ActiveLearningUtils.getMaximumScoreForLowScoreVariation() / PERCENTAGE_DIVISOR)) {
                 // Get filtered list of the response that support low score variation criteria.
                 response.setAnswers(qnaMakerClient.getLowScoreVariation(response.getAnswers()));
 
@@ -990,14 +988,13 @@ public class QnAMakerDialog extends WaterfallDialog {
             if (answer.getContext() != null && answer.getContext().getPrompts().length > 0) {
                 Map<String, Integer> previousContextData = ObjectPath.getPathValue(
                         stepContext.getActiveDialog().getState(), QNA_CONTEXT_DATA, Map.class);
-                Integer previousQnAId = ObjectPath.getPathValue(stepContext.getActiveDialog().getState(),
-                        PREVIOUS_QNA_ID, Integer.class, 0);
 
                 for (QnAMakerPrompt prompt : answer.getContext().getPrompts()) {
                     previousContextData.put(prompt.getDisplayText(), prompt.getQnaId());
                 }
 
-                ObjectPath.setPathValue(stepContext.getActiveDialog().getState(), QNA_CONTEXT_DATA, previousContextData);
+                ObjectPath.setPathValue(stepContext.getActiveDialog().getState(),
+                    QNA_CONTEXT_DATA, previousContextData);
                 ObjectPath.setPathValue(stepContext.getActiveDialog().getState(), PREVIOUS_QNA_ID, answer.getId());
                 ObjectPath.setPathValue(stepContext.getActiveDialog().getState(), OPTIONS, dialogOptions);
 
@@ -1013,8 +1010,13 @@ public class QnAMakerDialog extends WaterfallDialog {
         return stepContext.next(stepContext.getResult());
     }
 
-    class ValueProperty {
+    /**
+     * Helper class.
+     */
+    final class ValueProperty {
         public static final String CURRENT_QUERY = "currentQuery";
         public static final String QNA_DATA = "qnaData";
+
+        private ValueProperty() { }
     }
 }

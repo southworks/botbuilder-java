@@ -44,6 +44,7 @@ import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityTypes;
 
 import okhttp3.OkHttpClient;
+import org.slf4j.LoggerFactory;
 
 /**
  * A dialog that supports multi-step and adaptive-learning QnA Maker services.
@@ -629,10 +630,13 @@ public class QnAMakerDialog extends WaterfallDialog {
             return CompletableFuture.completedFuture(END_OF_TURN);
         }
 
+        QnAMakerOptions qnAMakerOptions = this.getQnAMakerOptions(dc).join();
+        QnADialogResponseOptions qnADialogResponseOptions = this.getQnAResponseOptions(dc).join();
+
         QnAMakerDialogOptions dialogOptions = new QnAMakerDialogOptions() {
             {
-                setQnAMakerOptions(QnAMakerDialog.this.getQnAMakerOptions(dc).join());
-                setResponseOptions(getQnAResponseOptions(dc).join());
+                setQnAMakerOptions(qnAMakerOptions);
+                setResponseOptions(qnADialogResponseOptions);
             }
         };
 
@@ -882,7 +886,7 @@ public class QnAMakerDialog extends WaterfallDialog {
             // Check if active learning is enabled.
             // MaximumScoreForLowScoreVariation is the score above which no need to check
             // for feedback.
-            if (response.getAnswers().length != 0 && response.getAnswers()[0]
+            if (response.getAnswers().length > 0 && response.getAnswers()[0]
                     .getScore() <= (ActiveLearningUtils.getMaximumScoreForLowScoreVariation() / PERCENTAGE_DIVISOR)) {
                 // Get filtered list of the response that support low score variation criteria.
                 response.setAnswers(qnaMakerClient.getLowScoreVariation(response.getAnswers()));
@@ -948,7 +952,7 @@ public class QnAMakerDialog extends WaterfallDialog {
                         return qnaClient.callTrain(feedbackRecords).thenCompose(task ->
                             stepContext.next(new ArrayList<QueryResult>().add(qnaResult)));
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        LoggerFactory.getLogger(QnAMakerDialog.class).error("callTrain");
                     }
                     return CompletableFuture.completedFuture(null);
                 });

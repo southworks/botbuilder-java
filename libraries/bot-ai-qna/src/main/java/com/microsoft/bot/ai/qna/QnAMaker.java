@@ -232,7 +232,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      *
      * @param feedbackRecords Feedback records.
      * @return Representing the asynchronous operation.
-     * @throws IOException IOException
+     * @throws IOException Throws an IOException if there is any.
      */
     public CompletableFuture<Void> callTrain(FeedbackRecords feedbackRecords) throws IOException {
         return this.activeLearningTrainHelper.callTrain(feedbackRecords);
@@ -248,7 +248,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      * @param telemetryMetrics    Additional metrics to be logged to telemetry with
      *                            the LuisResult event.
      * @return A Task representing the work to be executed.
-     * @throws IOException IOException
+     * @throws IOException Throws an IOException if there is any.
      */
     protected CompletableFuture<Void> onQnaResults(QueryResult[] queryResults, TurnContext turnContext,
             @Nullable Map<String, String> telemetryProperties, @Nullable Map<String, Double> telemetryMetrics)
@@ -274,7 +274,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      *         IBotTelemetryClient. TrackEvent method for the QnAMessage event. The
      *         properties and metrics returned the standard properties logged with
      *         any properties passed from the GetAnswersAsync method.
-     * @throws IOException IOException
+     * @throws IOException Throws an IOException if there is any.
      */
     protected CompletableFuture<Pair<Map<String, String>, Map<String, Double>>> fillQnAEvent(QueryResult[] queryResults,
             TurnContext turnContext, @Nullable Map<String, String> telemetryProperties,

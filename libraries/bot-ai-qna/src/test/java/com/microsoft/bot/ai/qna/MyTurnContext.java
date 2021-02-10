@@ -31,7 +31,9 @@ public class MyTurnContext implements TurnContext {
         throw new UnsupportedOperationException();
     }
 
-    public void setLocale(String withLocale) {throw new UnsupportedOperationException();}
+    public void setLocale(String withLocale) {
+        throw new UnsupportedOperationException();
+    }
 
     public BotAdapter getAdapter() {
         return adapter;
@@ -73,7 +75,8 @@ public class MyTurnContext implements TurnContext {
         throw new UnsupportedOperationException();
     }
 
-    public CompletableFuture<ResourceResponse> sendActivity(String textReplyToSend, String speak, InputHints inputHint) {
+    public CompletableFuture<ResourceResponse> sendActivity(String textReplyToSend, String speak,
+                                                            InputHints inputHint) {
         throw new UnsupportedOperationException();
     }
 

@@ -61,6 +61,22 @@
     <dependency>
       <groupId>com.microsoft.bot</groupId>
       <artifactId>bot-builder</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.microsoft.bot</groupId>
+      <artifactId>bot-builder</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.microsoft.bot</groupId>
+      <artifactId>bot-integration-spring</artifactId>
+      <version>4.6.0-preview8</version>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>

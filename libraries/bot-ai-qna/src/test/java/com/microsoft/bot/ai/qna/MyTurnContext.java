@@ -28,10 +28,10 @@ public class MyTurnContext implements TurnContext {
     }
 
     public String getLocale() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
-    public void setLocale(String withLocale) {}
+    public void setLocale(String withLocale) {throw new UnsupportedOperationException();}
 
     public BotAdapter getAdapter() {
         return adapter;

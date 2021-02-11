@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import com.microsoft.bot.ai.qna.dialogs.QnAMakerDialog;
 import com.microsoft.bot.ai.qna.models.FeedbackRecord;
 import com.microsoft.bot.ai.qna.models.FeedbackRecords;
 import com.microsoft.bot.ai.qna.models.Metadata;
@@ -24,6 +26,7 @@ import com.microsoft.bot.builder.*;
 import com.microsoft.bot.builder.adapters.TestAdapter;
 import com.microsoft.bot.builder.adapters.TestFlow;
 
+import com.microsoft.bot.dialogs.*;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityTypes;
 import com.microsoft.bot.schema.ChannelAccount;
@@ -34,7 +37,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +70,10 @@ public class QnAMakerTests {
 
     private String getV3LegacyRequestUrl() {
         return String.format("%1$s/v3.0/knowledgebases/%2$s/generateanswer", hostname, knowledgeBaseId);
+    }
+
+    private String getTrainRequestUrl() {
+        return String.format("%1$s/v3.0/knowledgebases/%2$s/train", hostname, knowledgeBaseId);
     }
 
     @Test
@@ -303,7 +309,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerCallTrain() throws IOException {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
+        Request request = new Request.Builder().url(this.getTrainRequestUrl()).build();
         OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
         Mockito.doReturn(this.getResponse("{ }")).when(mockHttp.newCall(request));
         QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
@@ -1456,6 +1462,58 @@ public class QnAMakerTests {
             return CompletableFuture.completedFuture(null);
         }
 
+    }
+
+    private TestFlow createFlow(Dialog rootDialog, String testName) {
+        Storage storage = new MemoryStorage();
+        UserState userState = new UserState(storage);
+        ConversationState conversationState = new ConversationState(storage);
+
+        TestAdapter adapter = new TestAdapter(TestAdapter.createConversationReference(testName, "User1", "Bot"));
+        adapter
+            .useStorage(storage)
+            .useBotState(userState, conversationState)
+            .use(new TranscriptLoggerMiddleware(new TraceTranscriptLogger()));
+
+        DialogManager dm = new DialogManager(rootDialog, null);
+        return new TestFlow(adapter, (turnContext) -> dm.onTurn(turnContext).thenApply(task -> null));
+    }
+
+    public class QnAMakerTestDialog extends ComponentDialog implements DialogDependencies {
+
+        public QnAMakerTestDialog(String knowledgeBaseId, String endpointKey, String hostName, OkHttpClient httpClient) {
+            super("QnaMakerTestDialog");
+            addDialog(new QnAMakerDialog(knowledgeBaseId, endpointKey, hostName, null,
+                null, null, null, null,
+                null, null, httpClient, null, null));
+        }
+
+        @Override
+        public CompletableFuture<DialogTurnResult> beginDialog(DialogContext outerDc, Object options) {
+            return super.beginDialog(outerDc, options);
+        }
+
+        @Override
+        public CompletableFuture<DialogTurnResult> continueDialog(DialogContext dc) {
+            if (dc.getContext().getActivity().getText() == "moo") {
+                dc.getContext().sendActivity("Yippee ki-yay!").thenApply(task -> END_OF_TURN);
+            }
+
+            return dc.beginDialog("qnaDialog").thenApply(task -> task);
+        }
+
+        public List<Dialog> getDependencies() {
+            return getDialogs().getDialogs().stream().collect(Collectors.toList());
+        }
+
+        @Override
+        public CompletableFuture<DialogTurnResult> resumeDialog(DialogContext dc, DialogReason reason, Object result) {
+            if((boolean) result == false) {
+                dc.getContext().sendActivity("I didn't understand that.");
+            }
+
+            return super.resumeDialog(dc, reason, result).thenApply(task -> task);
+        }
     }
 
     private class CapturedRequest {

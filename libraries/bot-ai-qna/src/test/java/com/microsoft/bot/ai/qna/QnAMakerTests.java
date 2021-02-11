@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -16,10 +19,8 @@ import com.microsoft.bot.ai.qna.models.Metadata;
 import com.microsoft.bot.ai.qna.models.QnAMakerTraceInfo;
 import com.microsoft.bot.ai.qna.models.QnARequestContext;
 import com.microsoft.bot.ai.qna.models.QueryResult;
-import com.microsoft.bot.builder.MemoryTranscriptStore;
-import com.microsoft.bot.builder.TranscriptLoggerMiddleware;
-import com.microsoft.bot.builder.TurnContext;
-import com.microsoft.bot.builder.TurnContextImpl;
+import com.microsoft.bot.ai.qna.utils.QnATelemetryConstants;
+import com.microsoft.bot.builder.*;
 import com.microsoft.bot.builder.adapters.TestAdapter;
 import com.microsoft.bot.builder.adapters.TestFlow;
 
@@ -31,6 +32,9 @@ import com.microsoft.bot.schema.ConversationAccount;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +44,19 @@ import okhttp3.Request;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 public class QnAMakerTests {
     private final String knowledgeBaseId = "dummy-id";
     private final String endpointKey = "dummy-key";
     private final String hostname = "https://dummy-hostname.azurewebsites.net/qnamaker";
+
+    @Captor
+    ArgumentCaptor<String> eventNameCaptor;
+
+    @Captor
+    ArgumentCaptor<Map<String, String>> propertiesCaptor;
 
     private String getRequestUrl() {
         return String.format("%1$s/knowledgebases/%2$s/generateanswer", hostname, knowledgeBaseId);
@@ -1001,6 +1014,448 @@ public class QnAMakerTests {
            Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack", results[0].getAnswer());
            Assert.assertEquals("Editorial", results[0].getSource());
         });
+    }
+
+    @Test
+    public CompletableFuture<Void> telemetryReturnsAnswer() {
+        // Arrange
+        Request request = new Request.Builder().url(this.getRequestUrl()).build();
+        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
+        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
+            .when(mockHttp.newCall(request));
+        QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
+            {
+                setKnowledgeBaseId(knowledgeBaseId);
+                setEndpointKey(endpointKey);
+                setHost(hostname);
+            }
+        };
+        QnAMakerOptions options = new QnAMakerOptions() {
+            {
+                setTop(1);
+            }
+        };
+
+        BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
+
+        // Act - See if we get data back in telemetry
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, mockHttp, telemetryClient, true);
+        return qna.getAnswers(getContext("what is the answer to my nonsense question?"), null)
+            .thenAccept(results -> {
+                // Assert - Check Telemetry logged
+                // verify BotTelemetryClient was invoked 1 times, and capture arguments.
+                verify(telemetryClient, times(1)).trackEvent(
+                    eventNameCaptor.capture(),
+                    propertiesCaptor.capture()
+                );
+                List<String> eventNames = eventNameCaptor.getAllValues();
+                List<Map<String, String>> properties = propertiesCaptor.getAllValues();
+                Assert.assertEquals(3, eventNames.size());
+                Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
+                Assert.assertTrue(properties.get(0).containsKey("knowledgeBaseId"));
+                Assert.assertTrue(properties.get(0).containsKey("matchedQuestion"));
+                Assert.assertEquals("No Qna Question matched", properties.get(0).get("matchedQuestion"));
+                Assert.assertTrue(properties.get(0).containsKey("question"));
+                Assert.assertTrue(properties.get(0).containsKey("questionId"));
+                Assert.assertTrue(properties.get(0).containsKey("answer"));
+                Assert.assertEquals("No Qna Question matched", properties.get(0).get("answer"));
+                Assert.assertTrue(properties.get(0).containsKey("articleFound"));
+                Assert.assertTrue(properties.get(1) == null);
+
+                // Assert - Validate we didn't break QnA functionality.
+                Assert.assertNotNull(results);
+                Assert.assertTrue(results.length == 0);
+            });
+    }
+
+    @Test
+    public CompletableFuture<Void> telemetryPii() {
+        // Arrange
+        Request request = new Request.Builder().url(this.getRequestUrl()).build();
+        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
+        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
+            .when(mockHttp.newCall(request));
+        QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
+            {
+                setKnowledgeBaseId(knowledgeBaseId);
+                setEndpointKey(endpointKey);
+                setHost(hostname);
+            }
+        };
+        QnAMakerOptions options = new QnAMakerOptions() {
+            {
+                setTop(1);
+            }
+        };
+
+        BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
+
+        // Act
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, mockHttp, telemetryClient, false);
+        return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
+            // verify BotTelemetryClient was invoked 3 times, and capture arguments.
+            verify(telemetryClient, times(3)).trackEvent(
+                eventNameCaptor.capture(),
+                propertiesCaptor.capture()
+            );
+            List<String> eventNames = eventNameCaptor.getAllValues();
+            List<Map<String, String>> properties = propertiesCaptor.getAllValues();
+
+            Assert.assertEquals(3, eventNames.size());
+            Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
+            Assert.assertTrue(properties.get(0).containsKey("knowledgeBaseId"));
+            Assert.assertTrue(properties.get(0).containsKey("matchedQuestion"));
+            Assert.assertTrue(properties.get(0).containsKey("question"));
+            Assert.assertTrue(properties.get(0).containsKey("questionId"));
+            Assert.assertTrue(properties.get(0).containsKey("answer"));
+            Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
+                properties.get(0).get("answer"));
+            Assert.assertTrue(properties.get(0).containsKey("articleFound"));
+            Assert.assertTrue(eventNames.get(2).length() == 1);
+            Assert.assertTrue(eventNames.get(2).contains("score"));
+
+            // Assert - Validate we didn't break QnA functionality.
+            Assert.assertNotNull(results);
+            Assert.assertTrue(results.length == 1);
+            Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
+                results[0].getAnswer());
+            Assert.assertEquals("Editorial", results[0].getSource());
+        });
+    }
+
+    @Test
+    public CompletableFuture<Void> telemetryOverride() {
+        Request request = new Request.Builder().url(this.getRequestUrl()).build();
+        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
+        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
+            .when(mockHttp.newCall(request));
+        QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
+            {
+                setKnowledgeBaseId(knowledgeBaseId);
+                setEndpointKey(endpointKey);
+                setHost(hostname);
+            }
+        };
+        QnAMakerOptions options = new QnAMakerOptions() {
+            {
+                setTop(1);
+            }
+        };
+
+        BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
+
+        // Act - Override the QnaMaker object to log custom stuff and honor parms passed in.
+        Map<String, String> telemetryProperties = new HashMap<String, String>();
+        telemetryProperties.put("Id", "MyID");
+
+        QnAMaker qna = new OverrideTelemetry(qnAMakerEndpoint, options, mockHttp, telemetryClient, false);
+        return qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, null)
+            .thenAccept(results -> {
+                // verify BotTelemetryClient was invoked 2 times, and capture arguments.
+                verify(telemetryClient, times(2)).trackEvent(
+                    eventNameCaptor.capture(),
+                    propertiesCaptor.capture()
+                );
+                List<String> eventNames = eventNameCaptor.getAllValues();
+                List<Map<String, String>> properties = propertiesCaptor.getAllValues();
+
+                Assert.assertEquals(3, eventNames.size());
+                Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
+                Assert.assertTrue(properties.get(0).size() == 2);
+                Assert.assertTrue(properties.get(0).containsKey("MyImportantProperty"));
+                Assert.assertEquals("myImportantValue", properties.get(0).get("MyImportantProperty"));
+                Assert.assertTrue(properties.get(0).containsKey("Id"));
+                Assert.assertEquals("MyID", properties.get(0).get("Id"));
+
+                Assert.assertEquals("MySecondEvent", eventNames.get(1));
+                Assert.assertTrue(properties.get(1).containsKey("MyImportantProperty2"));
+                Assert.assertEquals("myImportantValue2", properties.get(1).get("MyImportantProperty2"));
+
+                // Validate we didn't break QnA functionality.
+                Assert.assertNotNull(results);
+                Assert.assertTrue(results.length == 1);
+                Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
+                    results[0].getAnswer());
+                Assert.assertEquals("Editorial", results[0].getSource());
+            });
+    }
+
+    @Test
+    public CompletableFuture<Void> telemetryAdditionalPropsMetrics() {
+        //Arrange
+        Request request = new Request.Builder().url(this.getRequestUrl()).build();
+        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
+        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
+            .when(mockHttp.newCall(request));
+        QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
+            {
+                setKnowledgeBaseId(knowledgeBaseId);
+                setEndpointKey(endpointKey);
+                setHost(hostname);
+            }
+        };
+        QnAMakerOptions options = new QnAMakerOptions() {
+            {
+                setTop(1);
+            }
+        };
+
+        BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
+
+        // Act - Pass in properties during QnA invocation
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, mockHttp, telemetryClient, false);
+        Map<String, String> telemetryProperties = new HashMap<String, String>() {
+            {
+                put("MyImportantProperty", "myImportantValue");
+            }
+        };
+        Map<String, Double> telemetryMetrics = new HashMap<String, Double>() {
+            {
+                put("MyImportantMetric", 3.14159);
+            }
+        };
+
+        return qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, telemetryMetrics)
+            .thenAccept(results -> {
+                // Assert - added properties were added.
+                // verify BotTelemetryClient was invoked 1 times, and capture arguments.
+                verify(telemetryClient, times(1)).trackEvent(
+                    eventNameCaptor.capture(),
+                    propertiesCaptor.capture()
+                );
+                List<String> eventNames = eventNameCaptor.getAllValues();
+                List<Map<String, String>> properties = propertiesCaptor.getAllValues();
+
+                Assert.assertEquals(3, eventNames.size());
+                Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
+                Assert.assertTrue(properties.get(0).containsKey(QnATelemetryConstants.KNOWLEDGE_BASE_ID_PROPERTY));
+                Assert.assertFalse(properties.get(0).containsKey(QnATelemetryConstants.QUESTION_PROPERTY));
+                Assert.assertTrue(properties.get(0).containsKey(QnATelemetryConstants.MATCHED_QUESTION_PROPERTY));
+                Assert.assertTrue(properties.get(0).containsKey(QnATelemetryConstants.QUESTION_ID_PROPERTY));
+                Assert.assertTrue(properties.get(0).containsKey(QnATelemetryConstants.ANSWER_PROPERTY));
+                Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
+                    properties.get(0).get("answer"));
+                Assert.assertTrue(properties.get(0).containsKey("MyImportantProperty"));
+                Assert.assertEquals("myImportantValue", properties.get(0).get("MyImportantProperty"));
+
+                Assert.assertEquals(2, properties.get(0).size());
+                Assert.assertTrue(properties.get(0).containsKey("score"));
+                Assert.assertTrue(properties.get(0).containsKey("MyImportantMetric"));
+                Assert.assertEquals(3.14159,
+                    properties.get(0).get("MyImportantMetric"));
+
+                // Validate we didn't break QnA functionality.
+                Assert.assertNotNull(results);
+                Assert.assertTrue(results.length == 1);
+                Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
+                    results[0].getAnswer());
+                Assert.assertEquals("Editorial", results[0].getSource());
+            });
+    }
+
+    @Test
+    public CompletableFuture<Void> telemetryAdditionalPropsOverride() {
+        //Arrange
+        Request request = new Request.Builder().url(this.getRequestUrl()).build();
+        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
+        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
+            .when(mockHttp.newCall(request));
+        QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
+            {
+                setKnowledgeBaseId(knowledgeBaseId);
+                setEndpointKey(endpointKey);
+                setHost(hostname);
+            }
+        };
+        QnAMakerOptions options = new QnAMakerOptions() {
+            {
+                setTop(1);
+            }
+        };
+
+        BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
+
+        // Act - Pass in properties during QnA invocation that override default properties
+        //  NOTE: We are invoking this with PII turned OFF, and passing a PII property (originalQuestion).
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, mockHttp, telemetryClient, false);
+        Map<String, String> telemetryProperties = new HashMap<String, String>() {
+            {
+                put("knowledgeBaseId", "myImportantValue");
+                put("originalQuestion", "myImportantValue2");
+            }
+        };
+        Map<String, Double> telemetryMetrics = new HashMap<String, Double>() {
+            {
+                put("score", 3.14159);
+            }
+        };
+
+        return qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, telemetryMetrics)
+            .thenAccept(results -> {
+                // Assert - added properties were added.
+                // verify BotTelemetryClient was invoked 1 times, and capture arguments.
+                verify(telemetryClient, times(1)).trackEvent(
+                    eventNameCaptor.capture(),
+                    propertiesCaptor.capture()
+                );
+                List<String> eventNames = eventNameCaptor.getAllValues();
+                List<Map<String, String>> properties = propertiesCaptor.getAllValues();
+
+                Assert.assertEquals(3, eventNames.size());
+                Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
+                Assert.assertTrue(properties.get(0).containsKey("knowledgeBaseId"));
+                Assert.assertEquals("myImportantValue", properties.get(0).get("knowledgeBaseId"));
+                Assert.assertTrue(properties.get(0).containsKey("matchedQuestion"));
+                Assert.assertEquals("myImportantValue2", properties.get(0).get("originalQuestion"));
+                Assert.assertFalse(properties.get(0).containsKey("question"));
+                Assert.assertTrue(properties.get(0).containsKey("questionId"));
+                Assert.assertTrue(properties.get(0).containsKey("answer"));
+                Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
+                    properties.get(0).get("answer"));
+                Assert.assertFalse(properties.get(0).containsKey("MyImportantProperty"));
+
+                Assert.assertEquals(1, properties.get(0).size());
+                Assert.assertTrue(properties.get(0).containsKey("score"));
+                Assert.assertEquals(3.14159,
+                    properties.get(0).get("score"));
+            });
+    }
+
+    @Test
+    public CompletableFuture<Void> telemetryFillPropsOverride() {
+        //Arrange
+        Request request = new Request.Builder().url(this.getRequestUrl()).build();
+        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
+        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
+            .when(mockHttp.newCall(request));
+        QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
+            {
+                setKnowledgeBaseId(knowledgeBaseId);
+                setEndpointKey(endpointKey);
+                setHost(hostname);
+            }
+        };
+        QnAMakerOptions options = new QnAMakerOptions() {
+            {
+                setTop(1);
+            }
+        };
+
+        BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
+
+        // Act - Pass in properties during QnA invocation that override default properties
+        //       In addition Override with derivation.  This presents an interesting question of order of setting properties.
+        //       If I want to override "originalQuestion" property:
+        //           - Set in "Stock" schema
+        //           - Set in derived QnAMaker class
+        //           - Set in GetAnswersAsync
+        //       Logically, the GetAnswersAync should win.  But ultimately OnQnaResultsAsync decides since it is the last
+        //       code to touch the properties before logging (since it actually logs the event).
+        QnAMaker qna = new OverrideFillTelemetry(qnAMakerEndpoint, options, mockHttp, telemetryClient, false);
+        Map<String, String> telemetryProperties = new HashMap<String, String>() {
+            {
+                put("knowledgeBaseId", "myImportantValue");
+                put("matchedQuestion", "myImportantValue2");
+            }
+        };
+        Map<String, Double> telemetryMetrics = new HashMap<String, Double>() {
+            {
+                put("score", 3.14159);
+            }
+        };
+
+        return qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, telemetryMetrics)
+            .thenAccept(results -> {
+                // Assert - added properties were added.
+                // verify BotTelemetryClient was invoked 2 times, and capture arguments.
+                verify(telemetryClient, times(2)).trackEvent(
+                    eventNameCaptor.capture(),
+                    propertiesCaptor.capture()
+                );
+                List<String> eventNames = eventNameCaptor.getAllValues();
+                List<Map<String, String>> properties = propertiesCaptor.getAllValues();
+
+                Assert.assertEquals(3, eventNames.size());
+                Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
+                Assert.assertEquals(6, properties.get(0).size());
+                Assert.assertTrue(properties.get(0).containsKey("knowledgeBaseId"));
+                Assert.assertEquals("myImportantValue", properties.get(0).get("knowledgeBaseId"));
+                Assert.assertTrue(properties.get(0).containsKey("matchedQuestion"));
+                Assert.assertEquals("myImportantValue2", properties.get(0).get("matchedQuestion"));
+                Assert.assertTrue(properties.get(0).containsKey("questionId"));
+                Assert.assertTrue(properties.get(0).containsKey("answer"));
+                Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
+                    properties.get(0).get("answer"));
+                Assert.assertTrue(properties.get(0).containsKey("articleFound"));
+                Assert.assertTrue(properties.get(0).containsKey("MyImportantProperty"));
+                Assert.assertEquals("myImportantValue", properties.get(0).get("MyImportantProperty"));
+
+                Assert.assertEquals(1, properties.get(0).size());
+                Assert.assertTrue(properties.get(0).containsKey("score"));
+                Assert.assertEquals(3.14159,
+                    properties.get(0).get("score"));
+            });
+    }
+
+    public class OverrideFillTelemetry extends QnAMaker {
+
+        public OverrideFillTelemetry(QnAMakerEndpoint endpoint, QnAMakerOptions options, OkHttpClient httpClient,
+                                     BotTelemetryClient telemetryClient, Boolean logPersonalInformation) {
+            super(endpoint, options, httpClient, telemetryClient, logPersonalInformation);
+        }
+
+        @Override
+        protected CompletableFuture<Void> onQnaResults(QueryResult[] queryResults, TurnContext turnContext,
+                                                       Map<String, String> telemetryProperties,
+                                                       Map<String, Double> telemetryMetrics) throws IOException {
+            this.fillQnAEvent(queryResults, turnContext, telemetryProperties, telemetryMetrics).thenAccept(eventData -> {
+                // Add my property
+                eventData.getLeft().put("MyImportantProperty", "myImportantValue");
+
+                // Log QnaMessage event
+                BotTelemetryClient telemetryClient = getTelemetryClient();
+                telemetryClient.trackEvent(QnATelemetryConstants.QNA_MSG_EVENT, eventData.getLeft(), eventData.getRight());
+
+                // Create second event.
+                Map<String, String> secondEventProperties = new HashMap<String, String>(){
+                    {
+                        put("MyImportantProperty2", "myImportantValue2");
+                    }
+                };
+                telemetryClient.trackEvent("MySecondEvent", secondEventProperties);
+            });
+
+            return CompletableFuture.completedFuture(null);
+        }
+    }
+
+    public class OverrideTelemetry extends QnAMaker {
+
+        public OverrideTelemetry(QnAMakerEndpoint endpoint, QnAMakerOptions options, OkHttpClient httpClient,
+                                 BotTelemetryClient telemetryClient, Boolean logPersonalInformation) {
+            super(endpoint, options, httpClient, telemetryClient, logPersonalInformation);
+        }
+
+        @Override
+        protected CompletableFuture<Void> onQnaResults(QueryResult[] queryResults, TurnContext turnContext,
+                                                       Map<String, String> telemetryProperties,
+                                                       Map<String, Double> telemetryMetrics) {
+            Map<String, String> properties = telemetryProperties == null ? new HashMap<String, String>() : telemetryProperties;
+
+            // GetAnswerAsync overrides derived class.
+            properties.put("MyImportantProperty", "myImportantValue");
+
+            // Log event
+            BotTelemetryClient telemetryClient = getTelemetryClient();
+            telemetryClient.trackEvent(QnATelemetryConstants.QNA_MSG_EVENT, properties);
+
+            // Create second event.
+            Map<String, String> secondEventProperties = new HashMap<String, String>();
+            secondEventProperties.put("MyImportantProperty2", "myImportantValue2");
+            telemetryClient.trackEvent("MySecondEvent", secondEventProperties);
+            return CompletableFuture.completedFuture(null);
+        }
+
     }
 
     private class CapturedRequest {

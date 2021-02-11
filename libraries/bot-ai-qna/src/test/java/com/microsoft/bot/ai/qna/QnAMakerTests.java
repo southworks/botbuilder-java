@@ -361,8 +361,9 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerReturnsAnswerWithFiltering() {
-        this.configureMockServer("QnaMaker_UsesStrictFilters_ToReturnAnswer.json");
+    public CompletableFuture<Void> qnaMakerReturnsAnswerWithFiltering() throws InterruptedException {
+        MockWebServer mockWebServer = this.configureMockServer("QnaMaker_UsesStrictFilters_ToReturnAnswer.json");
+        RecordedRequest request = mockWebServer.takeRequest();
         QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -382,6 +383,7 @@ public class QnAMakerTests {
             }
         };
         QnAMaker qna = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions, new OkHttpClient());
+        ObjectMapper objectMapper = new ObjectMapper();
 
         return qna.getAnswers(getContext("how do I clean the stove?"), qnaMakerOptions).thenApply(results -> {
             Assert.assertNotNull(results);
@@ -391,11 +393,16 @@ public class QnAMakerTests {
             Assert.assertEquals("topic", results[0].getMetadata()[0].getName());
             Assert.assertEquals("value", results[0].getMetadata()[0].getValue());
 
+            CapturedRequest obj = new CapturedRequest();
+            try {
+                obj = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             // verify we are actually passing on the options
-            // var obj = JObject.Parse(interceptHttp.Content);
-            // Assert.Equal(1, obj["top"].Value<int>());
-            // Assert.Equal("topic", obj["strictFilters"][0]["name"].Value<string>());
-            // Assert.Equal("value", obj["strictFilters"][0]["value"].Value<string>());
+            Assert.assertEquals(1, (int) obj.getTop());
+            Assert.assertEquals("topic", obj.getStrictFilters()[0].getName());
+            Assert.assertEquals("value", obj.getStrictFilters()[0].getValue());
             return null;
         });
     }
@@ -717,8 +724,9 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerTestThresholdInQueryOption() {
-        this.configureMockServer("QnaMaker_ReturnsAnswer_GivenScoreThresholdQueryOption.json");
+    public CompletableFuture<Void> qnaMakerTestThresholdInQueryOption() throws InterruptedException {
+        MockWebServer mockWebServer = this.configureMockServer("QnaMaker_ReturnsAnswer_GivenScoreThresholdQueryOption.json");
+        RecordedRequest request = mockWebServer.takeRequest();
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -735,14 +743,21 @@ public class QnAMakerTests {
 
         QnAMaker qna = new QnAMaker(qnAMakerEndpoint, queryOptionsWithScoreThreshold, new OkHttpClient());
 
+        ObjectMapper objectMapper = new ObjectMapper();
+
         return qna.getAnswers(getContext("What happens when you hug a porcupine?"),
-            queryOptionsWithScoreThreshold).thenAccept(results -> {
+           queryOptionsWithScoreThreshold).thenAccept(results -> {
            Assert.assertNotNull(results);
-           /* TODO
-           var obj = JObject.Parse(interceptHttp.Content);
-            Assert.Equal(2, obj["top"].Value<int>());
-            Assert.Equal(0.5F, obj["scoreThreshold"].Value<float>());
-            */
+
+           CapturedRequest obj = new CapturedRequest();
+           try {
+               obj = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+           } catch (IOException e) {
+               e.printStackTrace();
+           }
+
+           Assert.assertEquals(2, (int) obj.getTop());
+           Assert.assertEquals(0.5, (float) obj.getScoreThreshold(), 2);
         });
     }
 
@@ -819,8 +834,9 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerTestOptionsHydration() {
-        this.configureMockServer("QnaMaker_ReturnsAnswer.json");
+    public CompletableFuture<Void> qnaMakerTestOptionsHydration() throws InterruptedException {
+        MockWebServer mockWebServer = this.configureMockServer("QnaMaker_ReturnsAnswer.json");
+        RecordedRequest request = mockWebServer.takeRequest();
 
         QnAMakerOptions noFiltersOptions = new QnAMakerOptions() {
             {
@@ -882,44 +898,65 @@ public class QnAMakerTests {
         // Ensure that options from previous requests do not bleed over to the next,
         // And that the options set in the constructor are not overwritten improperly by options passed into .GetAnswersAsync()
 
-        CapturedRequest requestContent1 = null;
-        CapturedRequest requestContent2 = null;
-        CapturedRequest requestContent3 = null;
-        CapturedRequest requestContent4 = null;
-        CapturedRequest requestContent5 = null;
-        CapturedRequest requestContent6 = null;
+        final CapturedRequest[] requestContent = {null, null, null, null, null, null};
+        ObjectMapper objectMapper = new ObjectMapper();
 
         return qna.getAnswers(context, noFiltersOptions).thenRun(() -> {
-            //var requestContent1 = JsonConvert.DeserializeObject<CapturedRequest>(interceptHttp.Content);
+            try {
+                requestContent[0] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }).thenCompose(task -> qna.getAnswers(context, twoStrictFiltersOptions).thenRun(() -> {
-            //var requestContent2 = JsonConvert.DeserializeObject<CapturedRequest>(interceptHttp.Content);
+            try {
+                requestContent[1] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         })).thenCompose(task -> qna.getAnswers(context, oneFilteredOption).thenRun(() -> {
-            //var requestContent3 = JsonConvert.DeserializeObject<CapturedRequest>(interceptHttp.Content);
+            try {
+                requestContent[2] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         })).thenCompose(task -> qna.getAnswers(context, null).thenRun(() -> {
-            // var requestContent4 = JsonConvert.DeserializeObject<CapturedRequest>(interceptHttp.Content);
+            try {
+                requestContent[3] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         })).thenCompose(task -> qna.getAnswers(context, allChangedRequestOptions).thenRun(() -> {
-            //var requestContent5 = JsonConvert.DeserializeObject<CapturedRequest>(interceptHttp.Content);
+            try {
+                requestContent[4] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         })).thenCompose(task -> qna.getAnswers(context, null).thenRun(() -> {
-            // var requestContent6 = JsonConvert.DeserializeObject<CapturedRequest>(interceptHttp.Content);
+            try {
+                requestContent[5] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-            Assert.assertTrue(requestContent1.getStrictFilters().length == 0);
-            Assert.assertEquals(2, requestContent2.getStrictFilters().length);
-            Assert.assertTrue(requestContent3.getStrictFilters().length == 1);
-            Assert.assertTrue(requestContent4.getStrictFilters().length == 0);
+            Assert.assertTrue(requestContent[0].getStrictFilters().length == 0);
+            Assert.assertEquals(2, requestContent[1].getStrictFilters().length);
+            Assert.assertTrue(requestContent[2].getStrictFilters().length == 1);
+            Assert.assertTrue(requestContent[3].getStrictFilters().length == 0);
 
-            Assert.assertEquals(2000, (int) requestContent5.getTop());
-            Assert.assertEquals(0.42, Math.round(requestContent5.getScoreThreshold()));
-            Assert.assertTrue(requestContent5.getStrictFilters().length == 1);
+            Assert.assertEquals(2000, (int) requestContent[4].getTop());
+            Assert.assertEquals(0.42, Math.round(requestContent[4].getScoreThreshold()));
+            Assert.assertTrue(requestContent[4].getStrictFilters().length == 1);
 
-            Assert.assertEquals(30, (int) requestContent6.getTop());
-            Assert.assertEquals(0.3, Math.round(requestContent6.getScoreThreshold()));
-            Assert.assertTrue(requestContent6.getStrictFilters().length == 0);
+            Assert.assertEquals(30, (int) requestContent[5].getTop());
+            Assert.assertEquals(0.3, Math.round(requestContent[5].getScoreThreshold()),2);
+            Assert.assertTrue(requestContent[5].getStrictFilters().length == 0);
         }));
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerStrictFiltersCompoundOperationType() {
-        this.configureMockServer("QnaMaker_ReturnsAnswer.json");
+    public CompletableFuture<Void> qnaMakerStrictFiltersCompoundOperationType() throws InterruptedException {
+        MockWebServer mockWebServer = this.configureMockServer("QnaMaker_ReturnsAnswer.json");
+        RecordedRequest request = mockWebServer.takeRequest();
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -951,9 +988,15 @@ public class QnAMakerTests {
         QnAMaker qna = new QnAMaker(qnAMakerEndpoint, oneFilteredOption, new OkHttpClient());
 
         TurnContext context = getContext("up");
+        ObjectMapper objectMapper = new ObjectMapper();
 
         return qna.getAnswers(context, oneFilteredOption).thenAccept(noFilterResults1 -> {
-           //  var requestContent1 = JsonConvert.DeserializeObject<CapturedRequest>(interceptHttp.Content);
+            CapturedRequest requestContent;
+            try {
+                requestContent = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             Assert.assertEquals(2, oneFilteredOption.getStrictFilters().length);
             Assert.assertEquals(JoinOperator.OR, oneFilteredOption.getStrictFiltersJoinOperator());
         });

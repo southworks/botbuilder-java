@@ -86,43 +86,46 @@ public class QnAMakerTests {
         TestAdapter adapter = new TestAdapter(
                 TestAdapter.createConversationReference("QnaMaker_TraceActivity", null, null))
                         .use(new TranscriptLoggerMiddleware(transcriptStore));
-        String conversationId = null;
-        new TestFlow(adapter, (turnContext) -> {
+        final String[] conversationId = {null};
+        new TestFlow(adapter, (turnContext -> {
             // Simulate Qna Lookup
-            if (turnContext.getActivity().getText().compareTo("how do I clean the stove?") == 0) {
-                return qna.getAnswers(turnContext, null).thenApply(results -> {
+            if(turnContext.getActivity().getText().compareTo("how do I clean the stove?") == 0) {
+                qna.getAnswers(turnContext, null).thenAccept(results -> {
                     Assert.assertNotNull(results);
                     Assert.assertTrue(results.length == 1);
                     Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
-                            results[0].getAnswer());
-                    return null;
-                }).thenCompose(task -> {
-                    conversationId = turnContext.getActivity().getConversation().getId();
+                        results[0].getAnswer());
+                }).thenApply(task -> {
+                    conversationId[0] = turnContext.getActivity().getConversation().getId();
                     Activity typingActivity = new Activity() {
                         {
                             setType(ActivityTypes.TYPING);
                             setRelatesTo(turnContext.getActivity().getRelatesTo());
                         }
                     };
-                    return turnContext.sendActivity(typingActivity);
-                }).thenCompose(task -> {
+                    return typingActivity;
+                }).thenAccept(typingActivity -> {
+                    turnContext.sendActivity(typingActivity);
+                }).thenAccept(task -> {
                     try {
                         TimeUnit.SECONDS.sleep(5);
                     } catch (InterruptedException e) {
                         // no handle exception
                     }
-                    return turnContext.sendActivity(String.format("echo: %s", turnContext.getActivity().getText()));
+                }).thenAccept(task -> {
+                    turnContext.sendActivity(String.format("echo: %s", turnContext.getActivity().getText()));
                 });
             }
-        }).send("how do I clean the stove?").assertReply(activity -> {
+            return null;
+        }))
+        .send("how do I clean the stove?").assertReply(activity -> {
             Assert.assertEquals(activity.getType(), ActivityTypes.TYPING);
 
         }).assertReply("echo:how do I clean the stove?").send("bar")
                 .assertReply(activity -> Assert.assertEquals(activity.getType(), ActivityTypes.TYPING))
                 .assertReply("echo:bar").startTest().join();
-
         // Validate Trace Activity created
-        transcriptStore.getTranscriptActivities("test", conversationId).thenApply(pagedResult -> {
+        return transcriptStore.getTranscriptActivities("test", conversationId[0]).thenAccept(pagedResult -> {
             Assert.assertEquals(7, pagedResult.getItems().size());
             Assert.assertEquals("how do I clean the stove?", pagedResult.getItems().get(0).getText());
             Assert.assertEquals(0, pagedResult.getItems().get(1).getType().compareTo(ActivityTypes.TRACE));
@@ -133,9 +136,9 @@ public class QnAMakerTests {
             Assert.assertEquals("echo:bar", pagedResult.getItems().get(6).getText());
             for (Activity activity : pagedResult.getItems()) {
                 Assert.assertFalse(StringUtils.isBlank(activity.getId()));
-                // Assert.assertTrue(activity.getTimestamp() > );
+                // default(DateTimeOffset) in C# is 1/1/0001 12:00:00 AM + 00:00 we need to test it
+                //Assert.assertTrue(activity.getTimestamp() > ));
             }
-            return null;
         });
     }
 
@@ -521,7 +524,7 @@ public class QnAMakerTests {
             Assert.assertNotNull(results);
             Assert.assertTrue(results.length == 1);
             Assert.assertEquals(55, (int) results[0].getId());
-            Assert.assertEquals(1, (double) results[0].getScore());
+            Assert.assertEquals(1, (double) results[0].getScore(), 2);
         });
     }
 
@@ -576,7 +579,7 @@ public class QnAMakerTests {
            Assert.assertNotNull(results);
            Assert.assertTrue(results.length == 1);
            Assert.assertEquals(55, (int) results[0].getId());
-           Assert.assertEquals(1, (double) results[0].getScore());
+           Assert.assertEquals(1, (double) results[0].getScore(), 2);
         });
     }
 

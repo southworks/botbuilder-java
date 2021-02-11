@@ -14,6 +14,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.bot.ai.qna.dialogs.QnAMakerDialog;
 import com.microsoft.bot.ai.qna.models.FeedbackRecord;
 import com.microsoft.bot.ai.qna.models.FeedbackRecords;
@@ -32,12 +34,17 @@ import com.microsoft.bot.schema.ActivityTypes;
 import com.microsoft.bot.schema.ChannelAccount;
 import com.microsoft.bot.schema.ConversationAccount;
 
+import okhttp3.HttpUrl;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import okhttp3.OkHttpClient;
@@ -271,9 +278,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerLowScoreVariation() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_TopNAnswer.json")).when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_TopNAnswer.json");
         QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -286,7 +291,7 @@ public class QnAMakerTests {
                 setTop(5);
             }
         };
-        QnAMaker qna = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions, mockHttp);
+        QnAMaker qna = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions, new OkHttpClient());
         return qna.getAnswers(getContext("Q11"), null).thenApply(results -> {
             Assert.assertNotNull(results);
             Assert.assertEquals(4, results.length);
@@ -296,8 +301,7 @@ public class QnAMakerTests {
             Assert.assertEquals(3, filteredResults.length);
             return null;
         }).thenCompose(task -> {
-            Mockito.doReturn(this.getResponse("QnaMaker_TopNAnswer_DisableActiveLearning.json"))
-                    .when(mockHttp.newCall(request));
+            this.configureMockServer("QnaMaker_TopNAnswer_DisableActiveLearning.json");
             return qna.getAnswers(getContext("Q11"), null).thenApply(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertEquals(4, results.length);
@@ -312,9 +316,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerCallTrain() throws IOException {
-        Request request = new Request.Builder().url(this.getTrainRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("{ }")).when(mockHttp.newCall(request));
+        this.configureMockServer("{ }");
         QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -322,7 +324,7 @@ public class QnAMakerTests {
                 setHost(hostname);
             }
         };
-        QnAMaker qna = new QnAMaker(qnaMakerEndpoint, null, mockHttp);
+        QnAMaker qna = new QnAMaker(qnaMakerEndpoint, null, new OkHttpClient());
         FeedbackRecords feedbackRecords = new FeedbackRecords();
 
         FeedbackRecord feedback1 = new FeedbackRecord() {
@@ -360,10 +362,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerReturnsAnswerWithFiltering() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_UsesStrictFilters_ToReturnAnswer.json"))
-                .when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_UsesStrictFilters_ToReturnAnswer.json");
         QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -382,7 +381,7 @@ public class QnAMakerTests {
                 setTop(1);
             }
         };
-        QnAMaker qna = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions, mockHttp);
+        QnAMaker qna = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions, new OkHttpClient());
 
         return qna.getAnswers(getContext("how do I clean the stove?"), qnaMakerOptions).thenApply(results -> {
             Assert.assertNotNull(results);
@@ -403,9 +402,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerSetScoreThresholdWhenThresholdIsZero() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json")).when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswer.json");
         QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -418,7 +415,7 @@ public class QnAMakerTests {
                 setScoreThreshold(0.0f);
             }
         };
-        QnAMaker qnaWithZeroValueThreshold = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions, mockHttp);
+        QnAMaker qnaWithZeroValueThreshold = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions, new OkHttpClient());
 
         return qnaWithZeroValueThreshold.getAnswers(getContext("how do I clean the stove?"), new QnAMakerOptions() {
             {
@@ -433,9 +430,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerTestThreshold() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_TestThreshold.json")).when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_TestThreshold.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -449,7 +444,7 @@ public class QnAMakerTests {
                 setScoreThreshold(0.99F);
             }
         };
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, qnaMakerOptions, mockHttp);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, qnaMakerOptions, new OkHttpClient());
 
         return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
             Assert.assertNotNull(results);
@@ -495,9 +490,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerReturnsAnswerWithContext() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswerWithContext.json")).when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswerWithContext.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -518,7 +511,7 @@ public class QnAMakerTests {
             }
         };
 
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, mockHttp);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, new OkHttpClient());
 
         return qna.getAnswers(getContext("Where can I buy?"), options).thenAccept(results -> {
             Assert.assertNotNull(results);
@@ -530,9 +523,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerReturnAnswersWithoutContext() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswerWithoutContext.json")).when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswerWithoutContext.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -546,7 +537,7 @@ public class QnAMakerTests {
             }
         };
 
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, mockHttp);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, new OkHttpClient());
 
         return qna.getAnswers(getContext("Where can I buy?"), options).thenAccept(results -> {
            Assert.assertNotNull(results);
@@ -557,9 +548,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerReturnsHighScoreWhenIdPassed() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswerWithContext.json")).when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswerWithContext.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -574,7 +563,7 @@ public class QnAMakerTests {
             }
         };
 
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, mockHttp);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, new OkHttpClient());
         return qna.getAnswers(getContext("Where can I buy?"), options).thenAccept(results -> {
            Assert.assertNotNull(results);
            Assert.assertTrue(results.length == 1);
@@ -638,11 +627,9 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerUserAgent() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        String userAgentHeader = request.header("User-Agent");
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json")).when(mockHttp.newCall(request));
+    public CompletableFuture<Void> qnaMakerUserAgent() throws InterruptedException {
+        MockWebServer mockWebServer = this.configureMockServer("QnaMaker_ReturnsAnswer.json");
+        RecordedRequest request = mockWebServer.takeRequest();
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -656,7 +643,7 @@ public class QnAMakerTests {
             }
         };
 
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, mockHttp);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, new OkHttpClient());
         return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
            Assert.assertNotNull(results);
            Assert.assertTrue(results.length == 1);
@@ -664,15 +651,13 @@ public class QnAMakerTests {
                results[0].getAnswer());
 
             // Verify that we added the bot.builder package details.
-           Assert.assertTrue(userAgentHeader.contains("Microsoft.Bot.Builder.AI.QnA/4"));
+           Assert.assertTrue(request.getHeader("User-Agent").contains("Microsoft.Bot.Builder.AI.QnA/4"));
         });
     }
 
     @Test
     public void qnaMakerV2LegacyEndpointShouldThrow() {
-        Request request = new Request.Builder().url(this.getV2LegacyRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_LegacyEndpointAnswer.json")).when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_LegacyEndpointAnswer.json");
         String host = new StringBuilder("{")
             .append(hostname)
             .append("}")
@@ -685,14 +670,12 @@ public class QnAMakerTests {
             }
         };
 
-        Assert.assertThrows(UnsupportedOperationException.class, () -> new QnAMaker(v2LegacyEndpoint,null,mockHttp));
+        Assert.assertThrows(UnsupportedOperationException.class, () -> new QnAMaker(v2LegacyEndpoint,null, new OkHttpClient()));
     }
 
     @Test
     public void qnaMakerV3LeagacyEndpointShouldThrow() {
-        Request request = new Request.Builder().url(this.getV3LegacyRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_LegacyEndpointAnswer.json")).when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_LegacyEndpointAnswer.json");
         String host = new StringBuilder("{")
             .append(hostname)
             .append("}")
@@ -705,14 +688,12 @@ public class QnAMakerTests {
             }
         };
 
-        Assert.assertThrows(UnsupportedOperationException.class, () -> new QnAMaker(v3LegacyEndpoint,null,mockHttp));
+        Assert.assertThrows(UnsupportedOperationException.class, () -> new QnAMaker(v3LegacyEndpoint,null, new OkHttpClient()));
     }
 
     @Test
     public CompletableFuture<Void> qnaMakerReturnsAnswerWithMetadataBoost() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswersWithMetadataBoost.json")).when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswersWithMetadataBoost.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -726,7 +707,7 @@ public class QnAMakerTests {
             }
         };
 
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, mockHttp);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, new OkHttpClient());
 
         return qna.getAnswers(getContext("who loves me?"), options).thenAccept(results -> {
            Assert.assertNotNull(results);
@@ -737,10 +718,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerTestThresholdInQueryOption() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer_GivenScoreThresholdQueryOption.json"))
-            .when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswer_GivenScoreThresholdQueryOption.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -755,7 +733,7 @@ public class QnAMakerTests {
             }
         };
 
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, queryOptionsWithScoreThreshold, mockHttp);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, queryOptionsWithScoreThreshold, new OkHttpClient());
 
         return qna.getAnswers(getContext("What happens when you hug a porcupine?"),
             queryOptionsWithScoreThreshold).thenAccept(results -> {
@@ -792,9 +770,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerIsTestTrue() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_IsTest_True.json")).when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_IsTest_True.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -809,7 +785,7 @@ public class QnAMakerTests {
             }
         };
 
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, qnaMakerOptions, mockHttp);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, qnaMakerOptions, new OkHttpClient());
 
         return qna.getAnswers(getContext("Q11"), qnaMakerOptions).thenAccept(results -> {
            Assert.assertNotNull(results);
@@ -818,11 +794,8 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerRankerTypeQuestionOnly() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_RankerType_QuestionOnly.json"))
-            .when(mockHttp.newCall(request));
+    public CompletableFuture<Void> qnaMakerRankerTypeQuestionOnly() throws IOException {
+        this.configureMockServer("QnaMaker_RankerType_QuestionOnly.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -837,7 +810,7 @@ public class QnAMakerTests {
             }
         };
 
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, qnaMakerOptions, mockHttp);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, qnaMakerOptions, new OkHttpClient());
 
         return qna.getAnswers(getContext("Q11"), qnaMakerOptions).thenAccept(results -> {
            Assert.assertNotNull(results);
@@ -847,10 +820,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerTestOptionsHydration() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
-            .when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswer.json");
 
         QnAMakerOptions noFiltersOptions = new QnAMakerOptions() {
             {
@@ -905,7 +875,7 @@ public class QnAMakerTests {
             }
         };
 
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, noFiltersOptions, mockHttp);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, noFiltersOptions, new OkHttpClient());
 
         TurnContext context = getContext("up");
 
@@ -949,10 +919,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerStrictFiltersCompoundOperationType() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
-            .when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswer.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -981,7 +948,7 @@ public class QnAMakerTests {
             }
         };
 
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, oneFilteredOption, mockHttp);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, oneFilteredOption, new OkHttpClient());
 
         TurnContext context = getContext("up");
 
@@ -995,10 +962,7 @@ public class QnAMakerTests {
     @Test
     public CompletableFuture<Void> telemetryNullTelemetryClient() {
         // Arrange
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
-            .when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswer.json");
 
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
@@ -1016,7 +980,7 @@ public class QnAMakerTests {
 
         // Act (Null Telemetry client)
         // This will default to the NullTelemetryClient which no-ops all calls.
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, mockHttp, null, true);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, new OkHttpClient(), null, true);
         return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
            Assert.assertNotNull(results);
            Assert.assertTrue(results.length == 1);
@@ -1028,10 +992,7 @@ public class QnAMakerTests {
     @Test
     public CompletableFuture<Void> telemetryReturnsAnswer() {
         // Arrange
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
-            .when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswer.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -1048,7 +1009,7 @@ public class QnAMakerTests {
         BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
 
         // Act - See if we get data back in telemetry
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, mockHttp, telemetryClient, true);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, new OkHttpClient(), telemetryClient, true);
         return qna.getAnswers(getContext("what is the answer to my nonsense question?"), null)
             .thenAccept(results -> {
                 // Assert - Check Telemetry logged
@@ -1080,10 +1041,7 @@ public class QnAMakerTests {
     @Test
     public CompletableFuture<Void> telemetryPii() {
         // Arrange
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
-            .when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswer.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -1100,7 +1058,7 @@ public class QnAMakerTests {
         BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
 
         // Act
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, mockHttp, telemetryClient, false);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, new OkHttpClient(), telemetryClient, false);
         return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
             // verify BotTelemetryClient was invoked 3 times, and capture arguments.
             verify(telemetryClient, times(3)).trackEvent(
@@ -1134,10 +1092,7 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> telemetryOverride() {
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
-            .when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswer.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -1157,7 +1112,7 @@ public class QnAMakerTests {
         Map<String, String> telemetryProperties = new HashMap<String, String>();
         telemetryProperties.put("Id", "MyID");
 
-        QnAMaker qna = new OverrideTelemetry(qnAMakerEndpoint, options, mockHttp, telemetryClient, false);
+        QnAMaker qna = new OverrideTelemetry(qnAMakerEndpoint, options, new OkHttpClient(), telemetryClient, false);
         return qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, null)
             .thenAccept(results -> {
                 // verify BotTelemetryClient was invoked 2 times, and capture arguments.
@@ -1192,10 +1147,7 @@ public class QnAMakerTests {
     @Test
     public CompletableFuture<Void> telemetryAdditionalPropsMetrics() {
         //Arrange
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
-            .when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswer.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -1212,7 +1164,7 @@ public class QnAMakerTests {
         BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
 
         // Act - Pass in properties during QnA invocation
-        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, mockHttp, telemetryClient, false);
+        QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, new OkHttpClient(), telemetryClient, false);
         Map<String, String> telemetryProperties = new HashMap<String, String>() {
             {
                 put("MyImportantProperty", "myImportantValue");
@@ -1265,10 +1217,7 @@ public class QnAMakerTests {
     @Test
     public CompletableFuture<Void> telemetryAdditionalPropsOverride() {
         //Arrange
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
-            .when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswer.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -1333,10 +1282,7 @@ public class QnAMakerTests {
     @Test
     public CompletableFuture<Void> telemetryFillPropsOverride() {
         //Arrange
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json"))
-            .when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswer.json");
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -1360,7 +1306,7 @@ public class QnAMakerTests {
         //           - Set in GetAnswersAsync
         //       Logically, the GetAnswersAync should win.  But ultimately OnQnaResultsAsync decides since it is the last
         //       code to touch the properties before logging (since it actually logs the event).
-        QnAMaker qna = new OverrideFillTelemetry(qnAMakerEndpoint, options, mockHttp, telemetryClient, false);
+        QnAMaker qna = new OverrideFillTelemetry(qnAMakerEndpoint, options, new OkHttpClient(), telemetryClient, false);
         Map<String, String> telemetryProperties = new HashMap<String, String>() {
             {
                 put("knowledgeBaseId", "myImportantValue");
@@ -1584,9 +1530,7 @@ public class QnAMakerTests {
 
     private QnAMaker qnaReturnsAnswer() {
         // Mock Qna
-        Request request = new Request.Builder().url(this.getRequestUrl()).build();
-        OkHttpClient mockHttp = Mockito.mock(OkHttpClient.class);
-        Mockito.doReturn(this.getResponse("QnaMaker_ReturnsAnswer.json")).when(mockHttp.newCall(request));
+        this.configureMockServer("QnaMaker_ReturnsAnswer.json");
         QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
@@ -1599,7 +1543,7 @@ public class QnAMakerTests {
                 setTop(1);
             }
         };
-        return new QnAMaker(qnaMakerEndpoint, qnaMakerOptions, mockHttp);
+        return new QnAMaker(qnaMakerEndpoint, qnaMakerOptions, new OkHttpClient());
     }
 
     private String getResponse(String fileName) {
@@ -1610,6 +1554,34 @@ public class QnAMakerTests {
             LoggerFactory.getLogger(QnAMakerTests.class).error(String.format("Cannot read the file: %s", fileName));
             return "";
         }
+    }
+
+    private MockWebServer configureMockServer(String fileName) {
+        MockWebServer mockWebServer = new MockWebServer();
+        try {
+            String pathToMock = this.getRequestUrl();
+            String filePath = new StringBuilder("/src/test/java/com/microsoft/bot/ai/qna/testData/")
+                .append(fileName)
+                .toString();
+            String content = getResponse(filePath);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode testData = mapper.readTree(content);
+            this.initializeMockServer(mockWebServer, testData, pathToMock);
+        } catch (IOException e) {
+        }
+        return mockWebServer;
+    }
+
+    private HttpUrl initializeMockServer(MockWebServer mockWebServer, JsonNode response, String url) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        String mockResponse = mapper.writeValueAsString(response);
+        mockWebServer.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json; charset=utf-8")
+            .setBody(mockResponse));
+
+        mockWebServer.start();
+
+        return mockWebServer.url(url);
     }
 
     private Path getFilePath(String fileName) {

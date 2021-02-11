@@ -77,6 +77,7 @@ public class MyTurnContext implements TurnContext {
 
     public CompletableFuture<ResourceResponse> sendActivity(String textReplyToSend, String speak,
                                                             InputHints inputHint) {
+        inputHint = inputHint != null ? inputHint : InputHints.ACCEPTING_INPUT;
         throw new UnsupportedOperationException();
     }
 

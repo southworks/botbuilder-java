@@ -309,12 +309,11 @@ public class QnAMakerTests {
         try {
             this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
             QnAMaker qna = this.qnaReturnsAnswer();
-            return qna.getAnswers(getContext("how do I clean the stove?"), null).thenApply(results -> {
+            return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
                 Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
                     results[0].getAnswer());
-                return null;
             });
         } finally {
             try {
@@ -336,14 +335,12 @@ public class QnAMakerTests {
                     setTop(1);
                 }
             };
-            return qna.getAnswersRaw(getContext("how do I clean the stove?"), options, null, null).thenApply(results -> {
+            return qna.getAnswersRaw(getContext("how do I clean the stove?"), options, null, null).thenAccept(results -> {
                 Assert.assertNotNull(results.getAnswers());
                 Assert.assertTrue(results.getActiveLearningEnabled());
                 Assert.assertTrue(results.getAnswers().length == 1);
                 Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
                     results.getAnswers()[0].getAnswer());
-
-                return null;
             });
         } finally {
             try {
@@ -372,24 +369,22 @@ public class QnAMakerTests {
                 }
             };
             QnAMaker qna = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions, new OkHttpClient());
-            return qna.getAnswers(getContext("Q11"), null).thenApply(results -> {
+            return qna.getAnswers(getContext("Q11"), null).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertEquals(4, results.length);
 
                 QueryResult[] filteredResults = qna.getLowScoreVariation(results);
                 Assert.assertNotNull(filteredResults);
                 Assert.assertEquals(3, filteredResults.length);
-                return null;
             }).thenCompose(task -> {
                 this.configureMockServer(mockWebServer, "QnaMaker_TopNAnswer_DisableActiveLearning.json");
-                return qna.getAnswers(getContext("Q11"), null).thenApply(results -> {
+                return qna.getAnswers(getContext("Q11"), null).thenAccept(results -> {
                     Assert.assertNotNull(results);
                     Assert.assertEquals(4, results.length);
 
                     QueryResult[] filteredResults = qna.getLowScoreVariation(results);
                     Assert.assertNotNull(filteredResults);
                     Assert.assertEquals(3, filteredResults.length);
-                    return null;
                 });
             });
         } finally {
@@ -454,12 +449,11 @@ public class QnAMakerTests {
         try {
             this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
             QnAMaker qna = this.qnaReturnsAnswer();
-            return qna.getAnswers(getContext("how do I clean the stove?"), null).thenApply(results -> {
+            return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
                 Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
                     results[0].getAnswer());
-                return null;
             });
         } finally {
             try {
@@ -497,7 +491,7 @@ public class QnAMakerTests {
             QnAMaker qna = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions, new OkHttpClient());
             ObjectMapper objectMapper = new ObjectMapper();
 
-            return qna.getAnswers(getContext("how do I clean the stove?"), qnaMakerOptions).thenApply(results -> {
+            return qna.getAnswers(getContext("how do I clean the stove?"), qnaMakerOptions).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
                 Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
@@ -515,7 +509,6 @@ public class QnAMakerTests {
                 Assert.assertEquals(1, (int) obj.getTop());
                 Assert.assertEquals("topic", obj.getStrictFilters()[0].getName());
                 Assert.assertEquals("value", obj.getStrictFilters()[0].getValue());
-                return null;
             });
         } catch (InterruptedException ex) {
             Assert.assertFalse(true);
@@ -552,10 +545,9 @@ public class QnAMakerTests {
                 {
                     setTop(1);
                 }
-            }).thenApply(results -> {
+            }).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
-                return null;
             });
         } finally {
             try {

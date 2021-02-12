@@ -87,7 +87,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerTraceActivity() {
+    public void qnaMakerTraceActivity() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
@@ -140,7 +140,7 @@ public class QnAMakerTests {
                     .assertReply("echo:bar")
                 .startTest().join();
             // Validate Trace Activity created
-            return transcriptStore.getTranscriptActivities("test", conversationId[0]).thenAccept(pagedResult -> {
+            transcriptStore.getTranscriptActivities("test", conversationId[0]).thenAccept(pagedResult -> {
                 Assert.assertEquals(7, pagedResult.getItems().size());
                 Assert.assertEquals("how do I clean the stove?", pagedResult.getItems().get(0).getText());
                 Assert.assertEquals(0, pagedResult.getItems().get(1).getType().compareTo(ActivityTypes.TRACE));
@@ -163,7 +163,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerTraceActivityEmptyText() {
+    public void qnaMakerTraceActivityEmptyText() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
@@ -185,7 +185,7 @@ public class QnAMakerTests {
             TurnContext context = new TurnContextImpl(adapter, activity);
             Assert.assertThrows(IllegalArgumentException.class, () -> qna.getAnswers(context, null));
 
-            return CompletableFuture.completedFuture(null);
+            return;
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -196,7 +196,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerTraceActivityNullText() {
+    public void qnaMakerTraceActivityNullText() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
@@ -219,7 +219,7 @@ public class QnAMakerTests {
             TurnContext context = new TurnContextImpl(adapter, activity);
             Assert.assertThrows(IllegalArgumentException.class, () -> qna.getAnswers(context, null));
 
-            return CompletableFuture.completedFuture(null);
+            return;
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -230,7 +230,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerTraceActivityNullContext() {
+    public void qnaMakerTraceActivityNullContext() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
@@ -239,7 +239,7 @@ public class QnAMakerTests {
 
             Assert.assertThrows(IllegalArgumentException.class, () -> qna.getAnswers(null, null));
 
-            return CompletableFuture.completedFuture(null);
+            return;
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -250,7 +250,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerTraceActivityBadMessage() {
+    public void qnaMakerTraceActivityBadMessage() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
@@ -274,7 +274,7 @@ public class QnAMakerTests {
 
             Assert.assertThrows(IllegalArgumentException.class, () -> qna.getAnswers(context, null));
 
-            return CompletableFuture.completedFuture(null);
+            return;
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -285,7 +285,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerTraceActivityNullActivity() {
+    public void qnaMakerTraceActivityNullActivity() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
@@ -299,7 +299,7 @@ public class QnAMakerTests {
 
             Assert.assertThrows(IllegalArgumentException.class, () -> qna.getAnswers(context, null));
 
-            return CompletableFuture.completedFuture(null);
+            return;
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -310,12 +310,12 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerReturnsAnswer() {
+    public void qnaMakerReturnsAnswer() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             QnAMaker qna = this.qnaReturnsAnswer();
-            return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
+            qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
                 Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
@@ -331,7 +331,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerReturnsAnswerRaw() {
+    public void qnaMakerReturnsAnswerRaw() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
@@ -341,7 +341,7 @@ public class QnAMakerTests {
                     setTop(1);
                 }
             };
-            return qna.getAnswersRaw(getContext("how do I clean the stove?"), options, null, null).thenAccept(results -> {
+            qna.getAnswersRaw(getContext("how do I clean the stove?"), options, null, null).thenAccept(results -> {
                 Assert.assertNotNull(results.getAnswers());
                 Assert.assertTrue(results.getActiveLearningEnabled());
                 Assert.assertTrue(results.getAnswers().length == 1);
@@ -358,7 +358,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerLowScoreVariation() {
+    public void qnaMakerLowScoreVariation() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_TopNAnswer.json", this.getRequestUrl());
@@ -375,7 +375,7 @@ public class QnAMakerTests {
                 }
             };
             QnAMaker qna = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions);
-            return qna.getAnswers(getContext("Q11"), null).thenAccept(results -> {
+            qna.getAnswers(getContext("Q11"), null).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertEquals(4, results.length);
 
@@ -403,7 +403,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerCallTrain() {
+    public void qnaMakerCallTrain() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer,"{ }", this.getTrainRequestUrl());
@@ -434,11 +434,11 @@ public class QnAMakerTests {
             };
 
             feedbackRecords.setRecords(new FeedbackRecord[] { feedback1, feedback2 });
-
-            return qna.callTrain(feedbackRecords);
+            qna.callTrain(feedbackRecords);
+            return;
         } catch (IOException e) {
             LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
-            return CompletableFuture.completedFuture(null);
+            return;
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -450,12 +450,12 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerReturnsAnswerConfiguration() {
+    public void qnaMakerReturnsAnswerConfiguration() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             QnAMaker qna = this.qnaReturnsAnswer();
-            return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
+            qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
                 Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
@@ -471,7 +471,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerReturnsAnswerWithFiltering() {
+    public void qnaMakerReturnsAnswerWithFiltering() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_UsesStrictFilters_ToReturnAnswer.json", this.getRequestUrl());
@@ -497,7 +497,7 @@ public class QnAMakerTests {
             QnAMaker qna = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions);
             ObjectMapper objectMapper = new ObjectMapper();
 
-            return qna.getAnswers(getContext("how do I clean the stove?"), qnaMakerOptions).thenAccept(results -> {
+            qna.getAnswers(getContext("how do I clean the stove?"), qnaMakerOptions).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
                 Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
@@ -518,7 +518,7 @@ public class QnAMakerTests {
             });
         } catch (InterruptedException e) {
             LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
-            return CompletableFuture.completedFuture(null);
+            return;
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -529,7 +529,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerSetScoreThresholdWhenThresholdIsZero() {
+    public void qnaMakerSetScoreThresholdWhenThresholdIsZero() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
@@ -547,7 +547,7 @@ public class QnAMakerTests {
             };
             QnAMaker qnaWithZeroValueThreshold = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions);
 
-            return qnaWithZeroValueThreshold.getAnswers(getContext("how do I clean the stove?"), new QnAMakerOptions() {
+            qnaWithZeroValueThreshold.getAnswers(getContext("how do I clean the stove?"), new QnAMakerOptions() {
                 {
                     setTop(1);
                 }
@@ -565,7 +565,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerTestThreshold() {
+    public void qnaMakerTestThreshold() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_TestThreshold.json", this.getRequestUrl());
@@ -584,7 +584,7 @@ public class QnAMakerTests {
             };
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, qnaMakerOptions);
 
-            return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
+            qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 0);
             });
@@ -635,7 +635,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerReturnsAnswerWithContext() {
+    public void qnaMakerReturnsAnswerWithContext() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswerWithContext.json", this.getRequestUrl());
@@ -661,7 +661,7 @@ public class QnAMakerTests {
 
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options);
 
-            return qna.getAnswers(getContext("Where can I buy?"), options).thenAccept(results -> {
+            qna.getAnswers(getContext("Where can I buy?"), options).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
                 Assert.assertEquals(55, (int)results[0].getId());
@@ -677,7 +677,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerReturnAnswersWithoutContext() {
+    public void qnaMakerReturnAnswersWithoutContext() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswerWithoutContext.json", this.getRequestUrl());
@@ -696,7 +696,7 @@ public class QnAMakerTests {
 
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options);
 
-            return qna.getAnswers(getContext("Where can I buy?"), options).thenAccept(results -> {
+            qna.getAnswers(getContext("Where can I buy?"), options).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertEquals(2, results.length);
                 Assert.assertNotEquals(1, results[0].getScore().intValue());
@@ -711,7 +711,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerReturnsHighScoreWhenIdPassed() {
+    public void qnaMakerReturnsHighScoreWhenIdPassed() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswerWithContext.json", this.getRequestUrl());
@@ -730,7 +730,7 @@ public class QnAMakerTests {
             };
 
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options);
-            return qna.getAnswers(getContext("Where can I buy?"), options).thenAccept(results -> {
+            qna.getAnswers(getContext("Where can I buy?"), options).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
                 Assert.assertEquals(55, (int)results[0].getId());
@@ -800,7 +800,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerUserAgent() {
+    public void qnaMakerUserAgent() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
@@ -819,7 +819,7 @@ public class QnAMakerTests {
             };
 
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options);
-            return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
+            qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
                 Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
@@ -830,7 +830,7 @@ public class QnAMakerTests {
             });
         } catch (InterruptedException e) {
             LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
-            return CompletableFuture.completedFuture(null);
+            return;
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -891,7 +891,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerReturnsAnswerWithMetadataBoost() {
+    public void qnaMakerReturnsAnswerWithMetadataBoost() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswersWithMetadataBoost.json", this.getRequestUrl());
@@ -910,7 +910,7 @@ public class QnAMakerTests {
 
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options);
 
-            return qna.getAnswers(getContext("who loves me?"), options).thenAccept(results -> {
+            qna.getAnswers(getContext("who loves me?"), options).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
                 Assert.assertEquals("Kiki", results[0].getAnswer());
@@ -925,7 +925,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerTestThresholdInQueryOption() {
+    public void qnaMakerTestThresholdInQueryOption() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer_GivenScoreThresholdQueryOption.json", this.getRequestUrl());
@@ -948,7 +948,7 @@ public class QnAMakerTests {
 
             ObjectMapper objectMapper = new ObjectMapper();
 
-            return qna.getAnswers(getContext("What happens when you hug a porcupine?"),
+            qna.getAnswers(getContext("What happens when you hug a porcupine?"),
                 queryOptionsWithScoreThreshold).thenAccept(results -> {
                 Assert.assertNotNull(results);
 
@@ -964,7 +964,7 @@ public class QnAMakerTests {
             });
         } catch (InterruptedException e) {
             LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
-            return CompletableFuture.completedFuture(null);
+            return;
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -975,7 +975,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerTestUnsuccessfulResponse() {
+    public void qnaMakerTestUnsuccessfulResponse() {
         MockWebServer mockWebServer = new MockWebServer();
         ObjectMapper objectMapper = new ObjectMapper();
         try {
@@ -994,10 +994,10 @@ public class QnAMakerTests {
             Assert.assertThrows(HttpRequestMethodNotSupportedException.class,
                 () -> qna.getAnswers(getContext("how do I clean the stove?"), null));
 
-            return CompletableFuture.completedFuture(null);
+            return;
         } catch (IOException e) {
             LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
-            return CompletableFuture.completedFuture(null);
+            return;
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -1008,7 +1008,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerIsTestTrue() {
+    public void qnaMakerIsTestTrue() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_IsTest_True.json", this.getRequestUrl());
@@ -1028,7 +1028,7 @@ public class QnAMakerTests {
 
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, qnaMakerOptions);
 
-            return qna.getAnswers(getContext("Q11"), qnaMakerOptions).thenAccept(results -> {
+            qna.getAnswers(getContext("Q11"), qnaMakerOptions).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 0);
             });
@@ -1042,7 +1042,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerRankerTypeQuestionOnly() {
+    public void qnaMakerRankerTypeQuestionOnly() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_RankerType_QuestionOnly.json", this.getRequestUrl());
@@ -1062,7 +1062,7 @@ public class QnAMakerTests {
 
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, qnaMakerOptions);
 
-            return qna.getAnswers(getContext("Q11"), qnaMakerOptions).thenAccept(results -> {
+            qna.getAnswers(getContext("Q11"), qnaMakerOptions).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertEquals(2, results.length);
             });
@@ -1076,7 +1076,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerTestOptionsHydration() {
+    public void qnaMakerTestOptionsHydration() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
@@ -1144,7 +1144,7 @@ public class QnAMakerTests {
             final CapturedRequest[] requestContent = new CapturedRequest[6];
             ObjectMapper objectMapper = new ObjectMapper();
 
-            return qna.getAnswers(context, noFiltersOptions).thenRun(() -> {
+            qna.getAnswers(context, noFiltersOptions).thenRun(() -> {
                 try {
                     requestContent[0] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
                 } catch (IOException e) {
@@ -1195,7 +1195,7 @@ public class QnAMakerTests {
                 Assert.assertTrue(requestContent[5].getStrictFilters().length == 0);
             }));
         } catch (InterruptedException ex) {
-            return CompletableFuture.completedFuture(null);
+            return;
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -1206,7 +1206,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> qnaMakerStrictFiltersCompoundOperationType() {
+    public void qnaMakerStrictFiltersCompoundOperationType() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
@@ -1244,7 +1244,7 @@ public class QnAMakerTests {
             TurnContext context = getContext("up");
             ObjectMapper objectMapper = new ObjectMapper();
 
-            return qna.getAnswers(context, oneFilteredOption).thenAccept(noFilterResults1 -> {
+            qna.getAnswers(context, oneFilteredOption).thenAccept(noFilterResults1 -> {
                 try {
                     CapturedRequest requestContent = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
                 } catch (IOException e) {
@@ -1255,7 +1255,7 @@ public class QnAMakerTests {
             });
         } catch (InterruptedException e) {
             LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
-            return CompletableFuture.completedFuture(null);
+            return;
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -1266,7 +1266,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> telemetryNullTelemetryClient() {
+    public void telemetryNullTelemetryClient() {
         // Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
@@ -1289,7 +1289,7 @@ public class QnAMakerTests {
             // Act (Null Telemetry client)
             // This will default to the NullTelemetryClient which no-ops all calls.
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, null, true);
-            return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
+            qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
                 Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack", results[0].getAnswer());
@@ -1305,7 +1305,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> telemetryReturnsAnswer() {
+    public void telemetryReturnsAnswer() {
         // Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
@@ -1327,7 +1327,7 @@ public class QnAMakerTests {
 
             // Act - See if we get data back in telemetry
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, telemetryClient, true);
-            return qna.getAnswers(getContext("what is the answer to my nonsense question?"), null)
+            qna.getAnswers(getContext("what is the answer to my nonsense question?"), null)
                 .thenAccept(results -> {
                     // Assert - Check Telemetry logged
                     // verify BotTelemetryClient was invoked 1 times, and capture arguments.
@@ -1365,7 +1365,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> telemetryReturnsAnswerWhenNoAnswerFoundInKB() {
+    public void telemetryReturnsAnswerWhenNoAnswerFoundInKB() {
         // Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
@@ -1387,7 +1387,7 @@ public class QnAMakerTests {
 
             // Act - See if we get data back in telemetry
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, telemetryClient, true);
-            return qna.getAnswers(getContext("what is the answer to my nonsense question?"), null)
+            qna.getAnswers(getContext("what is the answer to my nonsense question?"), null)
                 .thenAccept(results -> {
                     // Assert - Check Telemetry logged
                     // verify BotTelemetryClient was invoked 1 times, and capture arguments.
@@ -1423,7 +1423,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> telemetryPii() {
+    public void telemetryPii() {
         // Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
@@ -1445,7 +1445,7 @@ public class QnAMakerTests {
 
             // Act
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, telemetryClient, false);
-            return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
+            qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
                 // verify BotTelemetryClient was invoked 3 times, and capture arguments.
                 verify(telemetryClient, times(3)).trackEvent(
                     eventNameCaptor.capture(),
@@ -1484,7 +1484,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> telemetryOverride() {
+    public void telemetryOverride() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
@@ -1509,7 +1509,7 @@ public class QnAMakerTests {
             }};
 
             QnAMaker qna = new OverrideTelemetry(qnAMakerEndpoint, options, telemetryClient, false);
-            return qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, null)
+            qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, null)
                 .thenAccept(results -> {
                     // verify BotTelemetryClient was invoked 2 times, and capture arguments.
                     verify(telemetryClient, times(2)).trackEvent(
@@ -1548,7 +1548,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> telemetryAdditionalPropsMetrics() {
+    public void telemetryAdditionalPropsMetrics() {
         //Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
@@ -1581,7 +1581,7 @@ public class QnAMakerTests {
                 }
             };
 
-            return qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, telemetryMetrics)
+            qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, telemetryMetrics)
                 .thenAccept(results -> {
                     // Assert - added properties were added.
                     // verify BotTelemetryClient was invoked 1 times, and capture arguments.
@@ -1627,7 +1627,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> telemetryAdditionalPropsOverride() {
+    public void telemetryAdditionalPropsOverride() {
         //Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
@@ -1662,7 +1662,7 @@ public class QnAMakerTests {
                 }
             };
 
-            return qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, telemetryMetrics)
+            qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, telemetryMetrics)
                 .thenAccept(results -> {
                     // Assert - added properties were added.
                     // verify BotTelemetryClient was invoked 1 times, and capture arguments.
@@ -1701,7 +1701,7 @@ public class QnAMakerTests {
     }
 
     @Test
-    public CompletableFuture<Void> telemetryFillPropsOverride() {
+    public void telemetryFillPropsOverride() {
         //Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
@@ -1742,7 +1742,7 @@ public class QnAMakerTests {
                 }
             };
 
-            return qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, telemetryMetrics)
+            qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, telemetryMetrics)
                 .thenAccept(results -> {
                     // Assert - added properties were added.
                     // verify BotTelemetryClient was invoked 2 times, and capture arguments.

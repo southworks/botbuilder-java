@@ -659,7 +659,7 @@ public class QnAMakerTests {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
                 Assert.assertEquals(55, (int) results[0].getId());
-                Assert.assertEquals(1, (double) results[0].getScore(), 2);
+                Assert.assertEquals(1, (double) results[0].getScore(), 0);
             });
         } finally {
             try {
@@ -728,7 +728,7 @@ public class QnAMakerTests {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
                 Assert.assertEquals(55, (int) results[0].getId());
-                Assert.assertEquals(1, (double) results[0].getScore(), 2);
+                Assert.assertEquals(1, (double) results[0].getScore(), 0);
             });
         } finally {
             try {
@@ -960,7 +960,7 @@ public class QnAMakerTests {
                 }
 
                 Assert.assertEquals(2, (int) obj.getTop());
-                Assert.assertEquals(0.5, (float) obj.getScoreThreshold(), 2);
+                Assert.assertEquals(0.5, (float) obj.getScoreThreshold(), 0);
             });
         } catch (InterruptedException ex) {
             Assert.assertFalse(true);
@@ -1186,11 +1186,11 @@ public class QnAMakerTests {
                 Assert.assertTrue(requestContent[3].getStrictFilters().length == 0);
 
                 Assert.assertEquals(2000, (int) requestContent[4].getTop());
-                Assert.assertEquals(0.42, Math.round(requestContent[4].getScoreThreshold()));
+                Assert.assertEquals(0.42, Math.round(requestContent[4].getScoreThreshold()), 0);
                 Assert.assertTrue(requestContent[4].getStrictFilters().length == 1);
 
                 Assert.assertEquals(30, (int) requestContent[5].getTop());
-                Assert.assertEquals(0.3, Math.round(requestContent[5].getScoreThreshold()),2);
+                Assert.assertEquals(0.3, Math.round(requestContent[5].getScoreThreshold()),0);
                 Assert.assertTrue(requestContent[5].getStrictFilters().length == 0);
             }));
         } catch (InterruptedException ex) {

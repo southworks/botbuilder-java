@@ -28,13 +28,18 @@ import com.microsoft.bot.builder.*;
 import com.microsoft.bot.builder.adapters.TestAdapter;
 import com.microsoft.bot.builder.adapters.TestFlow;
 
-import com.microsoft.bot.dialogs.*;
+import com.microsoft.bot.dialogs.ComponentDialog;
+import com.microsoft.bot.dialogs.Dialog;
+import com.microsoft.bot.dialogs.DialogContext;
+import com.microsoft.bot.dialogs.DialogDependencies;
+import com.microsoft.bot.dialogs.DialogManager;
+import com.microsoft.bot.dialogs.DialogReason;
+import com.microsoft.bot.dialogs.DialogTurnResult;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityTypes;
 import com.microsoft.bot.schema.ChannelAccount;
 import com.microsoft.bot.schema.ConversationAccount;
 
-import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -83,10 +88,9 @@ public class QnAMakerTests {
 
     @Test
     public CompletableFuture<Void> qnaMakerTraceActivity() {
-        // Mock Qna
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             QnAMaker qna = this.qnaReturnsAnswer();
 
             // Invoke flow which uses mock
@@ -118,20 +122,23 @@ public class QnAMakerTests {
                         try {
                             TimeUnit.SECONDS.sleep(5);
                         } catch (InterruptedException e) {
-                            // no handle exception
+                            LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
                         }
                     }).thenAccept(task -> {
-                        turnContext.sendActivity(String.format("echo: %s", turnContext.getActivity().getText()));
+                        turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText()));
                     });
                 }
                 return null;
             }))
-                .send("how do I clean the stove?").assertReply(activity -> {
-                Assert.assertEquals(activity.getType(), ActivityTypes.TYPING);
-
-            }).assertReply("echo:how do I clean the stove?").send("bar")
-                .assertReply(activity -> Assert.assertEquals(activity.getType(), ActivityTypes.TYPING))
-                .assertReply("echo:bar").startTest().join();
+                .send("how do I clean the stove?")
+                    .assertReply(activity -> {
+                        Assert.assertEquals(activity.getType(), ActivityTypes.TYPING);
+                    })
+                    .assertReply("echo:how do I clean the stove?")
+                .send("bar")
+                    .assertReply(activity -> Assert.assertEquals(activity.getType(), ActivityTypes.TYPING))
+                    .assertReply("echo:bar")
+                .startTest().join();
             // Validate Trace Activity created
             return transcriptStore.getTranscriptActivities("test", conversationId[0]).thenAccept(pagedResult -> {
                 Assert.assertEquals(7, pagedResult.getItems().size());
@@ -144,15 +151,13 @@ public class QnAMakerTests {
                 Assert.assertEquals("echo:bar", pagedResult.getItems().get(6).getText());
                 for (Activity activity : pagedResult.getItems()) {
                     Assert.assertFalse(StringUtils.isBlank(activity.getId()));
-                    // default(DateTimeOffset) in C# is 1/1/0001 12:00:00 AM + 00:00 we need to test it
-                    //Assert.assertTrue(activity.getTimestamp() > ));
                 }
             });
         } finally {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -161,7 +166,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerTraceActivityEmptyText() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             // Get basic Qna
             QnAMaker qna = this.qnaReturnsAnswer();
 
@@ -185,7 +190,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -194,7 +199,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerTraceActivityNullText() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             // Get basic Qna
             QnAMaker qna = this.qnaReturnsAnswer();
 
@@ -219,7 +224,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -228,7 +233,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerTraceActivityNullContext() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             // Get basic Qna
             QnAMaker qna = this.qnaReturnsAnswer();
 
@@ -239,7 +244,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -248,7 +253,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerTraceActivityBadMessage() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             // Get basic Qna
             QnAMaker qna = this.qnaReturnsAnswer();
 
@@ -266,6 +271,7 @@ public class QnAMakerTests {
             };
 
             TurnContext context = new TurnContextImpl(adapter, activity);
+
             Assert.assertThrows(IllegalArgumentException.class, () -> qna.getAnswers(context, null));
 
             return CompletableFuture.completedFuture(null);
@@ -273,7 +279,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -282,7 +288,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerTraceActivityNullActivity() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             // Get basic Qna
             QnAMaker qna = this.qnaReturnsAnswer();
 
@@ -298,7 +304,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -307,7 +313,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerReturnsAnswer() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             QnAMaker qna = this.qnaReturnsAnswer();
             return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
                 Assert.assertNotNull(results);
@@ -319,7 +325,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -328,7 +334,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerReturnsAnswerRaw() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             QnAMaker qna = this.qnaReturnsAnswer();
             QnAMakerOptions options = new QnAMakerOptions() {
                 {
@@ -346,7 +352,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -355,7 +361,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerLowScoreVariation() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_TopNAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_TopNAnswer.json", this.getRequestUrl());
             QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -377,7 +383,7 @@ public class QnAMakerTests {
                 Assert.assertNotNull(filteredResults);
                 Assert.assertEquals(3, filteredResults.length);
             }).thenCompose(task -> {
-                this.configureMockServer(mockWebServer, "QnaMaker_TopNAnswer_DisableActiveLearning.json");
+                this.initializeMockServer(mockWebServer, "QnaMaker_TopNAnswer_DisableActiveLearning.json", this.getRequestUrl());
                 return qna.getAnswers(getContext("Q11"), null).thenAccept(results -> {
                     Assert.assertNotNull(results);
                     Assert.assertEquals(4, results.length);
@@ -391,7 +397,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -400,7 +406,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerCallTrain() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer,"{ }");
+            this.initializeMockServer(mockWebServer,"{ }", this.getTrainRequestUrl());
             QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -430,14 +436,14 @@ public class QnAMakerTests {
             feedbackRecords.setRecords(new FeedbackRecord[] { feedback1, feedback2 });
 
             return qna.callTrain(feedbackRecords);
-        } catch (IOException ex) {
-            Assert.assertFalse(true);
+        } catch (IOException e) {
+            LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             return CompletableFuture.completedFuture(null);
         } finally {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
 
@@ -447,7 +453,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerReturnsAnswerConfiguration() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             QnAMaker qna = this.qnaReturnsAnswer();
             return qna.getAnswers(getContext("how do I clean the stove?"), null).thenAccept(results -> {
                 Assert.assertNotNull(results);
@@ -459,7 +465,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -468,7 +474,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerReturnsAnswerWithFiltering() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_UsesStrictFilters_ToReturnAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_UsesStrictFilters_ToReturnAnswer.json", this.getRequestUrl());
             RecordedRequest request = mockWebServer.takeRequest();
             QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
                 {
@@ -503,21 +509,21 @@ public class QnAMakerTests {
                 try {
                     obj = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
                 }
                 // verify we are actually passing on the options
-                Assert.assertEquals(1, (int) obj.getTop());
+                Assert.assertEquals(1, (int)obj.getTop());
                 Assert.assertEquals("topic", obj.getStrictFilters()[0].getName());
                 Assert.assertEquals("value", obj.getStrictFilters()[0].getValue());
             });
-        } catch (InterruptedException ex) {
-            Assert.assertFalse(true);
+        } catch (InterruptedException e) {
+            LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             return CompletableFuture.completedFuture(null);
         } finally {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -526,7 +532,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerSetScoreThresholdWhenThresholdIsZero() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -553,7 +559,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -562,7 +568,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerTestThreshold() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_TestThreshold.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_TestThreshold.json", this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -586,7 +592,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
 
@@ -604,7 +610,7 @@ public class QnAMakerTests {
         QnAMakerOptions tooLargeThreshold = new QnAMakerOptions() {
             {
                 setTop(1);
-                setScoreThreshold(1.1F);
+                setScoreThreshold(1.1f);
             }
         };
         Assert.assertThrows(IllegalArgumentException.class, () -> new QnAMaker(qnAMakerEndpoint, tooLargeThreshold));
@@ -622,7 +628,7 @@ public class QnAMakerTests {
         QnAMakerOptions tooSmallThreshold = new QnAMakerOptions() {
             {
                 setTop(1);
-                setScoreThreshold(1.1F);
+                setScoreThreshold(-9000.0f);
             }
         };
         Assert.assertThrows(IllegalArgumentException.class, () -> new QnAMaker(qnAMakerEndpoint, tooSmallThreshold));
@@ -632,7 +638,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerReturnsAnswerWithContext() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswerWithContext.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswerWithContext.json", this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -658,14 +664,14 @@ public class QnAMakerTests {
             return qna.getAnswers(getContext("Where can I buy?"), options).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
-                Assert.assertEquals(55, (int) results[0].getId());
-                Assert.assertEquals(1, (double) results[0].getScore(), 0);
+                Assert.assertEquals(55, (int)results[0].getId());
+                Assert.assertEquals(1, (double)results[0].getScore(), 0);
             });
         } finally {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -674,7 +680,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerReturnAnswersWithoutContext() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswerWithoutContext.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswerWithoutContext.json", this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -693,13 +699,13 @@ public class QnAMakerTests {
             return qna.getAnswers(getContext("Where can I buy?"), options).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertEquals(2, results.length);
-                Assert.assertNotEquals((float) 1, results[0].getScore());
+                Assert.assertNotEquals(1, results[0].getScore().intValue());
             });
         } finally {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -708,7 +714,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerReturnsHighScoreWhenIdPassed() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswerWithContext.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswerWithContext.json", this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -727,14 +733,14 @@ public class QnAMakerTests {
             return qna.getAnswers(getContext("Where can I buy?"), options).thenAccept(results -> {
                 Assert.assertNotNull(results);
                 Assert.assertTrue(results.length == 1);
-                Assert.assertEquals(55, (int) results[0].getId());
-                Assert.assertEquals(1, (double) results[0].getScore(), 0);
+                Assert.assertEquals(55, (int)results[0].getId());
+                Assert.assertEquals(1, (double)results[0].getScore(), 0);
             });
         } finally {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -751,7 +757,7 @@ public class QnAMakerTests {
         QnAMakerOptions options = new QnAMakerOptions() {
             {
                 setTop(-1);
-                setScoreThreshold(0.5F);
+                setScoreThreshold(0.5f);
             }
         };
         Assert.assertThrows(IllegalArgumentException.class, () -> new QnAMaker(qnAMakerEndpoint, options));
@@ -761,7 +767,7 @@ public class QnAMakerTests {
     public void qnaMakerTestEndpointEmptyKbId() {
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
-                setKnowledgeBaseId("");
+                setKnowledgeBaseId(new String());
                 setEndpointKey(endpointKey);
                 setHost(hostname);
             }
@@ -774,7 +780,7 @@ public class QnAMakerTests {
         QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
-                setEndpointKey("");
+                setEndpointKey(new String());
                 setHost(hostname);
             }
         };
@@ -787,7 +793,7 @@ public class QnAMakerTests {
             {
                 setKnowledgeBaseId(knowledgeBaseId);
                 setEndpointKey(endpointKey);
-                setHost("");
+                setHost(new String());
             }
         };
         Assert.assertThrows(IllegalArgumentException.class, () -> new QnAMaker(qnAMakerEndpoint, null));
@@ -797,7 +803,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerUserAgent() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             RecordedRequest request = mockWebServer.takeRequest();
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
@@ -822,14 +828,14 @@ public class QnAMakerTests {
                 // Verify that we added the bot.builder package details.
                 Assert.assertTrue(request.getHeader("User-Agent").contains("Microsoft.Bot.Builder.AI.QnA/4"));
             });
-        } catch (InterruptedException ex) {
-            Assert.assertFalse(true);
+        } catch (InterruptedException e) {
+            LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             return CompletableFuture.completedFuture(null);
         } finally {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -838,11 +844,8 @@ public class QnAMakerTests {
     public void qnaMakerV2LegacyEndpointShouldThrow() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer,"QnaMaker_LegacyEndpointAnswer.json");
-            String host = new StringBuilder("{")
-                .append(hostname)
-                .append("}")
-                .append("/v2.0").toString();
+            this.initializeMockServer(mockWebServer,"QnaMaker_LegacyEndpointAnswer.json", this.getV2LegacyRequestUrl());
+            String host = String.format("{%s}/v2.0", hostname);
             QnAMakerEndpoint v2LegacyEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -857,7 +860,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -866,11 +869,8 @@ public class QnAMakerTests {
     public void qnaMakerV3LeagacyEndpointShouldThrow() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_LegacyEndpointAnswer.json");
-            String host = new StringBuilder("{")
-                .append(hostname)
-                .append("}")
-                .append("/v3.0").toString();
+            this.initializeMockServer(mockWebServer, "QnaMaker_LegacyEndpointAnswer.json", this.getV3LegacyRequestUrl());
+            String host = String.format("{%s}/v3.0", hostname);
             QnAMakerEndpoint v3LegacyEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -885,7 +885,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -894,7 +894,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerReturnsAnswerWithMetadataBoost() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswersWithMetadataBoost.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswersWithMetadataBoost.json", this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -919,7 +919,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -928,7 +928,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerTestThresholdInQueryOption() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer_GivenScoreThresholdQueryOption.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer_GivenScoreThresholdQueryOption.json", this.getRequestUrl());
             RecordedRequest request = mockWebServer.takeRequest();
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
@@ -939,7 +939,7 @@ public class QnAMakerTests {
             };
             QnAMakerOptions queryOptionsWithScoreThreshold = new QnAMakerOptions() {
                 {
-                    setScoreThreshold(0.5F);
+                    setScoreThreshold(0.5f);
                     setTop(2);
                 }
             };
@@ -956,20 +956,20 @@ public class QnAMakerTests {
                 try {
                     obj = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
                 }
 
-                Assert.assertEquals(2, (int) obj.getTop());
-                Assert.assertEquals(0.5, (float) obj.getScoreThreshold(), 0);
+                Assert.assertEquals(2, (int)obj.getTop());
+                Assert.assertEquals(0.5, obj.getScoreThreshold(), 0);
             });
-        } catch (InterruptedException ex) {
-            Assert.assertFalse(true);
+        } catch (InterruptedException e) {
+            LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             return CompletableFuture.completedFuture(null);
         } finally {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -977,8 +977,10 @@ public class QnAMakerTests {
     @Test
     public CompletableFuture<Void> qnaMakerTestUnsuccessfulResponse() {
         MockWebServer mockWebServer = new MockWebServer();
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            mockWebServer = this.initializeMockServer(HttpStatus.BAD_GATEWAY);
+            JsonNode response = objectMapper.readTree(HttpStatus.BAD_GATEWAY.toString());
+            this.initializeMockServer(mockWebServer, response, this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -993,14 +995,14 @@ public class QnAMakerTests {
                 () -> qna.getAnswers(getContext("how do I clean the stove?"), null));
 
             return CompletableFuture.completedFuture(null);
-        } catch (IOException exception) {
-            Assert.assertFalse(true);
+        } catch (IOException e) {
+            LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             return CompletableFuture.completedFuture(null);
         } finally {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -1009,7 +1011,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerIsTestTrue() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_IsTest_True.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_IsTest_True.json", this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -1034,7 +1036,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -1043,7 +1045,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerRankerTypeQuestionOnly() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_RankerType_QuestionOnly.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_RankerType_QuestionOnly.json", this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -1068,7 +1070,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -1077,7 +1079,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerTestOptionsHydration() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             RecordedRequest request = mockWebServer.takeRequest();
 
             QnAMakerOptions noFiltersOptions = new QnAMakerOptions() {
@@ -1128,7 +1130,7 @@ public class QnAMakerTests {
             QnAMakerOptions allChangedRequestOptions = new QnAMakerOptions() {
                 {
                     setTop(2000);
-                    setScoreThreshold(0.4F);
+                    setScoreThreshold(0.4f);
                     setStrictFilters(allChangedRequestOptionsFilters);
                 }
             };
@@ -1139,45 +1141,44 @@ public class QnAMakerTests {
 
             // Ensure that options from previous requests do not bleed over to the next,
             // And that the options set in the constructor are not overwritten improperly by options passed into .GetAnswersAsync()
-
-            final CapturedRequest[] requestContent = {null, null, null, null, null, null};
+            final CapturedRequest[] requestContent = new CapturedRequest[6];
             ObjectMapper objectMapper = new ObjectMapper();
 
             return qna.getAnswers(context, noFiltersOptions).thenRun(() -> {
                 try {
                     requestContent[0] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
                 }
             }).thenCompose(task -> qna.getAnswers(context, twoStrictFiltersOptions).thenRun(() -> {
                 try {
                     requestContent[1] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
                 }
             })).thenCompose(task -> qna.getAnswers(context, oneFilteredOption).thenRun(() -> {
                 try {
                     requestContent[2] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
                 }
             })).thenCompose(task -> qna.getAnswers(context, null).thenRun(() -> {
                 try {
                     requestContent[3] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
                 }
             })).thenCompose(task -> qna.getAnswers(context, allChangedRequestOptions).thenRun(() -> {
                 try {
                     requestContent[4] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
                 }
             })).thenCompose(task -> qna.getAnswers(context, null).thenRun(() -> {
                 try {
                     requestContent[5] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
                 }
 
                 Assert.assertTrue(requestContent[0].getStrictFilters().length == 0);
@@ -1186,21 +1187,20 @@ public class QnAMakerTests {
                 Assert.assertTrue(requestContent[3].getStrictFilters().length == 0);
 
                 Assert.assertEquals(2000, (int) requestContent[4].getTop());
-                Assert.assertEquals(0.42, Math.round(requestContent[4].getScoreThreshold()), 0);
+                Assert.assertEquals(0.42, Math.round(requestContent[4].getScoreThreshold()), 2);
                 Assert.assertTrue(requestContent[4].getStrictFilters().length == 1);
 
                 Assert.assertEquals(30, (int) requestContent[5].getTop());
-                Assert.assertEquals(0.3, Math.round(requestContent[5].getScoreThreshold()),0);
+                Assert.assertEquals(0.3, Math.round(requestContent[5].getScoreThreshold()),2);
                 Assert.assertTrue(requestContent[5].getStrictFilters().length == 0);
             }));
         } catch (InterruptedException ex) {
-            Assert.assertFalse(true);
             return CompletableFuture.completedFuture(null);
         } finally {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -1209,7 +1209,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> qnaMakerStrictFiltersCompoundOperationType() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             RecordedRequest request = mockWebServer.takeRequest();
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
@@ -1245,23 +1245,22 @@ public class QnAMakerTests {
             ObjectMapper objectMapper = new ObjectMapper();
 
             return qna.getAnswers(context, oneFilteredOption).thenAccept(noFilterResults1 -> {
-                CapturedRequest requestContent;
                 try {
-                    requestContent = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+                    CapturedRequest requestContent = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
                 }
                 Assert.assertEquals(2, oneFilteredOption.getStrictFilters().length);
                 Assert.assertEquals(JoinOperator.OR, oneFilteredOption.getStrictFiltersJoinOperator());
             });
-        } catch (InterruptedException ex) {
-            Assert.assertFalse(true);
+        } catch (InterruptedException e) {
+            LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             return CompletableFuture.completedFuture(null);
         } finally {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -1271,7 +1270,7 @@ public class QnAMakerTests {
         // Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
 
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
@@ -1300,7 +1299,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -1310,7 +1309,67 @@ public class QnAMakerTests {
         // Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
+            QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
+                {
+                    setKnowledgeBaseId(knowledgeBaseId);
+                    setEndpointKey(endpointKey);
+                    setHost(hostname);
+                }
+            };
+            QnAMakerOptions options = new QnAMakerOptions() {
+                {
+                    setTop(1);
+                }
+            };
+
+            BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
+
+            // Act - See if we get data back in telemetry
+            QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, telemetryClient, true);
+            return qna.getAnswers(getContext("what is the answer to my nonsense question?"), null)
+                .thenAccept(results -> {
+                    // Assert - Check Telemetry logged
+                    // verify BotTelemetryClient was invoked 1 times, and capture arguments.
+                    verify(telemetryClient, times(1)).trackEvent(
+                        eventNameCaptor.capture(),
+                        propertiesCaptor.capture()
+                    );
+                    List<String> eventNames = eventNameCaptor.getAllValues();
+                    List<Map<String, String>> properties = propertiesCaptor.getAllValues();
+                    Assert.assertEquals(3, eventNames.size());
+                    Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
+                    Assert.assertTrue(properties.get(0).containsKey("knowledgeBaseId"));
+                    Assert.assertTrue(properties.get(0).containsKey("matchedQuestion"));
+                    Assert.assertEquals("No Qna Question matched", properties.get(0).get("matchedQuestion"));
+                    Assert.assertTrue(properties.get(0).containsKey("question"));
+                    Assert.assertTrue(properties.get(0).containsKey("questionId"));
+                    Assert.assertTrue(properties.get(0).containsKey("answer"));
+                    Assert.assertEquals("No Qna Question matched", properties.get(0).get("answer"));
+                    Assert.assertTrue(properties.get(0).containsKey("articleFound"));
+                    Assert.assertTrue(properties.get(1) == null);
+
+                    // Assert - Validate we didn't break QnA functionality.
+                    Assert.assertNotNull(results);
+                    Assert.assertTrue(results.length == 0);
+                    Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack", results[0].getAnswer());
+                    Assert.assertEquals("Editorial", results[0].getSource());
+                });
+        } finally {
+            try {
+                mockWebServer.shutdown();
+            } catch (IOException e) {
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public CompletableFuture<Void> telemetryReturnsAnswerWhenNoAnswerFoundInKB() {
+        // Arrange
+        MockWebServer mockWebServer = new MockWebServer();
+        try {
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer_WhenNoAnswerFoundInKb.json", this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -1358,7 +1417,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -1368,7 +1427,7 @@ public class QnAMakerTests {
         // Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -1419,7 +1478,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -1428,7 +1487,7 @@ public class QnAMakerTests {
     public CompletableFuture<Void> telemetryOverride() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -1445,8 +1504,9 @@ public class QnAMakerTests {
             BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
 
             // Act - Override the QnaMaker object to log custom stuff and honor parms passed in.
-            Map<String, String> telemetryProperties = new HashMap<String, String>();
-            telemetryProperties.put("Id", "MyID");
+            Map<String, String> telemetryProperties = new HashMap<String, String>() {{
+                put("Id", "MyId");
+            }};
 
             QnAMaker qna = new OverrideTelemetry(qnAMakerEndpoint, options, telemetryClient, false);
             return qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, null)
@@ -1482,7 +1542,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -1492,7 +1552,7 @@ public class QnAMakerTests {
         //Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -1561,7 +1621,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -1571,7 +1631,7 @@ public class QnAMakerTests {
         //Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -1635,7 +1695,7 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
@@ -1645,7 +1705,7 @@ public class QnAMakerTests {
         //Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            this.configureMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json");
+            this.initializeMockServer(mockWebServer, "QnaMaker_ReturnsAnswer.json", this.getRequestUrl());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -1717,41 +1777,131 @@ public class QnAMakerTests {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }
 
-    public class OverrideFillTelemetry extends QnAMaker {
+    private static TurnContext getContext(String utterance) {
+        TestAdapter b = new TestAdapter();
+        Activity a = new Activity() {
+            {
+                setType(ActivityTypes.MESSAGE);
+                setText(utterance);
+                setConversation(new ConversationAccount());
+                setRecipient(new ChannelAccount());
+                setFrom(new ChannelAccount());
+            }
+        };
 
-        public OverrideFillTelemetry(QnAMakerEndpoint endpoint, QnAMakerOptions options,
-                                     BotTelemetryClient telemetryClient, Boolean logPersonalInformation) {
-            super(endpoint, options, telemetryClient, logPersonalInformation);
+        return new TurnContextImpl(b, a);
+    }
+
+    private TestFlow createFlow(Dialog rootDialog, String testName) {
+        Storage storage = new MemoryStorage();
+        UserState userState = new UserState(storage);
+        ConversationState conversationState = new ConversationState(storage);
+
+        TestAdapter adapter = new TestAdapter(TestAdapter.createConversationReference(testName, "User1", "Bot"));
+        adapter
+            .useStorage(storage)
+            .useBotState(userState, conversationState)
+            .use(new TranscriptLoggerMiddleware(new TraceTranscriptLogger()));
+
+        DialogManager dm = new DialogManager(rootDialog, null);
+        return new TestFlow(adapter, (turnContext) -> dm.onTurn(turnContext).thenApply(task -> null));
+    }
+
+    public class QnAMakerTestDialog extends ComponentDialog implements DialogDependencies {
+
+        public QnAMakerTestDialog(String knowledgeBaseId, String endpointKey, String hostName, OkHttpClient httpClient) {
+            super("QnaMakerTestDialog");
+            addDialog(new QnAMakerDialog(knowledgeBaseId, endpointKey, hostName, null,
+                null, null, null, null,
+                null, null, httpClient, null, null));
         }
 
         @Override
-        protected CompletableFuture<Void> onQnaResults(QueryResult[] queryResults, TurnContext turnContext,
-                                                       Map<String, String> telemetryProperties,
-                                                       Map<String, Double> telemetryMetrics) throws IOException {
-            this.fillQnAEvent(queryResults, turnContext, telemetryProperties, telemetryMetrics).thenAccept(eventData -> {
-                // Add my property
-                eventData.getLeft().put("MyImportantProperty", "myImportantValue");
-
-                // Log QnaMessage event
-                BotTelemetryClient telemetryClient = getTelemetryClient();
-                telemetryClient.trackEvent(QnATelemetryConstants.QNA_MSG_EVENT, eventData.getLeft(), eventData.getRight());
-
-                // Create second event.
-                Map<String, String> secondEventProperties = new HashMap<String, String>(){
-                    {
-                        put("MyImportantProperty2", "myImportantValue2");
-                    }
-                };
-                telemetryClient.trackEvent("MySecondEvent", secondEventProperties);
-            });
-
-            return CompletableFuture.completedFuture(null);
+        public CompletableFuture<DialogTurnResult> beginDialog(DialogContext outerDc, Object options) {
+            return this.continueDialog(outerDc);
         }
+
+        @Override
+        public CompletableFuture<DialogTurnResult> continueDialog(DialogContext dc) {
+            if (dc.getContext().getActivity().getText() == "moo") {
+                return dc.getContext().sendActivity("Yippee ki-yay!").thenApply(task -> END_OF_TURN);
+            }
+
+            return dc.beginDialog("qnaDialog").thenApply(task -> task);
+        }
+
+        public List<Dialog> getDependencies() {
+            return getDialogs().getDialogs().stream().collect(Collectors.toList());
+        }
+
+        @Override
+        public CompletableFuture<DialogTurnResult> resumeDialog(DialogContext dc, DialogReason reason, Object result) {
+            if(!(boolean)result) {
+                dc.getContext().sendActivity("I didn't understand that.");
+            }
+
+            return super.resumeDialog(dc, reason, result).thenApply(task -> task);
+        }
+    }
+
+    private QnAMaker qnaReturnsAnswer() {
+        // Mock Qna
+        QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
+            {
+                setKnowledgeBaseId(knowledgeBaseId);
+                setEndpointKey(endpointKey);
+                setHost(hostname);
+            }
+        };
+        QnAMakerOptions qnaMakerOptions = new QnAMakerOptions() {
+            {
+                setTop(1);
+            }
+        };
+        return new QnAMaker(qnaMakerEndpoint, qnaMakerOptions);
+    }
+
+    private String getResponse(String fileName) {
+        Path path = this.getFilePath(fileName);
+        try {
+            return Files.readAllBytes(path).toString();
+        } catch (IOException e) {
+            LoggerFactory.getLogger(QnAMakerTests.class).error(String.format("Cannot read the file: %s", fileName));
+            return "";
+        }
+    }
+
+    private void initializeMockServer(MockWebServer mockWebServer, String fileName, String endpoint) {
+        try {
+            String filePath = new StringBuilder("/src/test/java/com/microsoft/bot/ai/qna/testData/")
+                .append(fileName)
+                .toString();
+            String content = getResponse(filePath);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode response = mapper.readTree(content);
+            this.initializeMockServer(mockWebServer, response, endpoint);
+        } catch (IOException e) {
+        }
+    }
+
+    private void initializeMockServer(MockWebServer mockWebServer, JsonNode response, String url) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        String mockResponse = mapper.writeValueAsString(response);
+        mockWebServer.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json; charset=utf-8")
+            .setBody(mockResponse));
+
+        mockWebServer.url(url);
+        mockWebServer.start();
+    }
+
+    private Path getFilePath(String fileName) {
+        return Paths.get(System.getProperty("user.dir"), "TestData", fileName);
     }
 
     public class OverrideTelemetry extends QnAMaker {
@@ -1783,55 +1933,35 @@ public class QnAMakerTests {
 
     }
 
-    private TestFlow createFlow(Dialog rootDialog, String testName) {
-        Storage storage = new MemoryStorage();
-        UserState userState = new UserState(storage);
-        ConversationState conversationState = new ConversationState(storage);
+    public class OverrideFillTelemetry extends QnAMaker {
 
-        TestAdapter adapter = new TestAdapter(TestAdapter.createConversationReference(testName, "User1", "Bot"));
-        adapter
-            .useStorage(storage)
-            .useBotState(userState, conversationState)
-            .use(new TranscriptLoggerMiddleware(new TraceTranscriptLogger()));
-
-        DialogManager dm = new DialogManager(rootDialog, null);
-        return new TestFlow(adapter, (turnContext) -> dm.onTurn(turnContext).thenApply(task -> null));
-    }
-
-    public class QnAMakerTestDialog extends ComponentDialog implements DialogDependencies {
-
-        public QnAMakerTestDialog(String knowledgeBaseId, String endpointKey, String hostName, OkHttpClient httpClient) {
-            super("QnaMakerTestDialog");
-            addDialog(new QnAMakerDialog(knowledgeBaseId, endpointKey, hostName, null,
-                null, null, null, null,
-                null, null, httpClient, null, null));
+        public OverrideFillTelemetry(QnAMakerEndpoint endpoint, QnAMakerOptions options,
+                                     BotTelemetryClient telemetryClient, Boolean logPersonalInformation) {
+            super(endpoint, options, telemetryClient, logPersonalInformation);
         }
 
         @Override
-        public CompletableFuture<DialogTurnResult> beginDialog(DialogContext outerDc, Object options) {
-            return super.beginDialog(outerDc, options);
-        }
+        protected CompletableFuture<Void> onQnaResults(QueryResult[] queryResults, TurnContext turnContext,
+                                                       Map<String, String> telemetryProperties,
+                                                       Map<String, Double> telemetryMetrics) throws IOException {
+            this.fillQnAEvent(queryResults, turnContext, telemetryProperties, telemetryMetrics).thenAccept(eventData -> {
+                // Add my property
+                eventData.getLeft().put("MyImportantProperty", "myImportantValue");
 
-        @Override
-        public CompletableFuture<DialogTurnResult> continueDialog(DialogContext dc) {
-            if (dc.getContext().getActivity().getText() == "moo") {
-                dc.getContext().sendActivity("Yippee ki-yay!").thenApply(task -> END_OF_TURN);
-            }
+                // Log QnaMessage event
+                BotTelemetryClient telemetryClient = getTelemetryClient();
+                telemetryClient.trackEvent(QnATelemetryConstants.QNA_MSG_EVENT, eventData.getLeft(), eventData.getRight());
 
-            return dc.beginDialog("qnaDialog").thenApply(task -> task);
-        }
+                // Create second event.
+                Map<String, String> secondEventProperties = new HashMap<String, String>(){
+                    {
+                        put("MyImportantProperty2", "myImportantValue2");
+                    }
+                };
+                telemetryClient.trackEvent("MySecondEvent", secondEventProperties);
+            });
 
-        public List<Dialog> getDependencies() {
-            return getDialogs().getDialogs().stream().collect(Collectors.toList());
-        }
-
-        @Override
-        public CompletableFuture<DialogTurnResult> resumeDialog(DialogContext dc, DialogReason reason, Object result) {
-            if((boolean) result == false) {
-                dc.getContext().sendActivity("I didn't understand that.");
-            }
-
-            return super.resumeDialog(dc, reason, result).thenApply(task -> task);
+            return CompletableFuture.completedFuture(null);
         }
     }
 
@@ -1881,88 +2011,5 @@ public class QnAMakerTests {
         public void setScoreThreshold(Float scoreThreshold) {
             this.scoreThreshold = scoreThreshold;
         }
-    }
-
-    private static TurnContext getContext(String utterance) {
-        TestAdapter b = new TestAdapter();
-        Activity a = new Activity() {
-            {
-                setType(ActivityTypes.MESSAGE);
-                setText(utterance);
-                setConversation(new ConversationAccount());
-                setRecipient(new ChannelAccount());
-                setFrom(new ChannelAccount());
-            }
-        };
-
-        return new TurnContextImpl(b, a);
-    }
-
-    private QnAMaker qnaReturnsAnswer() {
-        // Mock Qna
-        QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
-            {
-                setKnowledgeBaseId(knowledgeBaseId);
-                setEndpointKey(endpointKey);
-                setHost(hostname);
-            }
-        };
-        QnAMakerOptions qnaMakerOptions = new QnAMakerOptions() {
-            {
-                setTop(1);
-            }
-        };
-        return new QnAMaker(qnaMakerEndpoint, qnaMakerOptions);
-    }
-
-    private String getResponse(String fileName) {
-        Path path = this.getFilePath(fileName);
-        try {
-            return Files.readAllBytes(path).toString();
-        } catch (IOException e) {
-            LoggerFactory.getLogger(QnAMakerTests.class).error(String.format("Cannot read the file: %s", fileName));
-            return "";
-        }
-    }
-
-    private MockWebServer configureMockServer(MockWebServer mockWebServer,String fileName) {
-        try {
-            String pathToMock = this.getRequestUrl();
-            String filePath = new StringBuilder("/src/test/java/com/microsoft/bot/ai/qna/testData/")
-                .append(fileName)
-                .toString();
-            String content = getResponse(filePath);
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode testData = mapper.readTree(content);
-            this.initializeMockServer(mockWebServer, testData, pathToMock);
-        } catch (IOException e) {
-        }
-        return mockWebServer;
-    }
-
-    private MockWebServer initializeMockServer(HttpStatus status) throws IOException {
-        MockWebServer mockWebServer = new MockWebServer();
-        mockWebServer.enqueue(new MockResponse()
-            .addHeader("Content-Type", "application/json; charset=utf-8")
-            .setResponseCode(status.value()));
-
-        mockWebServer.start();
-        return mockWebServer;
-    }
-
-    private HttpUrl initializeMockServer(MockWebServer mockWebServer, JsonNode response, String url) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        String mockResponse = mapper.writeValueAsString(response);
-        mockWebServer.enqueue(new MockResponse()
-            .addHeader("Content-Type", "application/json; charset=utf-8")
-            .setBody(mockResponse));
-
-        mockWebServer.start();
-
-        return mockWebServer.url(url);
-    }
-
-    private Path getFilePath(String fileName) {
-        return Paths.get(System.getProperty("user.dir"), "TestData", fileName);
     }
 }

@@ -96,10 +96,10 @@ public class QnAMakerTests {
             // Invoke flow which uses mock
             MemoryTranscriptStore transcriptStore = new MemoryTranscriptStore();
             TestAdapter adapter = new TestAdapter(
-                TestAdapter.createConversationReference("QnaMaker_TraceActivity", null, null))
+                TestAdapter.createConversationReference("QnaMaker_TraceActivity", "User1", "Bot"))
                 .use(new TranscriptLoggerMiddleware(transcriptStore));
             final String[] conversationId = {null};
-            new TestFlow(adapter, (turnContext -> {
+            new TestFlow(adapter, turnContext -> {
                 // Simulate Qna Lookup
                 if(turnContext.getActivity().getText().compareTo("how do I clean the stove?") == 0) {
                     qna.getAnswers(turnContext, null).thenAccept(results -> {
@@ -128,8 +128,8 @@ public class QnAMakerTests {
                         turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText()));
                     });
                 }
-                return null;
-            }))
+                return CompletableFuture.completedFuture(null);
+            })
                 .send("how do I clean the stove?")
                     .assertReply(activity -> {
                         Assert.assertEquals(activity.getType(), ActivityTypes.TYPING);
@@ -172,7 +172,7 @@ public class QnAMakerTests {
 
             // No text
             TestAdapter adapter = new TestAdapter(
-                TestAdapter.createConversationReference("QnaMaker_TraceActivity_EmptyText", null, null));
+                TestAdapter.createConversationReference("QnaMaker_TraceActivity_EmptyText", "User1", "Bot"));
             Activity activity = new Activity() {
                 {
                     setType(ActivityTypes.MESSAGE);
@@ -205,7 +205,7 @@ public class QnAMakerTests {
 
             // No text
             TestAdapter adapter = new TestAdapter(
-                TestAdapter.createConversationReference("QnaMaker_TraceActivity_NullText", null, null));
+                TestAdapter.createConversationReference("QnaMaker_TraceActivity_NullText", "User1", "Bot"));
             Activity activity = new Activity() {
                 {
                     setType(ActivityTypes.MESSAGE);
@@ -259,7 +259,7 @@ public class QnAMakerTests {
 
             // No text
             TestAdapter adapter = new TestAdapter(
-                TestAdapter.createConversationReference("QnaMaker_TraceActivity_BadMessage", null, null));
+                TestAdapter.createConversationReference("QnaMaker_TraceActivity_BadMessage", "User1", "Bot"));
             Activity activity = new Activity() {
                 {
                     setType(ActivityTypes.TRACE);
@@ -294,7 +294,7 @@ public class QnAMakerTests {
 
             // No text
             TestAdapter adapter = new TestAdapter(
-                TestAdapter.createConversationReference("QnaMaker_TraceActivity_NullActivity", null, null));
+                TestAdapter.createConversationReference("QnaMaker_TraceActivity_NullActivity", "User1", "Bot"));
             TurnContext context = new MyTurnContext(adapter, null);
 
             Assert.assertThrows(IllegalArgumentException.class, () -> qna.getAnswers(context, null));
@@ -405,8 +405,10 @@ public class QnAMakerTests {
     @Test
     public void qnaMakerCallTrain() {
         MockWebServer mockWebServer = new MockWebServer();
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            this.initializeMockServer(mockWebServer,"{ }", this.getTrainRequestUrl());
+            JsonNode response = objectMapper.readTree("{}");
+            this.initializeMockServer(mockWebServer, response, this.getTrainRequestUrl());
             QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);

@@ -285,7 +285,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
         properties.put(QnATelemetryConstants.KNOWLEDGE_BASE_ID_PROPERTY, this.endpoint.getKnowledgeBaseId());
 
         String text = turnContext.getActivity().getText();
-        String userName = turnContext.getActivity().getFrom().getName();
+        String userName = turnContext.getActivity().getFrom() != null ? turnContext.getActivity().getFrom().getName() : "";
 
         // Use the LogPersonalInformation flag to toggle logging PII data, text and user
         // name are common examples

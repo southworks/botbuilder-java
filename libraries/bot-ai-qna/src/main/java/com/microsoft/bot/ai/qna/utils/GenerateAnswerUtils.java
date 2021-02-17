@@ -186,8 +186,11 @@ public class GenerateAnswerUtils {
         QnAMakerOptions hydratedOptions = null;
 
         try {
-            hydratedOptions = jacksonAdapter.<QnAMakerOptions>deserialize(jacksonAdapter.serialize(queryOptions),
+            hydratedOptions = jacksonAdapter.deserialize(jacksonAdapter.serialize(queryOptions),
                     QnAMakerOptions.class);
+            if (hydratedOptions == null) {
+                hydratedOptions = new QnAMakerOptions();
+            }
         } catch (IOException e) {
             LoggerFactory.getLogger(GenerateAnswerUtils.class).error("hydrateOptions");
         }
@@ -202,7 +205,7 @@ public class GenerateAnswerUtils {
                 hydratedOptions.setTop(queryOptions.getTop());
             }
 
-            if (queryOptions.getStrictFilters().length > 0) {
+            if (queryOptions.getStrictFilters() != null && queryOptions.getStrictFilters().length > 0) {
                 hydratedOptions.setStrictFilters(queryOptions.getStrictFilters());
             }
 

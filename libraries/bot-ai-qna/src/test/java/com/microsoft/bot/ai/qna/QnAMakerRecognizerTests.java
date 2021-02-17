@@ -61,7 +61,7 @@ public class QnAMakerRecognizerTests {
             }
         };
         recognizer.recognize(dc, activity).thenApply(result -> {
-            Assert.assertEquals(result.getEntities().get("answer"), null);
+            Assert.assertEquals(result.getEntities(), null);
             Assert.assertEquals(result.getProperties().get("answers"), null);
             Assert.assertEquals(result.getIntents().get("QnAMatch"), null);
             Assert.assertNotEquals(result.getIntents().get("None"), null);
@@ -94,6 +94,7 @@ public class QnAMakerRecognizerTests {
             };
             Activity activity = Activity.createMessageActivity();
             activity.setText("test");
+            activity.setChannelId("EmptyContext");
             TurnContext context = new TurnContextImpl(new TestAdapter(), activity);
             DialogContext dc = new DialogContext(new DialogSet(), context, new DialogState());
             RecognizerResult result = recognizer.recognize(dc, activity).join();
@@ -137,6 +138,7 @@ public class QnAMakerRecognizerTests {
             };
             Activity activity = Activity.createMessageActivity();
             activity.setText("test");
+            activity.setChannelId("EmptyContext");
             TurnContext context = new TurnContextImpl(new TestAdapter(), activity);
             DialogContext dc = new DialogContext(new DialogSet(), context, new DialogState());
             RecognizerResult result = recognizer.recognize(dc, activity).join();
@@ -179,6 +181,7 @@ public class QnAMakerRecognizerTests {
             };
             Activity activity = Activity.createMessageActivity();
             activity.setText("test");
+            activity.setChannelId("EmptyContext");
             TurnContext context = new TurnContextImpl(new TestAdapter(), activity);
             DialogContext dc = new DialogContext(new DialogSet(), context, new DialogState());
             RecognizerResult result = recognizer.recognize(dc, activity).join();
@@ -221,6 +224,7 @@ public class QnAMakerRecognizerTests {
             };
             Activity activity = Activity.createMessageActivity();
             activity.setText("test");
+            activity.setChannelId("EmptyContext");
             TurnContext context = new TurnContextImpl(new TestAdapter(), activity);
             DialogContext dc = new DialogContext(new DialogSet(), context, new DialogState());
             RecognizerResult result = recognizer.recognize(dc, activity).join();

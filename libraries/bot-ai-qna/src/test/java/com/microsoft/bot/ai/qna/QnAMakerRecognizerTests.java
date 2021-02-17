@@ -50,10 +50,7 @@ public class QnAMakerRecognizerTests {
                 setKnowledgeBaseId(knowledgeBaseId);
             }
         };
-        Activity activity = MessageFactory.text("hi");
-        TurnContext context = new TurnContextImpl(new TestAdapter(), activity);
         Boolean logPersonalInfo = recognizer.getLogPersonalInformation();
-
         // Should be false by default, when not specified by user.
         Assert.assertFalse(logPersonalInfo);
     }

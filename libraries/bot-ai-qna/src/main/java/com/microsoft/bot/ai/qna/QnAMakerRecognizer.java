@@ -83,13 +83,6 @@ public class QnAMakerRecognizer extends Recognizer {
     private Boolean logPersonalInformation = false;
 
     /**
-     * Initializes a new instance of the {@link QnAMakerRecognizer} class.
-     */
-    public QnAMakerRecognizer() {
-
-    }
-
-    /**
      * Gets the declarative type for this recognizer.
      *
      * @return The declarative type for this recognizer.
@@ -537,6 +530,11 @@ public class QnAMakerRecognizer extends Recognizer {
                                 : null);
             }
         };
+
+        if (logPersonalInformation && !Strings.isNullOrEmpty(recognizerResult.getText())) {
+            properties.put("Text", recognizerResult.getText());
+            properties.put("AlteredText", recognizerResult.getAlteredText());
+        }
 
         // Additional Properties can override "stock properties".
         if (telemetryProperties != null) {

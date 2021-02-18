@@ -4,7 +4,6 @@
 package com.microsoft.bot.dialogs;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.NullNode;
@@ -744,7 +743,7 @@ public final class ObjectPath {
             .collect(Collectors.toList());
 
         if (matches.size() > 0) {
-            return matches.get(0) != null ? matches.get(0) : new ObjectMapper().createObjectNode();
+            return matches.get(0);
         }
         return null;
     }

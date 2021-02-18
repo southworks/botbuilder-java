@@ -68,7 +68,8 @@ public class HttpRequestUtils {
         Request.Builder requestBuilder = new Request.Builder()
             .url(httpBuilder.build())
             .addHeader("Authorization", String.format("EndpointKey %s", endpointKey))
-            .addHeader("Ocp-Apim-Subscription-Key", endpointKey).addHeader("User-Agent", UserAgent.value());
+            .addHeader("Ocp-Apim-Subscription-Key", endpointKey).addHeader("User-Agent", UserAgent.value())
+            .post(body);
         return requestBuilder.build();
     }
 

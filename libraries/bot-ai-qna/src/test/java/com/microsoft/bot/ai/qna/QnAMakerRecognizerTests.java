@@ -6,8 +6,6 @@ package com.microsoft.bot.ai.qna;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,13 +19,11 @@ import com.microsoft.bot.schema.Activity;
 import okhttp3.HttpUrl;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.Test;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 public class QnAMakerRecognizerTests {

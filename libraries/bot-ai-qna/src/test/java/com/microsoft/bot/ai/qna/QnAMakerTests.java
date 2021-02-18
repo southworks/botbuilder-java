@@ -13,6 +13,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.bot.ai.qna.dialogs.QnAMakerDialog;
@@ -1250,7 +1252,7 @@ public class QnAMakerTests {
 
             // Ensure that options from previous requests do not bleed over to the next,
             // And that the options set in the constructor are not overwritten improperly by options passed into .GetAnswersAsync()
-            final CapturedRequest[] requestContent = new CapturedRequest[6];
+            CapturedRequest[] requestContent = new CapturedRequest[6];
             ObjectMapper objectMapper = new ObjectMapper();
             RecordedRequest request;
 
@@ -1258,22 +1260,31 @@ public class QnAMakerTests {
             request = mockWebServer.takeRequest();
             requestContent[0] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
 
+            this.enqueueResponse(mockWebServer, response);
+
             qna.getAnswers(context, twoStrictFiltersOptions).join();
             request = mockWebServer.takeRequest();
             requestContent[1] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+
+            this.enqueueResponse(mockWebServer, response);
 
             qna.getAnswers(context, oneFilteredOption).join();
             request = mockWebServer.takeRequest();
             requestContent[2] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
 
+            this.enqueueResponse(mockWebServer, response);
+
             qna.getAnswers(context, null).join();
             request = mockWebServer.takeRequest();
             requestContent[3] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
 
+            this.enqueueResponse(mockWebServer, response);
 
             qna.getAnswers(context, allChangedRequestOptions).join();
             request = mockWebServer.takeRequest();
             requestContent[4] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+
+            this.enqueueResponse(mockWebServer, response);
 
             qna.getAnswers(context, null).join();
             request = mockWebServer.takeRequest();
@@ -1285,12 +1296,12 @@ public class QnAMakerTests {
             Assert.assertTrue(requestContent[2].getStrictFilters().length == 1);
             Assert.assertTrue(requestContent[3].getStrictFilters().length == 0);
 
-            Assert.assertEquals(2000, (int) requestContent[4].getTop());
-            Assert.assertEquals(0.42, Math.round(requestContent[4].getScoreThreshold()), 2);
+            Assert.assertEquals(2000, requestContent[4].getTop().intValue());
+            Assert.assertEquals(0.42, Math.round(requestContent[4].getScoreThreshold().doubleValue()), 1);
             Assert.assertTrue(requestContent[4].getStrictFilters().length == 1);
 
-            Assert.assertEquals(30, (int) requestContent[5].getTop());
-            Assert.assertEquals(0.3, Math.round(requestContent[5].getScoreThreshold()),2);
+            Assert.assertEquals(30, requestContent[5].getTop().intValue());
+            Assert.assertEquals(0.3, Math.round(requestContent[5].getScoreThreshold().doubleValue()),1);
             Assert.assertTrue(requestContent[5].getStrictFilters().length == 0);
 
         } catch (Exception e) {
@@ -2077,6 +2088,14 @@ public class QnAMakerTests {
         return mockWebServer.url(url);
     }
 
+    private void enqueueResponse(MockWebServer mockWebServer, JsonNode response) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        String mockResponse = mapper.writeValueAsString(response);
+        mockWebServer.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json; charset=utf-8")
+            .setBody(mockResponse));
+    }
+
     public class OverrideTelemetry extends QnAMaker {
 
         public OverrideTelemetry(QnAMakerEndpoint endpoint, QnAMakerOptions options,
@@ -2138,7 +2157,8 @@ public class QnAMakerTests {
         }
     }
 
-    private class CapturedRequest {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static class CapturedRequest {
         private String[] questions;
         private Integer top;
         private Metadata[] strictFilters;

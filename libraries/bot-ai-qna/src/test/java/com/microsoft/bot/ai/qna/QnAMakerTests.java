@@ -105,6 +105,7 @@ public class QnAMakerTests {
                     Assert.assertNotNull(results);
                     Assert.assertTrue(results.length == 1);
                     Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack", results[0].getAnswer());
+                }
 
                     conversationId[0] = turnContext.getActivity().getConversation().getId();
                     Activity typingActivity = new Activity() {
@@ -119,9 +120,8 @@ public class QnAMakerTests {
                     } catch (InterruptedException e) {
                         // Empty error
                     }
-                    turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText()));
-                }
-                return null;
+                    turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText())).join();
+                return CompletableFuture.completedFuture(null);
             })
                 .send("how do I clean the stove?")
                     .assertReply(activity -> {

@@ -6,6 +6,8 @@ package com.microsoft.bot.ai.qna;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,9 +15,7 @@ import com.microsoft.bot.builder.RecognizerResult;
 import com.microsoft.bot.builder.TurnContext;
 import com.microsoft.bot.builder.TurnContextImpl;
 import com.microsoft.bot.builder.adapters.TestAdapter;
-import com.microsoft.bot.dialogs.DialogContext;
-import com.microsoft.bot.dialogs.DialogSet;
-import com.microsoft.bot.dialogs.DialogState;
+import com.microsoft.bot.dialogs.*;
 import com.microsoft.bot.schema.Activity;
 
 import okhttp3.HttpUrl;
@@ -28,6 +28,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 public class QnAMakerRecognizerTests {
     private final String knowledgeBaseId = "dummy-id";
@@ -62,7 +63,7 @@ public class QnAMakerRecognizerTests {
             }
         };
         recognizer.recognize(dc, activity).thenApply(result -> {
-            Assert.assertEquals(result.getEntities(), null);
+            Assert.assertEquals(result.getEntities().get("answer"), null);
             Assert.assertEquals(result.getProperties().get("answers"), null);
             Assert.assertEquals(result.getIntents().get("QnAMatch"), null);
             Assert.assertNotEquals(result.getIntents().get("None"), null);
@@ -75,12 +76,12 @@ public class QnAMakerRecognizerTests {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             // Get Oracle file
-            String content = readFileContent("QnaMaker_ReturnsAnswer.json");
+            String content = readFileContent("QnaMaker_ReturnsNoAnswer.json");
             //Extract V3 response
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
             // Set mock response in MockWebServer
-            String url = "/knowledgebases/";
+            String url = "/qnamaker/knowledgebases/";
             String endpoint = "";
             if (this.mockQnAResponse) {
                 endpoint = String.format(
@@ -101,19 +102,15 @@ public class QnAMakerRecognizerTests {
             };
             Activity activity = Activity.createMessageActivity();
             activity.setText("test");
-            activity.setChannelId("EmptyContext");
             TurnContext context = new TurnContextImpl(new TestAdapter(), activity);
             DialogContext dc = new DialogContext(new DialogSet(), context, new DialogState());
-            recognizer.recognize(dc, activity).thenApply(result -> {
-                Assert.assertEquals(result.getProperties().get("entities.answer"), null);
-                Assert.assertEquals(result.getProperties().get("answers"), null);
-                Assert.assertEquals(result.getIntents().get("QnAMatch"), null);
-                Assert.assertNotEquals(result.getIntents().get("None"), null);
-                return null;
-            });
+            RecognizerResult result = recognizer.recognize(dc, activity).join();
+            Assert.assertEquals(result.getEntities(), null);
+            Assert.assertEquals(result.getProperties().get("answers"), null);
+            Assert.assertEquals(result.getIntents().get("QnAMatch"), null);
+            Assert.assertNotEquals(result.getIntents().get("None"), null);
         } catch (Exception e) {
-            LoggerFactory.getLogger(QnAMakerRecognizerTests.class).error(e.getMessage());
-            assertFalse(true);
+            fail();
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -133,7 +130,7 @@ public class QnAMakerRecognizerTests {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
             // Set mock response in MockWebServer
-            String url = "/knowledgebases/";
+            String url = "/qnamaker/knowledgebases/";
             String endpoint = "";
             if (this.mockQnAResponse) {
                 endpoint = String.format(
@@ -154,18 +151,14 @@ public class QnAMakerRecognizerTests {
             };
             Activity activity = Activity.createMessageActivity();
             activity.setText("test");
-            activity.setChannelId("EmptyContext");
             TurnContext context = new TurnContextImpl(new TestAdapter(), activity);
             DialogContext dc = new DialogContext(new DialogSet(), context, new DialogState());
-            recognizer.recognize(dc, activity).thenApply(result -> {
-                validateAnswers(result);
-                Assert.assertEquals(result.getIntents().get("None"), null);
-                Assert.assertNotEquals(result.getIntents().get("QnAMatch"), null);
-                return null;
-            });
+            RecognizerResult result = recognizer.recognize(dc, activity).join();
+            validateAnswers(result);
+            Assert.assertEquals(result.getIntents().get("None"), null);
+            Assert.assertNotEquals(result.getIntents().get("QnAMatch"), null);
         } catch (Exception e) {
-            LoggerFactory.getLogger(QnAMakerRecognizerTests.class).error(e.getMessage());
-            assertFalse(true);
+            fail();
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -185,7 +178,7 @@ public class QnAMakerRecognizerTests {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
             // Set mock response in MockWebServer
-            String url = "/knowledgebases/";
+            String url = "/qnamaker/knowledgebases/";
             String endpoint = "";
             if (this.mockQnAResponse) {
                 endpoint = String.format(
@@ -206,18 +199,14 @@ public class QnAMakerRecognizerTests {
             };
             Activity activity = Activity.createMessageActivity();
             activity.setText("test");
-            activity.setChannelId("EmptyContext");
             TurnContext context = new TurnContextImpl(new TestAdapter(), activity);
             DialogContext dc = new DialogContext(new DialogSet(), context, new DialogState());
-            recognizer.recognize(dc, activity).thenApply(result -> {
-                validateAnswers(result);
-                Assert.assertEquals(result.getIntents().get("None"), null);
-                Assert.assertNotEquals(result.getIntents().get("QnAMatch"), null);
-                return null;
-            });
+            RecognizerResult result = recognizer.recognize(dc, activity).join();
+            validateAnswers(result);
+            Assert.assertEquals(result.getIntents().get("None"), null);
+            Assert.assertNotEquals(result.getIntents().get("QnAMatch"), null);
         } catch (Exception e) {
-            LoggerFactory.getLogger(QnAMakerRecognizerTests.class).error(e.getMessage());
-            assertFalse(true);
+            fail();
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -237,7 +226,7 @@ public class QnAMakerRecognizerTests {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
             // Set mock response in MockWebServer
-            String url = "/knowledgebases/";
+            String url = "/qnamaker/knowledgebases/";
             String endpoint = "";
             if (this.mockQnAResponse) {
                 endpoint = String.format(
@@ -258,18 +247,14 @@ public class QnAMakerRecognizerTests {
             };
             Activity activity = Activity.createMessageActivity();
             activity.setText("test");
-            activity.setChannelId("EmptyContext");
             TurnContext context = new TurnContextImpl(new TestAdapter(), activity);
             DialogContext dc = new DialogContext(new DialogSet(), context, new DialogState());
-            recognizer.recognize(dc, activity).thenApply(result -> {
-                validateAnswers(result);
-                Assert.assertEquals(result.getIntents().get("None"), null);
-                Assert.assertNotEquals(result.getIntents().get("DeferToRecognizer_xxx"), null);
-                return null;
-            });
+            RecognizerResult result = recognizer.recognize(dc, activity).join();
+            validateAnswers(result);
+            Assert.assertEquals(result.getIntents().get("None"), null);
+            Assert.assertNotEquals(result.getIntents().get("DeferToRecognizer_xxx"), null);
         } catch (Exception e) {
-            LoggerFactory.getLogger(QnAMakerRecognizerTests.class).error(e.getMessage());
-            assertFalse(true);
+            fail();
         } finally {
             try {
                 mockWebServer.shutdown();
@@ -299,8 +284,8 @@ public class QnAMakerRecognizerTests {
 
     private void validateAnswers(RecognizerResult result) {
         Assert.assertNotEquals(result.getProperties().get("answers"), null);
-        Assert.assertEquals(result.getProperties().get("entities.answer").size(), 1);
-        Assert.assertEquals(result.getProperties().get("entities.$instance.answer").get("startIndex"), 0);
-        Assert.assertTrue(result.getProperties().get("entities.$instance.answer").get("endIndex") != null);
+        Assert.assertEquals(result.getEntities().get("answer").size(), 1);
+        Assert.assertEquals(result.getEntities().get("$instance").get("answer").get(0).get("startIndex").asInt(), 0);
+        Assert.assertTrue(result.getEntities().get("$instance").get("answer").get(0).get("endIndex") != null);
     }
 }

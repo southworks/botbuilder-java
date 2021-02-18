@@ -73,6 +73,6 @@ public class HttpRequestUtils {
     }
 
     private RequestBody buildRequestBody(String payloadBody) throws JsonProcessingException {
-        return RequestBody.create(payloadBody,  MediaType.parse("application/json; charset=utf-8"));
+        return RequestBody.create(payloadBody, MediaType.parse("application/json; charset=utf-8"));
     }
 }

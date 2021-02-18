@@ -46,7 +46,9 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
@@ -1040,6 +1042,9 @@ public class QnAMakerTests {
         }
     }
 
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
+
     @Test
     public void qnaMakerTestUnsuccessfulResponse() {
         MockWebServer mockWebServer = new MockWebServer();
@@ -1066,8 +1071,8 @@ public class QnAMakerTests {
 
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, null);
 
-            Assert.assertThrows(HttpRequestMethodNotSupportedException.class,
-                () -> qna.getAnswers(getContext("how do I clean the stove?"), null));
+            exception.expect(HttpRequestMethodNotSupportedException.class);
+            qna.getAnswers(getContext("how do I clean the stove?"), null);
 
             return;
         } catch (IOException e) {

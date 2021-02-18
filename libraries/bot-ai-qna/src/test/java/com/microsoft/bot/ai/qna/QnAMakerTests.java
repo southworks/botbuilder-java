@@ -71,19 +71,19 @@ public class QnAMakerTests {
     ArgumentCaptor<Map<String, String>> propertiesCaptor;
 
     private String getRequestUrl() {
-        return String.format("/qnamaker/knowledgebases/%2$s/generateanswer", knowledgeBaseId);
+        return String.format("/qnamaker/knowledgebases/%s/generateanswer", knowledgeBaseId);
     }
 
     private String getV2LegacyRequestUrl() {
-        return String.format("/qnamaker/v2.0/knowledgebases/%2$s/generateanswer", knowledgeBaseId);
+        return String.format("/qnamaker/v2.0/knowledgebases/%s/generateanswer", knowledgeBaseId);
     }
 
     private String getV3LegacyRequestUrl() {
-        return String.format("/qnamaker/v3.0/knowledgebases/%2$s/generateanswer", knowledgeBaseId);
+        return String.format("/qnamaker/v3.0/knowledgebases/%s/generateanswer", knowledgeBaseId);
     }
 
     private String getTrainRequestUrl() {
-        return String.format("/qnamaker/v3.0/knowledgebases/%2$s/train", knowledgeBaseId);
+        return String.format("/qnamaker/v3.0/knowledgebases/%s/train", knowledgeBaseId);
     }
 
     @Test
@@ -2067,7 +2067,7 @@ public class QnAMakerTests {
 
     private QnAMaker qnaReturnsAnswer(MockWebServer mockWebServer) {
         try {
-            String content = readFileContent("QnaMaker_ReturnsAnswer_WhenNoAnswerFoundInKb.json");
+            String content = readFileContent("QnaMaker_ReturnsAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
             String url = this.getRequestUrl();

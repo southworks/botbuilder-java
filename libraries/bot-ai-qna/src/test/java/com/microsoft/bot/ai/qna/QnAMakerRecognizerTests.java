@@ -13,7 +13,9 @@ import com.microsoft.bot.builder.RecognizerResult;
 import com.microsoft.bot.builder.TurnContext;
 import com.microsoft.bot.builder.TurnContextImpl;
 import com.microsoft.bot.builder.adapters.TestAdapter;
-import com.microsoft.bot.dialogs.*;
+import com.microsoft.bot.dialogs.DialogContext;
+import com.microsoft.bot.dialogs.DialogSet;
+import com.microsoft.bot.dialogs.DialogState;
 import com.microsoft.bot.schema.Activity;
 
 import okhttp3.HttpUrl;
@@ -80,13 +82,7 @@ public class QnAMakerRecognizerTests {
             String url = "/qnamaker/knowledgebases/";
             String endpoint = "";
             if (this.mockQnAResponse) {
-                endpoint = String.format(
-                    "%s:%s",
-                    hostname,
-                    initializeMockServer(
-                        mockWebServer,
-                        response,
-                        url).port());
+                endpoint = String.format("%s:%s", hostname, initializeMockServer(mockWebServer,response, url).port());
             }
             String finalEndpoint = endpoint;
             QnAMakerRecognizer recognizer = new QnAMakerRecognizer() {
@@ -129,13 +125,7 @@ public class QnAMakerRecognizerTests {
             String url = "/qnamaker/knowledgebases/";
             String endpoint = "";
             if (this.mockQnAResponse) {
-                endpoint = String.format(
-                    "%s:%s",
-                    hostname,
-                    initializeMockServer(
-                        mockWebServer,
-                        response,
-                        url).port());
+                endpoint = String.format("%s:%s", hostname, initializeMockServer(mockWebServer,response, url).port());
             }
             String finalEndpoint = endpoint;
             QnAMakerRecognizer recognizer = new QnAMakerRecognizer() {
@@ -177,13 +167,7 @@ public class QnAMakerRecognizerTests {
             String url = "/qnamaker/knowledgebases/";
             String endpoint = "";
             if (this.mockQnAResponse) {
-                endpoint = String.format(
-                    "%s:%s",
-                    hostname,
-                    initializeMockServer(
-                        mockWebServer,
-                        response,
-                        url).port());
+                endpoint = String.format("%s:%s", hostname, initializeMockServer(mockWebServer,response, url).port());
             }
             String finalEndpoint = endpoint;
             QnAMakerRecognizer recognizer = new QnAMakerRecognizer() {
@@ -225,13 +209,7 @@ public class QnAMakerRecognizerTests {
             String url = "/qnamaker/knowledgebases/";
             String endpoint = "";
             if (this.mockQnAResponse) {
-                endpoint = String.format(
-                    "%s:%s",
-                    hostname,
-                    initializeMockServer(
-                        mockWebServer,
-                        response,
-                        url).port());
+                endpoint = String.format("%s:%s", hostname, initializeMockServer(mockWebServer,response, url).port());
             }
             String finalEndpoint = endpoint;
             QnAMakerRecognizer recognizer = new QnAMakerRecognizer() {

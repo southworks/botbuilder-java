@@ -1177,21 +1177,19 @@ public class QnAMakerTests {
         }
     }
 
-//     @Test
+    @Test
     public void qnaMakerTestOptionsHydration() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
+            String url = this.getRequestUrl();
+            String endpoint = "";
             String content = readFileContent("QnaMaker_ReturnsAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
-            String url = this.getRequestUrl();
-            String endpoint = "";
             if (this.mockQnAResponse) {
                 endpoint = String.format("%s:%s", hostname, initializeMockServer(mockWebServer, response, url).port());
             }
             String finalEndpoint = endpoint;
-            RecordedRequest request = mockWebServer.takeRequest();
 
             QnAMakerOptions noFiltersOptions = new QnAMakerOptions() {
                 {
@@ -1254,43 +1252,33 @@ public class QnAMakerTests {
             // And that the options set in the constructor are not overwritten improperly by options passed into .GetAnswersAsync()
             final CapturedRequest[] requestContent = new CapturedRequest[6];
             ObjectMapper objectMapper = new ObjectMapper();
+            RecordedRequest request;
 
             qna.getAnswers(context, noFiltersOptions).join();
-            try {
-                requestContent[0] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
-            } catch (IOException e) {
-                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
-            }
+            request = mockWebServer.takeRequest();
+            requestContent[0] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+
             qna.getAnswers(context, twoStrictFiltersOptions).join();
-            try {
-                requestContent[1] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
-            } catch (IOException e) {
-                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
-            }
+            request = mockWebServer.takeRequest();
+            requestContent[1] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+
             qna.getAnswers(context, oneFilteredOption).join();
-            try {
-                requestContent[2] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
-            } catch (IOException e) {
-                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
-            }
+            request = mockWebServer.takeRequest();
+            requestContent[2] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+
             qna.getAnswers(context, null).join();
-            try {
-                requestContent[3] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
-            } catch (IOException e) {
-                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
-            }
+            request = mockWebServer.takeRequest();
+            requestContent[3] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+
+
             qna.getAnswers(context, allChangedRequestOptions).join();
-            try {
-                requestContent[4] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
-            } catch (IOException e) {
-                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
-            }
+            request = mockWebServer.takeRequest();
+            requestContent[4] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+
             qna.getAnswers(context, null).join();
-            try {
-                requestContent[5] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
-            } catch (IOException e) {
-                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
-            }
+            request = mockWebServer.takeRequest();
+            requestContent[5] = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
+
 
             Assert.assertTrue(requestContent[0].getStrictFilters().length == 0);
             Assert.assertEquals(2, requestContent[1].getStrictFilters().length);
@@ -1304,13 +1292,14 @@ public class QnAMakerTests {
             Assert.assertEquals(30, (int) requestContent[5].getTop());
             Assert.assertEquals(0.3, Math.round(requestContent[5].getScoreThreshold()),2);
             Assert.assertTrue(requestContent[5].getStrictFilters().length == 0);
+
         } catch (Exception e) {
             fail();
         } finally {
             try {
                 mockWebServer.shutdown();
             } catch (IOException e) {
-                // Empty error
+                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
         }
     }

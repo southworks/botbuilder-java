@@ -475,11 +475,10 @@ public class QnAMakerTests {
         }
     }
 
-//    @Test
+    @Test
     public void qnaMakerReturnsAnswerWithFiltering() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_UsesStrictFilters_ToReturnAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -488,12 +487,12 @@ public class QnAMakerTests {
             if (this.mockQnAResponse) {
                 endpoint = String.format("%s:%s", hostname, initializeMockServer(mockWebServer, response, url).port());
             }
-            RecordedRequest request = mockWebServer.takeRequest();
+            String finalEndpoint = endpoint;
             QnAMakerEndpoint qnaMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
                     setEndpointKey(endpointKey);
-                    setHost(hostname);
+                    setHost(finalEndpoint);
                 }
             };
             QnAMakerOptions qnaMakerOptions = new QnAMakerOptions() {
@@ -518,16 +517,17 @@ public class QnAMakerTests {
             Assert.assertEquals("topic", results[0].getMetadata()[0].getName());
             Assert.assertEquals("value", results[0].getMetadata()[0].getValue());
 
-            CapturedRequest obj = new CapturedRequest();
+            JsonNode obj = null;
             try {
-                obj = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
-            } catch (IOException e) {
+                RecordedRequest request = mockWebServer.takeRequest();
+                obj = objectMapper.readTree(request.getBody().readUtf8());
+            } catch (IOException | InterruptedException e) {
                 LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
             }
             // verify we are actually passing on the options
-            Assert.assertEquals(1, (int)obj.getTop());
-            Assert.assertEquals("topic", obj.getStrictFilters()[0].getName());
-            Assert.assertEquals("value", obj.getStrictFilters()[0].getValue());
+            Assert.assertEquals(1, obj.get("top").asInt());
+            Assert.assertEquals("topic", obj.get("strictFilters").get(0).get("name").asText());
+            Assert.assertEquals("value", obj.get("strictFilters").get(0).get("value").asText());
         } catch (Exception e) {
             fail();
         } finally {
@@ -859,44 +859,22 @@ public class QnAMakerTests {
         Assert.assertThrows(IllegalArgumentException.class, () -> new QnAMaker(qnAMakerEndpoint, null));
     }
 
-//     @Test
+    @Test
     public void qnaMakerUserAgent() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
-            String content = readFileContent("QnaMaker_ReturnsAnswer.json");
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode response = mapper.readTree(content);
-            String url = this.getRequestUrl();
-            String endpoint = "";
-            if (this.mockQnAResponse) {
-                endpoint = String.format("%s:%s", hostname, initializeMockServer(mockWebServer, response, url).port());
-            }
-            String finalEndpoint = endpoint;
-            RecordedRequest request = mockWebServer.takeRequest();
-            QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
-                {
-                    setKnowledgeBaseId(knowledgeBaseId);
-                    setEndpointKey(endpointKey);
-                    setHost(finalEndpoint);
-                }
-            };
-            QnAMakerOptions options = new QnAMakerOptions() {
-                {
-                    setTop(1);
-                }
-            };
+            QnAMaker qna = this.qnaReturnsAnswer(mockWebServer);
 
-            QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options);
             QueryResult[] results = qna.getAnswers(getContext("how do I clean the stove?"), null).join();
+            RecordedRequest request = mockWebServer.takeRequest();
             Assert.assertNotNull(results);
             Assert.assertTrue(results.length == 1);
             Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
                 results[0].getAnswer());
 
             // Verify that we added the bot.builder package details.
-            Assert.assertTrue(request.getHeader("User-Agent").contains("Microsoft.Bot.Builder.AI.QnA/4"));
-        } catch (Exception e) {
+            Assert.assertTrue(request.getHeader("User-Agent").contains("BotBuilder/4.0.0"));
+        } catch (Exception ex) {
             fail();
         } finally {
             try {
@@ -1025,7 +1003,6 @@ public class QnAMakerTests {
     public void qnaMakerTestThresholdInQueryOption() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswer_GivenScoreThresholdQueryOption.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -1035,7 +1012,6 @@ public class QnAMakerTests {
                 endpoint = String.format("%s:%s", hostname, initializeMockServer(mockWebServer, response, url).port());
             }
             String finalEndpoint = endpoint;
-            RecordedRequest request = mockWebServer.takeRequest();
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -1054,19 +1030,21 @@ public class QnAMakerTests {
 
             ObjectMapper objectMapper = new ObjectMapper();
 
-            QueryResult[] results = qna.getAnswers(getContext("What happens when you hug a porcupine?"),
-                queryOptionsWithScoreThreshold).join();
-            Assert.assertNotNull(results);
+            qna.getAnswers(getContext("What happens when you hug a porcupine?"), queryOptionsWithScoreThreshold).thenAccept(results -> {
+                RecordedRequest request;
+                JsonNode obj = null;
+                try {
+                    request = mockWebServer.takeRequest();
+                    obj = objectMapper.readTree(request.getBody().readUtf8());
+                } catch (InterruptedException | IOException e) {
+                    e.printStackTrace();
+                }
+                Assert.assertNotNull(results);
 
-            CapturedRequest obj = new CapturedRequest();
-            try {
-                obj = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
-            } catch (IOException e) {
-                LoggerFactory.getLogger(QnAMakerTests.class).error(e.getMessage());
-            }
-            Assert.assertEquals(2, (int)obj.getTop());
-            Assert.assertEquals(0.5, obj.getScoreThreshold(), 0);
-        } catch (Exception e) {
+                Assert.assertEquals(2, obj.get("top").asInt());
+                Assert.assertEquals(0.5, obj.get("scoreThreshold").asDouble(), 0);
+            });
+        } catch (Exception ex) {
             fail();
         } finally {
             try {
@@ -1339,11 +1317,10 @@ public class QnAMakerTests {
         }
     }
 
-//    @Test
+    @Test
     public void qnaMakerStrictFiltersCompoundOperationType() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -1353,7 +1330,6 @@ public class QnAMakerTests {
                 endpoint = String.format("%s:%s", hostname, initializeMockServer(mockWebServer, response, url).port());
             }
             String finalEndpoint = endpoint;
-            RecordedRequest request = mockWebServer.takeRequest();
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -1388,14 +1364,11 @@ public class QnAMakerTests {
             ObjectMapper objectMapper = new ObjectMapper();
 
             QueryResult[] noFilterResults1 = qna.getAnswers(context, oneFilteredOption).join();
-            try {
-                CapturedRequest requestContent = objectMapper.readValue(request.getBody().readUtf8(), CapturedRequest.class);
-            } catch (IOException e) {
-                // Empty error
-            }
+            RecordedRequest request = mockWebServer.takeRequest();
+            JsonNode requestContent = objectMapper.readTree(request.getBody().readUtf8());
             Assert.assertEquals(2, oneFilteredOption.getStrictFilters().length);
             Assert.assertEquals(JoinOperator.OR, oneFilteredOption.getStrictFiltersJoinOperator());
-        } catch (Exception e) {
+        }catch (Exception e) {
             fail();
         } finally {
             try {

@@ -999,7 +999,7 @@ public class QnAMakerTests {
         }
     }
 
-//     @Test
+    @Test
     public void qnaMakerTestThresholdInQueryOption() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
@@ -1030,22 +1030,17 @@ public class QnAMakerTests {
 
             ObjectMapper objectMapper = new ObjectMapper();
 
-            qna.getAnswers(getContext("What happens when you hug a porcupine?"), queryOptionsWithScoreThreshold).thenAccept(results -> {
-                RecordedRequest request;
-                JsonNode obj = null;
-                try {
-                    request = mockWebServer.takeRequest();
-                    obj = objectMapper.readTree(request.getBody().readUtf8());
-                } catch (InterruptedException | IOException e) {
-                    e.printStackTrace();
-                }
-                Assert.assertNotNull(results);
+            QueryResult[] results = qna.getAnswers(getContext("What happens when you hug a porcupine?"), queryOptionsWithScoreThreshold).join();
+            RecordedRequest request = mockWebServer.takeRequest();
+            JsonNode obj = objectMapper.readTree(request.getBody().readUtf8());
 
-                Assert.assertEquals(2, obj.get("top").asInt());
-                Assert.assertEquals(0.5, obj.get("scoreThreshold").asDouble(), 0);
-            });
+            Assert.assertNotNull(results);
+
+            Assert.assertEquals(2, obj.get("top").asInt());
+            Assert.assertEquals(0.5, obj.get("scoreThreshold").asDouble(), 0);
+
         } catch (Exception ex) {
-            fail();
+            ex.printStackTrace();
         } finally {
             try {
                 mockWebServer.shutdown();

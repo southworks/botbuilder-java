@@ -60,13 +60,11 @@ public class QnAMakerRecognizerTests {
                 setEndpointKey(endpointKey);
             }
         };
-        recognizer.recognize(dc, activity).thenApply(result -> {
-            Assert.assertEquals(result.getEntities(), null);
-            Assert.assertEquals(result.getProperties().get("answers"), null);
-            Assert.assertEquals(result.getIntents().get("QnAMatch"), null);
-            Assert.assertNotEquals(result.getIntents().get("None"), null);
-            return null;
-        });
+        RecognizerResult result = recognizer.recognize(dc, activity).join();
+        Assert.assertEquals(result.getEntities(), null);
+        Assert.assertEquals(result.getProperties().get("answers"), null);
+        Assert.assertEquals(result.getIntents().get("QnAMatch"), null);
+        Assert.assertNotEquals(result.getIntents().get("None"), null);
     }
 
     @Test

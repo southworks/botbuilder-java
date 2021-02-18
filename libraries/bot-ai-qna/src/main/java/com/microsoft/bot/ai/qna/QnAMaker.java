@@ -45,7 +45,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
     private TrainUtils activeLearningTrainHelper;
     private Boolean logPersonalInformation;
     @JsonIgnore
-    private BotTelemetryClient telemetryClient;
+    protected BotTelemetryClient telemetryClient;
 
     /**
      * The name of the QnAMaker class.

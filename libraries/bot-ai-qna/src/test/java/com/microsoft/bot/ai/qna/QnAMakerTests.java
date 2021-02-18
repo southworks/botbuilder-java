@@ -42,11 +42,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
 import okhttp3.OkHttpClient;
@@ -58,6 +60,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@RunWith(MockitoJUnitRunner.class)
 public class QnAMakerTests {
     private final String knowledgeBaseId = "dummy-id";
     private final String endpointKey = "dummy-key";
@@ -1661,7 +1664,7 @@ public class QnAMakerTests {
 
             // Act - Override the QnaMaker object to log custom stuff and honor parms passed in.
             Map<String, String> telemetryProperties = new HashMap<String, String>() {{
-                put("Id", "MyId");
+                put("Id", "MyID");
             }};
 
             QnAMaker qna = new OverrideTelemetry(qnAMakerEndpoint, options, telemetryClient, false);
@@ -1675,7 +1678,7 @@ public class QnAMakerTests {
             List<String> eventNames = eventNameCaptor.getAllValues();
             List<Map<String, String>> properties = propertiesCaptor.getAllValues();
 
-            Assert.assertEquals(3, eventNames.size());
+            Assert.assertEquals(2, eventNames.size());
             Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
             Assert.assertTrue(properties.get(0).size() == 2);
             Assert.assertTrue(properties.get(0).containsKey("MyImportantProperty"));

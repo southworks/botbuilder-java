@@ -224,7 +224,8 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
      * @return Filtered array of ambiguous question.
      */
     public QueryResult[] getLowScoreVariation(QueryResult[] queryResult) {
-        return (QueryResult[]) ActiveLearningUtils.getLowScoreVariation(Arrays.asList(queryResult)).toArray();
+        List<QueryResult> queryResults = ActiveLearningUtils.getLowScoreVariation(Arrays.asList(queryResult));
+        return queryResults.toArray(new QueryResult[queryResults.size()]);
     }
 
     /**

@@ -379,8 +379,8 @@ public class QnAMakerTests {
             Assert.assertEquals(3, filteredResults.length);
 
             String content2 = readFileContent("QnaMaker_TopNAnswer_DisableActiveLearning.json");
-            JsonNode response2 = mapper.readTree(content);
-            this.initializeMockServer(mockWebServer, response, this.getRequestUrl());
+            JsonNode response2 = mapper.readTree(content2);
+            this.initializeMockServer(mockWebServer, response2, this.getRequestUrl());
             QueryResult[] results2 = qna.getAnswers(getContext("Q11"), null).join();
             Assert.assertNotNull(results2);
             Assert.assertEquals(4, results2.length);
@@ -2082,7 +2082,11 @@ public class QnAMakerTests {
             .addHeader("Content-Type", "application/json; charset=utf-8")
             .setBody(mockResponse));
 
-        mockWebServer.start();
+        try {
+            mockWebServer.start();
+        } catch (Exception e) {
+            // Empty error
+        }
         return mockWebServer.url(url);
     }
 

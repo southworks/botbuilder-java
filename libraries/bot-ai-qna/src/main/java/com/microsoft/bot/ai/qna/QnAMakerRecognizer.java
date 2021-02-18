@@ -16,7 +16,9 @@ import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import com.microsoft.bot.ai.qna.models.Metadata;
@@ -364,13 +366,9 @@ public class QnAMakerRecognizer extends Recognizer {
     public CompletableFuture<RecognizerResult> recognize(DialogContext dialogContext, Activity activity,
             Map<String, String> telemetryProperties, Map<String, Double> telemetryMetrics) {
         // Identify matched intents
-        RecognizerResult recognizerResult = new RecognizerResult() {
-            {
-                setText(activity.getText());
-                setIntents(new HashMap<String, IntentScore>());
-            }
-        };
-
+        RecognizerResult recognizerResult = new RecognizerResult();
+        recognizerResult.setText(activity.getText());
+        recognizerResult.setIntents(new HashMap<String, IntentScore>());
         if (Strings.isNullOrEmpty(activity.getText())) {
             recognizerResult.getIntents().put("None", new IntentScore());
             return CompletableFuture.completedFuture(recognizerResult);
@@ -431,16 +429,21 @@ public class QnAMakerRecognizer extends Recognizer {
                         });
                     }
                     ObjectMapper mapper = new ObjectMapper();
+                    ObjectNode entitiesNode = mapper.createObjectNode();
                     List<String> answerArray = new ArrayList<String>();
                     answerArray.add(topAnswer.getAnswer());
-                    ObjectPath.setPathValue(recognizerResult, "entities.answer", answerArray);
+                    ArrayNode entitiesArrayNode = entitiesNode.putArray("answer");
+                    entitiesArrayNode.add(topAnswer.getAnswer());
 
-                    ObjectNode instance = mapper.createObjectNode();
-                    instance.put("startIndex", 0);
-                    instance.put("endIndex", activity.getText().length());
-                    ObjectPath.setPathValue(recognizerResult, "entities.$instance.answer", instance);
+                    ObjectNode instance = entitiesNode.putObject("$instance");
+                    ArrayNode instanceArrayNode = instance.putArray("answer");
+                    ObjectNode data = instanceArrayNode.addObject();
+                    data.setAll((ObjectNode) mapper.valueToTree(topAnswer));
+                    data.put("startIndex", 0);
+                    data.put("endIndex", activity.getText().length());
 
-                    recognizerResult.getProperties().put("answers", mapper.valueToTree(answerArray));
+                    recognizerResult.setEntities(entitiesNode);
+                    recognizerResult.getProperties().put("answers", mapper.valueToTree(answers));
                 } else {
                     recognizerResult.getIntents().put("None", new IntentScore() {
                         {

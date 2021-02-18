@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+package com.microsoft.bot.ai.qna;
+
 import java.io.IOException;
 import java.util.UUID;
 
@@ -9,7 +11,7 @@ import com.microsoft.bot.ai.qna.models.QueryResult;
 import com.microsoft.bot.restclient.serializer.JacksonAdapter;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class QnAMakerTraceInfoTests {
 

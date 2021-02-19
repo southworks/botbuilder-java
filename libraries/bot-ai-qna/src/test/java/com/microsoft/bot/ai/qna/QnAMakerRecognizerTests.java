@@ -91,7 +91,6 @@ public class QnAMakerRecognizerTests {
             };
             Activity activity = Activity.createMessageActivity();
             activity.setText("test");
-            activity.setChannelId("EmptyContext");
             TurnContext context = new TurnContextImpl(new TestAdapter(), activity);
             DialogContext dc = new DialogContext(new DialogSet(), context, new DialogState());
             RecognizerResult result = recognizer.recognize(dc, activity).join();
@@ -134,7 +133,6 @@ public class QnAMakerRecognizerTests {
             };
             Activity activity = Activity.createMessageActivity();
             activity.setText("test");
-            activity.setChannelId("EmptyContext");
             TurnContext context = new TurnContextImpl(new TestAdapter(), activity);
             DialogContext dc = new DialogContext(new DialogSet(), context, new DialogState());
             RecognizerResult result = recognizer.recognize(dc, activity).join();
@@ -176,7 +174,6 @@ public class QnAMakerRecognizerTests {
             };
             Activity activity = Activity.createMessageActivity();
             activity.setText("test");
-            activity.setChannelId("EmptyContext");
             TurnContext context = new TurnContextImpl(new TestAdapter(), activity);
             DialogContext dc = new DialogContext(new DialogSet(), context, new DialogState());
             RecognizerResult result = recognizer.recognize(dc, activity).join();
@@ -218,7 +215,6 @@ public class QnAMakerRecognizerTests {
             };
             Activity activity = Activity.createMessageActivity();
             activity.setText("test");
-            activity.setChannelId("EmptyContext");
             TurnContext context = new TurnContextImpl(new TestAdapter(), activity);
             DialogContext dc = new DialogContext(new DialogSet(), context, new DialogState());
             RecognizerResult result = recognizer.recognize(dc, activity).join();

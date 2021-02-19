@@ -209,11 +209,11 @@ public class QnAMakerRecognizer extends Recognizer {
      * Sets a value indicating whether gets or sets environment of knowledgebase to
      * be called.
      *
-     * @param wihtIsTest A value indicating whether to call test or prod environment of
+     * @param withIsTest A value indicating whether to call test or prod environment of
      *               knowledgebase.
      */
-    public void setIsTest(Boolean wihtIsTest) {
-        this.isTest = wihtIsTest;
+    public void setIsTest(Boolean withIsTest) {
+        this.isTest = withIsTest;
     }
 
     /**

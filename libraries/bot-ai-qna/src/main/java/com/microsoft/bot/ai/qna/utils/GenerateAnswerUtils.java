@@ -186,11 +186,8 @@ public class GenerateAnswerUtils {
         QnAMakerOptions hydratedOptions = null;
 
         try {
-            hydratedOptions = jacksonAdapter.deserialize(jacksonAdapter.serialize(queryOptions),
+            hydratedOptions = jacksonAdapter.deserialize(jacksonAdapter.serialize(options),
                     QnAMakerOptions.class);
-            if (hydratedOptions == null) {
-                hydratedOptions = new QnAMakerOptions();
-            }
         } catch (IOException e) {
             LoggerFactory.getLogger(GenerateAnswerUtils.class).error("hydrateOptions");
         }

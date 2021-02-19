@@ -21,7 +21,7 @@ import com.microsoft.bot.schema.Activity;
 import okhttp3.HttpUrl;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

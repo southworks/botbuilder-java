@@ -3,7 +3,6 @@
 
 package com.microsoft.bot.ai.qna.utils;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -13,8 +12,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.bot.ai.qna.QnAMakerEndpoint;
 import com.microsoft.bot.connector.UserAgent;
 
-import okhttp3.*;
-import org.apache.http.HttpException;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.slf4j.LoggerFactory;
 
 /**

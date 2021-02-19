@@ -137,7 +137,8 @@ public class GenerateAnswerUtils {
         for (QueryResult answer : results.getAnswers()) {
             answer.setScore(answer.getScore() / PERCENTAGE_DIVISOR);
         }
-        List<QueryResult> answerList = Arrays.asList(results.getAnswers()).stream().filter(answer -> answer.getScore() > options.getScoreThreshold()).collect(Collectors.toList());
+        List<QueryResult> answerList = Arrays.asList(results.getAnswers()).
+            stream().filter(answer -> answer.getScore() > options.getScoreThreshold()).collect(Collectors.toList());
         results.setAnswers(answerList.toArray(new QueryResult[answerList.size()]));
 
         return CompletableFuture.completedFuture(results);

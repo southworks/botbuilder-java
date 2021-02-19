@@ -2150,8 +2150,10 @@ public class QnAMakerTests {
                 // Add my property
                 eventData.getLeft().put("MyImportantProperty", "myImportantValue");
 
+                BotTelemetryClient telemetryClient = this.getTelemetryClient();
+
                 // Log QnaMessage event
-                this.telemetryClient.trackEvent(QnATelemetryConstants.QNA_MSG_EVENT, eventData.getLeft(), eventData.getRight());
+                telemetryClient.trackEvent(QnATelemetryConstants.QNA_MSG_EVENT, eventData.getLeft(), eventData.getRight());
 
                 // Create second event.
                 Map<String, String> secondEventProperties = new HashMap<String, String>(){
@@ -2159,7 +2161,7 @@ public class QnAMakerTests {
                         put("MyImportantProperty2", "myImportantValue2");
                     }
                 };
-                this.telemetryClient.trackEvent("MySecondEvent", secondEventProperties);
+                telemetryClient.trackEvent("MySecondEvent", secondEventProperties);
             });
         }
     }

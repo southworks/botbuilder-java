@@ -23,15 +23,16 @@ import com.microsoft.bot.schema.Pair;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Strings;
-import org.apache.commons.collections4.MultiValuedMap;
-import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,7 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
     private TrainUtils activeLearningTrainHelper;
     private Boolean logPersonalInformation;
     @JsonIgnore
-    protected BotTelemetryClient telemetryClient;
+    private BotTelemetryClient telemetryClient;
 
     /**
      * The name of the QnAMaker class.
@@ -287,7 +288,8 @@ public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
         properties.put(QnATelemetryConstants.KNOWLEDGE_BASE_ID_PROPERTY, this.endpoint.getKnowledgeBaseId());
 
         String text = turnContext.getActivity().getText();
-        String userName = turnContext.getActivity().getFrom() != null ? turnContext.getActivity().getFrom().getName() : null;
+        String userName = turnContext.getActivity().getFrom() != null
+            ? turnContext.getActivity().getFrom().getName() : null;
 
         // Use the LogPersonalInformation flag to toggle logging PII data, text and user
         // name are common examples

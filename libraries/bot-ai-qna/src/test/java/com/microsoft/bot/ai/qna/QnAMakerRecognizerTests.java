@@ -71,7 +71,6 @@ public class QnAMakerRecognizerTests {
     public void noAnswer() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsNoAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -113,7 +112,6 @@ public class QnAMakerRecognizerTests {
     public void returnAnswers() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -154,7 +152,6 @@ public class QnAMakerRecognizerTests {
     public void topNAnswers() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_TopNAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -195,7 +192,6 @@ public class QnAMakerRecognizerTests {
     public void returnAnswersWithIntents() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswerWithIntent.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -233,9 +229,9 @@ public class QnAMakerRecognizerTests {
     }
 
     private String readFileContent (String fileName) throws IOException {
-        String path = Paths.get("").toAbsolutePath().toString();
-        String testDataPath = "/src/test/java/com/microsoft/bot/ai/qna/testdata/";
-        File file = new File(path + testDataPath + fileName);
+        String path = Paths.get("", "src", "test", "java", "com", "microsoft", "bot", "ai", "qna",
+            "testData", fileName).toAbsolutePath().toString();
+        File file = new File(path);
         return FileUtils.readFileToString(file, "utf-8");
     }
 

@@ -367,7 +367,6 @@ public class QnAMakerTests {
     public void qnaMakerLowScoreVariation() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_TopNAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -563,7 +562,6 @@ public class QnAMakerTests {
     public void qnaMakerSetScoreThresholdWhenThresholdIsZero() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -609,7 +607,6 @@ public class QnAMakerTests {
     public void qnaMakerTestThreshold() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_TestThreshold.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -688,7 +685,6 @@ public class QnAMakerTests {
     public void qnaMakerReturnsAnswerWithContext() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswerWithContext.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -740,7 +736,6 @@ public class QnAMakerTests {
     public void qnaMakerReturnAnswersWithoutContext() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswerWithoutContext.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -784,7 +779,6 @@ public class QnAMakerTests {
     public void qnaMakerReturnsHighScoreWhenIdPassed() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswerWithContext.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -909,7 +903,6 @@ public class QnAMakerTests {
     public void qnaMakerV2LegacyEndpointShouldThrow() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_LegacyEndpointAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -944,7 +937,6 @@ public class QnAMakerTests {
     public void qnaMakerV3LeagacyEndpointShouldThrow() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_LegacyEndpointAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -979,7 +971,6 @@ public class QnAMakerTests {
     public void qnaMakerReturnsAnswerWithMetadataBoost() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswersWithMetadataBoost.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -1101,7 +1092,6 @@ public class QnAMakerTests {
     public void qnaMakerIsTestTrue() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_IsTest_True.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -1145,7 +1135,6 @@ public class QnAMakerTests {
     public void qnaMakerRankerTypeQuestionOnly() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_RankerType_QuestionOnly.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -1388,7 +1377,6 @@ public class QnAMakerTests {
         // Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -1437,7 +1425,6 @@ public class QnAMakerTests {
         // Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -1506,7 +1493,6 @@ public class QnAMakerTests {
         // Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswer_WhenNoAnswerFoundInKb.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -1575,7 +1561,6 @@ public class QnAMakerTests {
         // Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -1646,7 +1631,6 @@ public class QnAMakerTests {
     public void telemetryOverride() {
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -1721,7 +1705,6 @@ public class QnAMakerTests {
         //Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -1809,7 +1792,6 @@ public class QnAMakerTests {
         // Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -1893,7 +1875,6 @@ public class QnAMakerTests {
         //Arrange
         MockWebServer mockWebServer = new MockWebServer();
         try {
-            // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswer.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
@@ -2077,9 +2058,9 @@ public class QnAMakerTests {
     }
 
     private String readFileContent (String fileName) throws IOException {
-        String path = Paths.get("").toAbsolutePath().toString();
-        String testDataPath = "/src/test/java/com/microsoft/bot/ai/qna/testdata/";
-        File file = new File(path + testDataPath + fileName);
+        String path = Paths.get("", "src", "test", "java", "com", "microsoft", "bot", "ai", "qna",
+            "testData", fileName).toAbsolutePath().toString();
+        File file = new File(path);
         return FileUtils.readFileToString(file, "utf-8");
     }
 

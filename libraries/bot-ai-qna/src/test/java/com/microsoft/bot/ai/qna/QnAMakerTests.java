@@ -75,6 +75,9 @@ public class QnAMakerTests {
     @Captor
     ArgumentCaptor<Map<String, String>> propertiesCaptor;
 
+    @Captor
+    ArgumentCaptor<Map<String, Double>> metricsCaptor;
+
     private String getRequestUrl() {
         return String.format("/qnamaker/knowledgebases/%s/generateanswer", knowledgeBaseId);
     }
@@ -1458,30 +1461,30 @@ public class QnAMakerTests {
 
             // Act - See if we get data back in telemetry
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, telemetryClient, true);
-            QueryResult[] results = qna.getAnswers(getContext("what is the answer to my nonsense question?"), null).join();
+            QueryResult[] results = qna.getAnswers(getContext("how do I clean the stove?"), null).join();
             // Assert - Check Telemetry logged
             // verify BotTelemetryClient was invoked 1 times, and capture arguments.
             verify(telemetryClient, times(1)).trackEvent(
                 eventNameCaptor.capture(),
-                propertiesCaptor.capture()
+                propertiesCaptor.capture(),
+                metricsCaptor.capture()
             );
             List<String> eventNames = eventNameCaptor.getAllValues();
             List<Map<String, String>> properties = propertiesCaptor.getAllValues();
-            Assert.assertEquals(3, eventNames.size());
+            List<Map<String, Double>> metrics = metricsCaptor.getAllValues();            ;
             Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
             Assert.assertTrue(properties.get(0).containsKey("knowledgeBaseId"));
             Assert.assertTrue(properties.get(0).containsKey("matchedQuestion"));
-            Assert.assertEquals("No Qna Question matched", properties.get(0).get("matchedQuestion"));
             Assert.assertTrue(properties.get(0).containsKey("question"));
             Assert.assertTrue(properties.get(0).containsKey("questionId"));
             Assert.assertTrue(properties.get(0).containsKey("answer"));
-            Assert.assertEquals("No Qna Question matched", properties.get(0).get("answer"));
+            Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack", properties.get(0).get("answer"));
             Assert.assertTrue(properties.get(0).containsKey("articleFound"));
-            Assert.assertTrue(properties.get(1) == null);
+            Assert.assertTrue(metrics.get(0).size() == 1);
 
             // Assert - Validate we didn't break QnA functionality.
             Assert.assertNotNull(results);
-            Assert.assertTrue(results.length == 0);
+            Assert.assertTrue(results.length == 1);
             Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack", results[0].getAnswer());
             Assert.assertEquals("Editorial", results[0].getSource());
         } catch (Exception e) {
@@ -1532,11 +1535,13 @@ public class QnAMakerTests {
             // verify BotTelemetryClient was invoked 1 times, and capture arguments.
             verify(telemetryClient, times(1)).trackEvent(
                 eventNameCaptor.capture(),
-                propertiesCaptor.capture()
+                propertiesCaptor.capture(),
+                metricsCaptor.capture()
             );
             List<String> eventNames = eventNameCaptor.getAllValues();
             List<Map<String, String>> properties = propertiesCaptor.getAllValues();
-            Assert.assertEquals(3, eventNames.size());
+            List<Map<String, Double>> metrics = metricsCaptor.getAllValues();
+
             Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
             Assert.assertTrue(properties.get(0).containsKey("knowledgeBaseId"));
             Assert.assertTrue(properties.get(0).containsKey("matchedQuestion"));
@@ -1544,9 +1549,9 @@ public class QnAMakerTests {
             Assert.assertTrue(properties.get(0).containsKey("question"));
             Assert.assertTrue(properties.get(0).containsKey("questionId"));
             Assert.assertTrue(properties.get(0).containsKey("answer"));
-            Assert.assertEquals("No Qna Question matched", properties.get(0).get("answer"));
+            Assert.assertEquals("No Qna Answer matched", properties.get(0).get("answer"));
             Assert.assertTrue(properties.get(0).containsKey("articleFound"));
-            Assert.assertTrue(properties.get(1) == null);
+            Assert.assertTrue(metrics.get(0).isEmpty());
 
             // Assert - Validate we didn't break QnA functionality.
             Assert.assertNotNull(results);
@@ -1595,26 +1600,27 @@ public class QnAMakerTests {
             // Act
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, options, telemetryClient, false);
             QueryResult[] results = qna.getAnswers(getContext("how do I clean the stove?"), null).join();
-            // verify BotTelemetryClient was invoked 3 times, and capture arguments.
-            verify(telemetryClient, times(3)).trackEvent(
+            // verify BotTelemetryClient was invoked 1 times, and capture arguments.
+            verify(telemetryClient, times(1)).trackEvent(
                 eventNameCaptor.capture(),
-                propertiesCaptor.capture()
+                propertiesCaptor.capture(),
+                metricsCaptor.capture()
             );
             List<String> eventNames = eventNameCaptor.getAllValues();
             List<Map<String, String>> properties = propertiesCaptor.getAllValues();
+            List<Map<String, Double>> metrics = metricsCaptor.getAllValues();
 
-            Assert.assertEquals(3, eventNames.size());
             Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
             Assert.assertTrue(properties.get(0).containsKey("knowledgeBaseId"));
             Assert.assertTrue(properties.get(0).containsKey("matchedQuestion"));
-            Assert.assertTrue(properties.get(0).containsKey("question"));
+            Assert.assertFalse(properties.get(0).containsKey("question"));
             Assert.assertTrue(properties.get(0).containsKey("questionId"));
             Assert.assertTrue(properties.get(0).containsKey("answer"));
             Assert.assertEquals("BaseCamp: You can use a damp rag to clean around the Power Pack",
                 properties.get(0).get("answer"));
             Assert.assertTrue(properties.get(0).containsKey("articleFound"));
-            Assert.assertTrue(eventNames.get(2).length() == 1);
-            Assert.assertTrue(eventNames.get(2).contains("score"));
+            Assert.assertTrue(metrics.get(0).size() == 1);
+            Assert.assertTrue(metrics.get(0).containsKey("score"));
 
             // Assert - Validate we didn't break QnA functionality.
             Assert.assertNotNull(results);
@@ -1755,12 +1761,13 @@ public class QnAMakerTests {
             // verify BotTelemetryClient was invoked 1 times, and capture arguments.
             verify(telemetryClient, times(1)).trackEvent(
                 eventNameCaptor.capture(),
-                propertiesCaptor.capture()
+                propertiesCaptor.capture(),
+                metricsCaptor.capture()
             );
             List<String> eventNames = eventNameCaptor.getAllValues();
             List<Map<String, String>> properties = propertiesCaptor.getAllValues();
+            List<Map<String, Double>> metrics = metricsCaptor.getAllValues();
 
-            Assert.assertEquals(3, eventNames.size());
             Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
             Assert.assertTrue(properties.get(0).containsKey(QnATelemetryConstants.KNOWLEDGE_BASE_ID_PROPERTY));
             Assert.assertFalse(properties.get(0).containsKey(QnATelemetryConstants.QUESTION_PROPERTY));
@@ -1772,11 +1779,10 @@ public class QnAMakerTests {
             Assert.assertTrue(properties.get(0).containsKey("MyImportantProperty"));
             Assert.assertEquals("myImportantValue", properties.get(0).get("MyImportantProperty"));
 
-            Assert.assertEquals(2, properties.get(0).size());
-            Assert.assertTrue(properties.get(0).containsKey("score"));
-            Assert.assertTrue(properties.get(0).containsKey("MyImportantMetric"));
-            Assert.assertEquals(3.14159,
-                properties.get(0).get("MyImportantMetric"));
+            Assert.assertEquals(2, metrics.get(0).size());
+            Assert.assertTrue(metrics.get(0).containsKey("score"));
+            Assert.assertTrue(metrics.get(0).containsKey("MyImportantMetric"));
+            Assert.assertTrue(Double.compare((double)metrics.get(0).get("MyImportantMetric"), 3.14159) == 0);
 
             // Validate we didn't break QnA functionality.
             Assert.assertNotNull(results);
@@ -1845,12 +1851,14 @@ public class QnAMakerTests {
             // verify BotTelemetryClient was invoked 1 times, and capture arguments.
             verify(telemetryClient, times(1)).trackEvent(
                 eventNameCaptor.capture(),
-                propertiesCaptor.capture()
+                propertiesCaptor.capture(),
+                metricsCaptor.capture()
             );
             List<String> eventNames = eventNameCaptor.getAllValues();
             List<Map<String, String>> properties = propertiesCaptor.getAllValues();
+            List<Map<String, Double>> metrics = metricsCaptor.getAllValues();
 
-            Assert.assertEquals(3, eventNames.size());
+            Assert.assertEquals(1, eventNames.size());
             Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
             Assert.assertTrue(properties.get(0).containsKey("knowledgeBaseId"));
             Assert.assertEquals("myImportantValue", properties.get(0).get("knowledgeBaseId"));
@@ -1863,10 +1871,9 @@ public class QnAMakerTests {
                 properties.get(0).get("answer"));
             Assert.assertFalse(properties.get(0).containsKey("MyImportantProperty"));
 
-            Assert.assertEquals(1, properties.get(0).size());
-            Assert.assertTrue(properties.get(0).containsKey("score"));
-            Assert.assertEquals(3.14159,
-                properties.get(0).get("score"));
+            Assert.assertEquals(1, metrics.get(0).size());
+            Assert.assertTrue(metrics.get(0).containsKey("score"));
+            Assert.assertTrue(Double.compare((double)metrics.get(0).get("score"), 3.14159) == 0);
         } catch (Exception e) {
             fail();
         } finally {
@@ -1931,15 +1938,16 @@ public class QnAMakerTests {
 
             QueryResult[] results = qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, telemetryMetrics).join();
             // Assert - added properties were added.
-            // verify BotTelemetryClient was invoked 2 times, and capture arguments.
-            verify(telemetryClient, times(2)).trackEvent(
+            // verify BotTelemetryClient was invoked 2 times calling different trackEvents methods, and capture arguments.
+            verify(telemetryClient, times(1)).trackEvent(
                 eventNameCaptor.capture(),
-                propertiesCaptor.capture()
+                propertiesCaptor.capture(),
+                metricsCaptor.capture()
             );
             List<String> eventNames = eventNameCaptor.getAllValues();
             List<Map<String, String>> properties = propertiesCaptor.getAllValues();
+            List<Map<String, Double>> metrics = metricsCaptor.getAllValues();
 
-            Assert.assertEquals(3, eventNames.size());
             Assert.assertEquals(eventNames.get(0), QnATelemetryConstants.QNA_MSG_EVENT);
             Assert.assertEquals(6, properties.get(0).size());
             Assert.assertTrue(properties.get(0).containsKey("knowledgeBaseId"));
@@ -1954,10 +1962,9 @@ public class QnAMakerTests {
             Assert.assertTrue(properties.get(0).containsKey("MyImportantProperty"));
             Assert.assertEquals("myImportantValue", properties.get(0).get("MyImportantProperty"));
 
-            Assert.assertEquals(1, properties.get(0).size());
-            Assert.assertTrue(properties.get(0).containsKey("score"));
-            Assert.assertEquals(3.14159,
-                properties.get(0).get("score"));
+            Assert.assertEquals(1, metrics.get(0).size());
+            Assert.assertTrue(metrics.get(0).containsKey("score"));
+            Assert.assertTrue(Double.compare((double)metrics.get(0).get("score"), 3.14159) == 0);
         } catch (Exception e) {
             fail();
         } finally {
@@ -2136,13 +2143,12 @@ public class QnAMakerTests {
         protected CompletableFuture<Void> onQnaResults(QueryResult[] queryResults, TurnContext turnContext,
                                                        Map<String, String> telemetryProperties,
                                                        Map<String, Double> telemetryMetrics) throws IOException {
-            this.fillQnAEvent(queryResults, turnContext, telemetryProperties, telemetryMetrics).thenAccept(eventData -> {
+            return this.fillQnAEvent(queryResults, turnContext, telemetryProperties, telemetryMetrics).thenAccept(eventData -> {
                 // Add my property
                 eventData.getLeft().put("MyImportantProperty", "myImportantValue");
 
                 // Log QnaMessage event
-                BotTelemetryClient telemetryClient = getTelemetryClient();
-                telemetryClient.trackEvent(QnATelemetryConstants.QNA_MSG_EVENT, eventData.getLeft(), eventData.getRight());
+                this.telemetryClient.trackEvent(QnATelemetryConstants.QNA_MSG_EVENT, eventData.getLeft(), eventData.getRight());
 
                 // Create second event.
                 Map<String, String> secondEventProperties = new HashMap<String, String>(){
@@ -2150,10 +2156,8 @@ public class QnAMakerTests {
                         put("MyImportantProperty2", "myImportantValue2");
                     }
                 };
-                telemetryClient.trackEvent("MySecondEvent", secondEventProperties);
+                this.telemetryClient.trackEvent("MySecondEvent", secondEventProperties);
             });
-
-            return CompletableFuture.completedFuture(null);
         }
     }
 

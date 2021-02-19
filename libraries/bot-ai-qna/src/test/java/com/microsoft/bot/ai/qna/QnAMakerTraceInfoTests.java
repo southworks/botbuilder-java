@@ -11,7 +11,7 @@ import com.microsoft.bot.ai.qna.models.QueryResult;
 import com.microsoft.bot.restclient.serializer.JacksonAdapter;
 
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class QnAMakerTraceInfoTests {
 

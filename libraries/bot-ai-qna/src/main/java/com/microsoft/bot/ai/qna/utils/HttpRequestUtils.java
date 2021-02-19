@@ -12,7 +12,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.bot.ai.qna.QnAMakerEndpoint;
 import com.microsoft.bot.connector.UserAgent;
 
-import okhttp3.*;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -43,7 +48,7 @@ public class HttpRequestUtils {
         }
 
         ObjectMapper mapper = new ObjectMapper();
-        String endpointKey = String.format("%s", endpoint.getEndpointKey());
+        String endpointKey = endpoint.getEndpointKey();
         Response response;
         JsonNode qnaResponse = null;
         try {
@@ -51,8 +56,7 @@ public class HttpRequestUtils {
             response = this.httpClient.newCall(request).execute();
             qnaResponse = mapper.readTree(response.body().string());
             if (!response.isSuccessful()) {
-                String message = new StringBuilder("The call to the translation service returned HTTP status code ")
-                    .append(response.code()).append(".").toString();
+                String message = "Unexpected code " + response.code();
                 throw new Exception(message);
             }
         } catch (Exception e) {

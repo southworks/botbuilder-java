@@ -21,7 +21,7 @@ import com.microsoft.bot.schema.Activity;
 import okhttp3.HttpUrl;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -60,13 +60,11 @@ public class QnAMakerRecognizerTests {
                 setEndpointKey(endpointKey);
             }
         };
-        recognizer.recognize(dc, activity).thenApply(result -> {
-            Assert.assertEquals(result.getEntities().get("answer"), null);
-            Assert.assertEquals(result.getProperties().get("answers"), null);
-            Assert.assertEquals(result.getIntents().get("QnAMatch"), null);
-            Assert.assertNotEquals(result.getIntents().get("None"), null);
-            return null;
-        });
+        RecognizerResult result = recognizer.recognize(dc, activity).join();
+        Assert.assertEquals(result.getEntities(), null);
+        Assert.assertEquals(result.getProperties().get("answers"), null);
+        Assert.assertEquals(result.getIntents().get("QnAMatch"), null);
+        Assert.assertNotEquals(result.getIntents().get("None"), null);
     }
 
     @Test
@@ -75,7 +73,6 @@ public class QnAMakerRecognizerTests {
         try {
             // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsNoAnswer.json");
-            //Extract V3 response
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
             // Set mock response in MockWebServer
@@ -118,7 +115,6 @@ public class QnAMakerRecognizerTests {
         try {
             // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswer.json");
-            //Extract V3 response
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
             // Set mock response in MockWebServer
@@ -160,7 +156,6 @@ public class QnAMakerRecognizerTests {
         try {
             // Get Oracle file
             String content = readFileContent("QnaMaker_TopNAnswer.json");
-            //Extract V3 response
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
             // Set mock response in MockWebServer
@@ -202,7 +197,6 @@ public class QnAMakerRecognizerTests {
         try {
             // Get Oracle file
             String content = readFileContent("QnaMaker_ReturnsAnswerWithIntent.json");
-            //Extract V3 response
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(content);
             // Set mock response in MockWebServer

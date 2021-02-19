@@ -3,6 +3,7 @@
 
 package com.microsoft.bot.ai.qna.utils;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -13,6 +14,7 @@ import com.microsoft.bot.ai.qna.QnAMakerEndpoint;
 import com.microsoft.bot.connector.UserAgent;
 
 import okhttp3.*;
+import org.apache.http.HttpException;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -43,7 +45,7 @@ public class HttpRequestUtils {
         }
 
         ObjectMapper mapper = new ObjectMapper();
-        String endpointKey = String.format("%s", endpoint.getEndpointKey());
+        String endpointKey = endpoint.getEndpointKey();
         Response response;
         JsonNode qnaResponse = null;
         try {
@@ -51,8 +53,7 @@ public class HttpRequestUtils {
             response = this.httpClient.newCall(request).execute();
             qnaResponse = mapper.readTree(response.body().string());
             if (!response.isSuccessful()) {
-                String message = new StringBuilder("The call to the translation service returned HTTP status code ")
-                    .append(response.code()).append(".").toString();
+                String message = "Unexpected code " + response.code();
                 throw new Exception(message);
             }
         } catch (Exception e) {

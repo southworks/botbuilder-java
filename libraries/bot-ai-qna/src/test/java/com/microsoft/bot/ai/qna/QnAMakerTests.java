@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -18,9 +19,25 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.bot.ai.qna.dialogs.QnAMakerDialog;
-import com.microsoft.bot.ai.qna.models.*;
+import com.microsoft.bot.ai.qna.models.FeedbackRecord;
+import com.microsoft.bot.ai.qna.models.FeedbackRecords;
+import com.microsoft.bot.ai.qna.models.Metadata;
+import com.microsoft.bot.ai.qna.models.QnAMakerTraceInfo;
+import com.microsoft.bot.ai.qna.models.QnARequestContext;
+import com.microsoft.bot.ai.qna.models.QueryResult;
+import com.microsoft.bot.ai.qna.models.QueryResults;
 import com.microsoft.bot.ai.qna.utils.QnATelemetryConstants;
-import com.microsoft.bot.builder.*;
+import com.microsoft.bot.builder.BotTelemetryClient;
+import com.microsoft.bot.builder.ConversationState;
+import com.microsoft.bot.builder.MemoryStorage;
+import com.microsoft.bot.builder.MemoryTranscriptStore;
+import com.microsoft.bot.builder.PagedResult;
+import com.microsoft.bot.builder.Storage;
+import com.microsoft.bot.builder.TraceTranscriptLogger;
+import com.microsoft.bot.builder.TranscriptLoggerMiddleware;
+import com.microsoft.bot.builder.TurnContext;
+import com.microsoft.bot.builder.TurnContextImpl;
+import com.microsoft.bot.builder.UserState;
 import com.microsoft.bot.builder.adapters.TestAdapter;
 import com.microsoft.bot.builder.adapters.TestFlow;
 
@@ -43,9 +60,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -54,9 +69,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
 import okhttp3.OkHttpClient;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
@@ -1058,21 +1070,13 @@ public class QnAMakerTests {
         }
     }
 
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
-
     @Test
     public void qnaMakerTestUnsuccessfulResponse() {
         MockWebServer mockWebServer = new MockWebServer();
-        ObjectMapper objectMapper = new ObjectMapper();
+        mockWebServer.enqueue(new MockResponse().setResponseCode(502));
         try {
-            JsonNode response = objectMapper.readTree(HttpStatus.BAD_GATEWAY.toString());
             String url = this.getRequestUrl();
-            String endpoint = "";
-            if (this.mockQnAResponse) {
-                endpoint = String.format("%s:%s", hostname, initializeMockServer(mockWebServer, response, url).port());
-            }
-            String finalEndpoint = endpoint;
+            String finalEndpoint = String.format("%s:%s", hostname, mockWebServer.url(url).port());
             QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
                 {
                     setKnowledgeBaseId(knowledgeBaseId);
@@ -1081,8 +1085,7 @@ public class QnAMakerTests {
                 }
             };
             QnAMaker qna = new QnAMaker(qnAMakerEndpoint, null);
-            exception.expect(HttpRequestMethodNotSupportedException.class);
-            qna.getAnswers(getContext("how do I clean the stove?"), null);
+            Assert.assertThrows(CompletionException.class, () -> qna.getAnswers(getContext("how do I clean the stove?"), null));
         } catch (Exception e) {
             fail();
         } finally {

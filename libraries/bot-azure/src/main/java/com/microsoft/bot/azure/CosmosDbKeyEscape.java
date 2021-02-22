@@ -104,7 +104,7 @@ public final class CosmosDbKeyEscape {
             }
         }
 
-        if (StringUtils.isNotBlank(key) {
+        if (StringUtils.isNotBlank(key)) {
             sanitizedKeyBuilder.append(suffix);
         }
 

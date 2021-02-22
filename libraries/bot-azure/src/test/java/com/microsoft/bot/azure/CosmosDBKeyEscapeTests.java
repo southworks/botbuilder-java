@@ -100,4 +100,33 @@ public class CosmosDBKeyEscapeTests {
 
         Assert.assertNotEquals(escaped1, escaped2);
     }
+
+    @Test
+    public void Long_Key_With_Illegal_Characters_Should_Not_Be_Truncated_With_False_CompatibilityMode()
+    {
+        StringBuilder tooLongKey = new StringBuilder();
+        for (int i = 0; i < CosmosDbKeyEscape.MAX_LENGTH + 1; i++) {
+            tooLongKey.append("a");
+        }
+
+        String longKeyWithIllegalCharacters = "?test?" + tooLongKey.toString();
+        String sanitizedKey = CosmosDbKeyEscape.escapeKey(longKeyWithIllegalCharacters, "", false);
+
+        // Verify the key was NOT truncated
+        Assert.assertEquals(longKeyWithIllegalCharacters.length() + 4, sanitizedKey.length());
+
+        // Make sure the escaping still happened
+        Assert.assertTrue(sanitizedKey.startsWith("*3ftest*3f"));
+    }
+
+    @Test
+    public void KeySuffix_Is_Added_To_End_of_Key()
+    {
+        String suffix = "test suffix";
+        String key = "this is a test";
+        String sanitizedKey = CosmosDbKeyEscape.escapeKey(key, suffix, false);
+
+        // Verify the suffix was added to the end of the key
+        Assert.assertEquals(sanitizedKey, key + suffix);
+    }
 }

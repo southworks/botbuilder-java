@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.CompletableFuture;
 
 public class QnABot extends ActivityHandler {
-    private static Configuration configuration;
+    private Configuration configuration;
 
     public QnABot(Configuration withConfiguration) {
         configuration = withConfiguration;
@@ -22,25 +22,31 @@ public class QnABot extends ActivityHandler {
 
     @Override
     protected CompletableFuture<Void> onMessageActivity(TurnContext turnContext) {
-        QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint();
-        qnAMakerEndpoint.setKnowledgeBaseId(configuration.getProperty("QnAKnowledgebaseId"));
-        qnAMakerEndpoint.setEndpointKey(configuration.getProperty("QnAEndpointKey"));
-        qnAMakerEndpoint.setHost(configuration.getProperty("QnAEndpointHostName"));
+        QnAMakerEndpoint qnAMakerEndpoint = new QnAMakerEndpoint() {
+            {
+                setKnowledgeBaseId(configuration.getProperty("QnAKnowledgebaseId"));
+                setEndpointKey(configuration.getProperty("QnAEndpointKey"));
+                setHost(configuration.getProperty("QnAEndpointHostName"));
+            }};
 
-        QnAMaker qnAMaker = new QnAMaker(qnAMakerEndpoint, null);
+        QnAMaker qnaMaker = new QnAMaker(qnAMakerEndpoint, null);
 
-        (LoggerFactory.getLogger(QnABot.class)).info("Calling QnA Maker");
+        LoggerFactory.getLogger(QnABot.class).info("Calling QnA Maker");
 
-        QnAMakerOptions options = new QnAMakerOptions();
-        options.setTop(1);
+        QnAMakerOptions options = new QnAMakerOptions() {{
+            setTop(1);
+        }};
 
         // The actual call to the QnA Maker service.
-        QueryResult[] response = qnaMaker.getAnswers(turnContext, options);
-        if (response != null && response.length > 0) {
-            turnContext.sendActivity(MessageFactory.text(response[0].getAnswer()));
-        }
-        else {
-            turnContext.sendActivity(MessageFactory.text("No QnA Maker answers were found."));
-        }
+        qnaMaker.getAnswers(turnContext, options).thenAccept(response -> {
+            if (response != null && response.length > 0) {
+                turnContext.sendActivity(MessageFactory.text(response[0].getAnswer())).join();
+            }
+            else {
+                turnContext.sendActivity(MessageFactory.text("No QnA Maker answers were found.")).join();
+            }
+        });
+
+        return CompletableFuture.completedFuture(null);
     }
 }

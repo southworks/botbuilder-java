@@ -18,9 +18,11 @@ public class CosmosDbPartitionedStorageOptions {
     private String authKey;
     private String databaseId;
     private String containerId;
+    private String keySuffix;
     private int containerThroughput;
     private ConnectionPolicy connectionPolicy;
     private ConsistencyLevel consistencyLevel;
+    private boolean compatibilityMode;
 
     /**
      * Constructs an empty options object.
@@ -174,5 +176,56 @@ public class CosmosDbPartitionedStorageOptions {
      */
     public void setContainerThroughput(int withContainerThroughput) {
         containerThroughput = withContainerThroughput;
+    }
+
+    /**
+     * Gets a value indicating whether or not to run in Compatibility Mode.
+     * Early versions of CosmosDb had a key length limit of 255. Keys longer than this were
+     * truncated in CosmosDbKeyEscape. This remains the default behavior, but
+     * can be overridden by setting CompatibilityMode to false. This setting will also allow
+     * for using older collections where no PartitionKey was specified.
+     *
+     * Note: CompatibilityMode cannot be 'true' if KeySuffix is used.
+     */
+    public boolean getCompatibilityMode() {
+        return compatibilityMode;
+    }
+
+    /**
+     * Sets a value indicating whether or not to run in Compatibility Mode.
+     * Early versions of CosmosDb had a key length limit of 255. Keys longer than this were
+     * truncated in CosmosDbKeyEscape. This remains the default behavior, but
+     * can be overridden by setting CompatibilityMode to false. This setting will also allow
+     * for using older collections where no PartitionKey was specified.
+     *
+     * Note: CompatibilityMode cannot be 'true' if KeySuffix is used.
+     * @param withCompatibilityMode Currently, max key length for cosmosdb is 1023:
+     * https://docs.microsoft.com/en-us/azure/cosmos-db/concepts-limits#per-item-limits
+     * The default for backwards compatibility is 255, CosmosDbKeyEscape.MaxKeyLength.
+     */
+    public void setCompatibilityMode(boolean withCompatibilityMode) {
+        this.compatibilityMode = withCompatibilityMode;
+    }
+
+    /**
+     * Gets the suffix to be added to every key. See CosmosDbKeyEscape.EscapeKey(string).
+     * Note:CompatibilityMode must be set to 'false' to use a KeySuffix.
+     * When KeySuffix is used, keys will NOT be truncated but an exception will be thrown if
+     * the key length is longer than allowed by CosmosDb.
+     * @return String containing only valid CosmosDb key characters. (e.g. not: '\\', '?', '/', '#', '*').
+     */
+    public String getKeySuffix() {
+        return keySuffix;
+    }
+
+    /**
+     * Sets the suffix to be added to every key. See CosmosDbKeyEscape.EscapeKey(string).
+     * Note:CompatibilityMode must be set to 'false' to use a KeySuffix.
+     * When KeySuffix is used, keys will NOT be truncated but an exception will be thrown if
+     * the key length is longer than allowed by CosmosDb.
+     * @param withKeySuffix String containing only valid CosmosDb key characters. (e.g. not: '\\', '?', '/', '#', '*').
+     */
+    public void setKeySuffix(String withKeySuffix) {
+        this.keySuffix = keySuffix;
     }
 }

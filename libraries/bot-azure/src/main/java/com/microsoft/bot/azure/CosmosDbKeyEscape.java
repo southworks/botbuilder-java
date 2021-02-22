@@ -14,35 +14,34 @@ import java.util.stream.Collectors;
  * Helper class to escape CosmosDB keys.
  */
 public final class CosmosDbKeyEscape {
-    private static final int ESCAPE_LENGTH = 3;
-
-    private CosmosDbKeyEscape() {
-
-    }
+    private static final Integer ESCAPE_LENGTH = 3;
 
     /**
-     * Per the CosmosDB Docs, there is a max key length of 255.
+     * Older libraries had a max key length of 255.
+     * The limit is now 1023. In this library, 255 remains the default for backwards compat.
+     * To override this behavior, and use the longer limit, set CosmosDbPartitionedStorageOptions.CompatibilityMode to false.
+     * https://docs.microsoft.com/en-us/azure/cosmos-db/concepts-limits#per-item-limits.
      */
-    static final int MAX_LENGTH = 255;
+    public static final Integer MAX_KEY_LENGTH = 255;
 
     /**
      * The list of illegal characters for Cosmos DB Keys comes from this list on the CosmostDB docs:
      *    https://docs.microsoft.com/dotnet/api/microsoft.azure.documents.resource.id?view=azure-dotnet#remarks
      *
-     * <p>Note: We are also escaping the "*" character, as that what we're using
-     * as our escape character.</p>
+     * Note: We are also escaping the "*" character, as that what we're using
+     * as our escape character.
      *
-     * <p>Note: The Java version escapes more than .NET since otherwise it errors out.  The additional characters are
-     * quote, single quote, semi-colon.</p>
+     * Note: The Java version escapes more than .NET since otherwise it errors out.  The additional characters are
+     * quote, single quote, semi-colon.
      */
-    private static final char[] ILLEGAL_CHARS = new char[] {'\\', '?', '/', '#', '*', ';', '\"', '\''};
+    private static final char[] ILLEGAL_KEYS = new char[] {'\\', '?', '/', '#', '*', ';', '\"', '\''};
 
     /**
      * We are escaping illegal characters using a "*{AsciiCodeInHex}" pattern. This
      * means a key of "?test?" would be escaped as "*3ftest*3f".
      */
-    private static final Map<Character, String> ESCAPE_REPLACEMENTS =
-        Arrays.stream(ArrayUtils.toObject(ILLEGAL_CHARS)).collect(Collectors.toMap(c -> c, c -> "*" + String.format("%02x", (int) c)));
+    private static final Map<Character, String> ILLEGAL_KEY_CHARACTER_REPLACEMENT_MAP =
+        Arrays.stream(ArrayUtils.toObject(ILLEGAL_KEYS)).collect(Collectors.toMap(c -> c, c -> "*" + String.format("%02x", (int) c)));
 
     /**
      * Converts the key into a DocumentID that can be used safely with Cosmos DB.
@@ -50,18 +49,27 @@ public final class CosmosDbKeyEscape {
      * @param key The key to escape.
      * @return An escaped key that can be used safely with CosmosDB.
      *
-     * @see #ILLEGAL_CHARS
+     * @see #ILLEGAL_KEYS
      */
     public static String escapeKey(String key) {
-        return escapeKey(key, "", true);
+        return escapeKey(key, new String(), true);
     }
 
-    public static String escapeKey(String key, String suffix, boolean compatibilityMode) {
-        if (StringUtils.isEmpty(key) || StringUtils.isWhitespace(key)) {
+    /**
+     * Converts the key into a DocumentID that can be used safely with Cosmos DB.
+     * @param key The key to escape.
+     * @param suffix The string to add at the end of all row keys.
+     * @param compatibilityMode True if running in compatability mode and keys should
+     * be truncated in order to support previous CosmosDb max key length of 255.
+     * This behavior can be overridden by setting {@link CosmosDbPartitionedStorage.compatibilityMode} to false.     *
+     * @return An escaped key that can be used safely with CosmosDB.
+     */
+    public static String escapeKey(String key, String suffix, Boolean compatibilityMode) {
+        if (StringUtils.isBlank(key)) {
             throw new IllegalArgumentException("key");
         }
 
-        Integer firstIllegalCharIndex = StringUtils.indexOfAny(key, new String(ILLEGAL_CHARS));
+        Integer firstIllegalCharIndex = StringUtils.indexOfAny(key, new String(ILLEGAL_KEYS));
 
         // If there are no illegal characters, and the key is within length costraints,
         // return immediately and avoid any further processing/allocations
@@ -79,7 +87,7 @@ public final class CosmosDbKeyEscape {
             sanitizedKeyBuilder.append(key.charAt(index));
         }
 
-        Map<Character, String> illegalCharacterReplacementMap = ESCAPE_REPLACEMENTS;
+        Map<Character, String> illegalCharacterReplacementMap = ILLEGAL_KEY_CHARACTER_REPLACEMENT_MAP;
 
         // Now walk the remaining characters, starting at the first known bad character, replacing any bad ones with
         // their designated replacement value from the
@@ -96,21 +104,21 @@ public final class CosmosDbKeyEscape {
             }
         }
 
-        if (!StringUtils.isEmpty(key) && !StringUtils.isWhitespace(key)) {
+        if (StringUtils.isNotBlank(key) {
             sanitizedKeyBuilder.append(suffix);
         }
 
         return truncateKeyIfNeeded(sanitizedKeyBuilder.toString(), compatibilityMode);
     }
 
-    private static String truncateKeyIfNeeded(String key, boolean truncateKeysForCompatibility) {
+    private static String truncateKeyIfNeeded(String key, Boolean truncateKeysForCompatibility) {
         if (!truncateKeysForCompatibility) {
             return key;
         }
 
-        if (key.length() > MAX_LENGTH) {
+        if (key.length() > MAX_KEY_LENGTH) {
             String hash = String.format("%x", key.hashCode());
-            key = key.substring(0, MAX_LENGTH - hash.length()) + hash;
+            key = key.substring(0, MAX_KEY_LENGTH - hash.length()) + hash;
         }
 
         return key;

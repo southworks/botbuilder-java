@@ -3,6 +3,7 @@
 
 package com.microsoft.bot.azure;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -34,14 +35,14 @@ public final class CosmosDbKeyEscape {
      * <p>Note: The Java version escapes more than .NET since otherwise it errors out.  The additional characters are
      * quote, single quote, semi-colon.</p>
      */
-    private static final Character[] ILLEGAL_CHARS = new Character[] {'\\', '?', '/', '#', '*', ';', '\"', '\''};
+    private static final char[] ILLEGAL_CHARS = new char[] {'\\', '?', '/', '#', '*', ';', '\"', '\''};
 
     /**
      * We are escaping illegal characters using a "*{AsciiCodeInHex}" pattern. This
      * means a key of "?test?" would be escaped as "*3ftest*3f".
      */
     private static final Map<Character, String> ESCAPE_REPLACEMENTS =
-        Arrays.stream(ILLEGAL_CHARS).collect(Collectors.toMap(c -> c, c -> "*" + String.format("%02x", (int) c)));
+        Arrays.stream(ArrayUtils.toObject(ILLEGAL_CHARS)).collect(Collectors.toMap(c -> c, c -> "*" + String.format("%02x", (int) c)));
 
     /**
      * Converts the key into a DocumentID that can be used safely with Cosmos DB.
@@ -52,24 +53,61 @@ public final class CosmosDbKeyEscape {
      * @see #ILLEGAL_CHARS
      */
     public static String escapeKey(String key) {
+        return escapeKey(key, "", true);
+    }
+
+    public static String escapeKey(String key, String suffix, boolean compatibilityMode) {
         if (StringUtils.isEmpty(key) || StringUtils.isWhitespace(key)) {
             throw new IllegalArgumentException("key");
         }
 
-        StringBuilder escKey = new StringBuilder(key.length() * ESCAPE_LENGTH);
-        for (char c : key.toCharArray()) {
-            String escaped = ESCAPE_REPLACEMENTS.get(c);
-            if (escaped != null) {
-                escKey.append(escaped);
-            } else {
-                escKey.append(c);
+        Integer firstIllegalCharIndex = StringUtils.indexOfAny(key, new String(ILLEGAL_CHARS));
+
+        // If there are no illegal characters, and the key is within length costraints,
+        // return immediately and avoid any further processing/allocations
+        if (firstIllegalCharIndex == -1) {
+            return truncateKeyIfNeeded(key.concat(suffix), compatibilityMode);
+        }
+
+        // Allocate a builder that assumes that all remaining characters might be replaced
+        // to avoid any extra allocations
+        StringBuilder sanitizedKeyBuilder =
+            new StringBuilder(key.length() + ((key.length() - firstIllegalCharIndex) * ESCAPE_LENGTH));
+
+        // Add all good characters up to the first bad character to the builder first
+        for (Integer index = 0; index < firstIllegalCharIndex; index++) {
+            sanitizedKeyBuilder.append(key.charAt(index));
+        }
+
+        Map<Character, String> illegalCharacterReplacementMap = ESCAPE_REPLACEMENTS;
+
+        // Now walk the remaining characters, starting at the first known bad character, replacing any bad ones with
+        // their designated replacement value from the
+        for (Integer index = firstIllegalCharIndex; index < key.length(); index++) {
+            Character ch = key.charAt(index);
+
+            // Check if this next character is considered illegal and, if so, append its replacement;
+            // otherwise just append the good character as is
+            if (illegalCharacterReplacementMap.containsKey(ch)) {
+                sanitizedKeyBuilder.append(illegalCharacterReplacementMap.get(ch));
+            }
+            else {
+                sanitizedKeyBuilder.append(ch);
             }
         }
 
-        return truncateKeyIfNeeded(escKey.toString());
+        if (!StringUtils.isEmpty(key) && !StringUtils.isWhitespace(key)) {
+            sanitizedKeyBuilder.append(suffix);
+        }
+
+        return truncateKeyIfNeeded(sanitizedKeyBuilder.toString(), compatibilityMode);
     }
 
-    private static String truncateKeyIfNeeded(String key) {
+    private static String truncateKeyIfNeeded(String key, boolean truncateKeysForCompatibility) {
+        if (!truncateKeysForCompatibility) {
+            return key;
+        }
+
         if (key.length() > MAX_LENGTH) {
             String hash = String.format("%x", key.hashCode());
             key = key.substring(0, MAX_LENGTH - hash.length()) + hash;

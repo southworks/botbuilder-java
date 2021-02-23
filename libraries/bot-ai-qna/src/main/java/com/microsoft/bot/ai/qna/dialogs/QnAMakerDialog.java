@@ -895,7 +895,7 @@ public class QnAMakerDialog extends WaterfallDialog {
 
         if (trainResponses.size() > 1) {
             QueryResult qnaResult = trainResponses
-                .stream().filter(kvp -> kvp.getQuestions()[0] == reply).findFirst().orElse(null);
+                .stream().filter(kvp -> kvp.getQuestions()[0].equals(reply)).findFirst().orElse(null);
             if (qnaResult != null) {
                 List<QueryResult> queryResultArr = new ArrayList<QueryResult>();
                 stepContext.getValues().put(ValueProperty.QNA_DATA, queryResultArr.add(qnaResult));
@@ -908,7 +908,6 @@ public class QnAMakerDialog extends WaterfallDialog {
                 FeedbackRecords feedbackRecords = new FeedbackRecords() {{
                     setRecords(records);
                 }};
-
                 // Call Active Learning Train API
                 return this.getQnAMakerClient(stepContext).thenCompose(qnaClient -> {
                     try {

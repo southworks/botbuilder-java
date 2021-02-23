@@ -570,30 +570,6 @@ public class QnAMakerDialog extends WaterfallDialog {
     }
 
     /**
-     * Initializes a new instance of the {@link QnAMakerDialog} class. The JSON
-     * serializer uses this constructor to deserialize objects of this class.
-     *
-     * @param sourceFilePath   The source file path, for debugging. Defaults to the
-     *                         full path of the source file that contains the
-     *                         caller.
-     * @param sourceLineNumber The line number, for debugging. Defaults to the line
-     *                         number in the source file at which the method is
-     *                         called.
-     */
-    @JsonCreator
-    public QnAMakerDialog(String sourceFilePath, Integer sourceLineNumber) {
-        super(QnAMakerDialog.class.getName(), null);
-        sourceFilePath = sourceFilePath != null ? sourceFilePath : "";
-        sourceLineNumber = sourceLineNumber != null ? sourceLineNumber : 0;
-
-        // add waterfall steps
-        this.addStep(this::callGenerateAnswer);
-        this.addStep(this::callTrain);
-        this.addStep(this::checkForMultiTurnPrompt);
-        this.addStep(this::displayQnAResult);
-    }
-
-    /**
      * Called when the dialog is started and pushed onto the dialog stack.
      *
      * @param dc      The @{link DialogContext} for the current turn of

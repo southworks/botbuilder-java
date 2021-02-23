@@ -6,6 +6,8 @@ package com.microsoft.bot.sample.qnamaker;
 import com.microsoft.bot.builder.Bot;
 import com.microsoft.bot.integration.AdapterWithErrorHandler;
 import com.microsoft.bot.integration.BotFrameworkHttpAdapter;
+import com.microsoft.bot.integration.CredentialProvider;
+import com.microsoft.bot.integration.ConfigurationCredentialProvider;
 import com.microsoft.bot.integration.Configuration;
 import com.microsoft.bot.integration.spring.BotController;
 import com.microsoft.bot.integration.spring.BotDependencyConfiguration;
@@ -60,6 +62,17 @@ public class Application extends BotDependencyConfiguration {
     @Override
     public BotFrameworkHttpAdapter getBotFrameworkHttpAdaptor(Configuration configuration) {
         return new AdapterWithErrorHandler(configuration);
+    }
+    
+    /**
+     * Returns a credential provider to be used with the Bot Framework Adapter.
+     *
+     * @param configuration The Configuration object to use.
+     * @return A credential provider ConfigurationCredentialProvider.
+     */
+    @Override
+    public CredentialProvider getCredentialProvider(Configuration configuration) {
+        return new ConfigurationCredentialProvider(configuration);
     }
 }
 }

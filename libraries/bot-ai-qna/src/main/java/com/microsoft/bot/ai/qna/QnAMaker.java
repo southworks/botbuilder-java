@@ -350,6 +350,6 @@ public class QnAMaker implements QnAMakerClient, TelemetryQnAMaker {
 
         Map<String, String> telemetryPropertiesResult = telemetryProperties != null ? telemetryProperties : properties;
         Map<String, Double> telemetryMetricsResult = telemetryMetrics != null ? telemetryMetrics : metrics;
-        return CompletableFuture.completedFuture(new Pair(telemetryPropertiesResult, telemetryMetricsResult));
+        return CompletableFuture.completedFuture(new Pair<>(telemetryPropertiesResult, telemetryMetricsResult));
     }
 }

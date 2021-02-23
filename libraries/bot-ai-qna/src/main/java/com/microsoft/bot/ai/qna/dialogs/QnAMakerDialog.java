@@ -53,8 +53,6 @@ import org.slf4j.LoggerFactory;
  * features.
  */
 public class QnAMakerDialog extends WaterfallDialog {
-    @JsonProperty("$kind")
-    private final String kind = "Microsoft.QnAMakerDialog";
 
     @JsonIgnore
     private OkHttpClient httpClient;
@@ -143,16 +141,6 @@ public class QnAMakerDialog extends WaterfallDialog {
     private static final String DEFAULT_CARD_NO_MATCH_TEXT = "None of the above.";
     private static final String DEFAULT_CARD_NO_MATCH_RESPONSE = "Thanks for the feedback.";
     private static final Integer PERCENTAGE_DIVISOR = 100;
-
-    /**
-     * The declarative name for this type. Used by the framework to serialize and
-     * deserialize an instance of this type to JSON.
-     *
-     * @return Kind of a QnADialog.
-     */
-    public String getKind() {
-        return this.kind;
-    }
 
     /**
      * Gets the OkHttpClient instance to use for requests to the QnA Maker service.

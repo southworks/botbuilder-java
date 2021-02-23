@@ -38,9 +38,6 @@ public class QnAMakerRecognizer extends Recognizer {
     private static final Integer TOP_DEFAULT_VALUE = 3;
     private static final Float THRESHOLD_DEFAULT_VALUE = 0.3f;
 
-    @JsonProperty("$kind")
-    private final String kind = "Microsoft.QnAMakerRecognizer";
-
     private final String qnAMatchIntent = "QnAMatch";
 
     private final String intentPrefix = "intent=";
@@ -83,15 +80,6 @@ public class QnAMakerRecognizer extends Recognizer {
 
     @JsonProperty("logPersonalInformation")
     private Boolean logPersonalInformation = false;
-
-    /**
-     * Gets the declarative type for this recognizer.
-     *
-     * @return The declarative type for this recognizer.
-     */
-    public String getKind() {
-        return kind;
-    }
 
     /**
      * Gets key used when adding the intent to the {@link RecognizerResult} intents

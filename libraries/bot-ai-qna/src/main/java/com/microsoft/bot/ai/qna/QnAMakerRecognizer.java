@@ -461,13 +461,13 @@ public class QnAMakerRecognizer extends Recognizer {
     }
 
     /**
-     * Gets an instance of {@link IQnAMakerClient}.
+     * Gets an instance of {@link QnAMakerClient}.
      *
      * @param dc The {@link DialogContext} used to access state.
-     * @return An instance of {@link IQnAMakerClient}.
+     * @return An instance of {@link QnAMakerClient}.
      */
-    protected CompletableFuture<IQnAMakerClient> getQnAMakerClient(DialogContext dc) {
-        IQnAMakerClient qnaClient = dc.getContext().getTurnState().get(IQnAMakerClient.class);
+    protected CompletableFuture<QnAMakerClient> getQnAMakerClient(DialogContext dc) {
+        QnAMakerClient qnaClient = dc.getContext().getTurnState().get(QnAMakerClient.class);
         if (qnaClient != null) {
             // return mock client
             return CompletableFuture.completedFuture(qnaClient);

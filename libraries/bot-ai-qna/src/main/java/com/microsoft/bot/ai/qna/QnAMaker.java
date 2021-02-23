@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Provides access to a QnA Maker knowledge base.
  */
-public class QnAMaker implements IQnAMakerClient, ITelemetryQnAMaker {
+public class QnAMaker implements QnAMakerClient, TelemetryQnAMaker {
 
     private QnAMakerEndpoint endpoint;
 

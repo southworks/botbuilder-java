@@ -15,9 +15,9 @@ import javax.annotation.Nullable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.microsoft.bot.ai.qna.IQnAMakerClient;
 import com.microsoft.bot.ai.qna.QnADialogResponseOptions;
 import com.microsoft.bot.ai.qna.QnAMaker;
+import com.microsoft.bot.ai.qna.QnAMakerClient;
 import com.microsoft.bot.ai.qna.QnAMakerEndpoint;
 import com.microsoft.bot.ai.qna.QnAMakerOptions;
 import com.microsoft.bot.ai.qna.models.FeedbackRecord;
@@ -710,15 +710,15 @@ public class QnAMakerDialog extends WaterfallDialog {
     }
 
     /**
-     * Gets an {@link IQnAMakerClient} to use to access the QnA Maker knowledge
+     * Gets an {@link QnAMakerClient} to use to access the QnA Maker knowledge
      * base.
      *
      * @param dc The {@link DialogContext} for the current turn of conversation.
      * @return A Task representing the asynchronous operation. If the task is
      *         successful, the result contains the QnA Maker client to use.
      */
-    protected CompletableFuture<IQnAMakerClient> getQnAMakerClient(DialogContext dc) {
-        IQnAMakerClient qnaClient = (IQnAMakerClient) dc.getContext().getTurnState();
+    protected CompletableFuture<QnAMakerClient> getQnAMakerClient(DialogContext dc) {
+        QnAMakerClient qnaClient = (QnAMakerClient) dc.getContext().getTurnState();
         if (qnaClient != null) {
             // return mock client
             return CompletableFuture.completedFuture(qnaClient);

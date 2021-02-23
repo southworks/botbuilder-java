@@ -470,22 +470,13 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @param withHttpClient              An HTTP client to use for requests to the
      *                                    QnA Maker Service; or `null` to use a
      *                                    default client.
-     * @param sourceFilePath              The source file path, for debugging.
-     *                                    Defaults to the full path of the source
-     *                                    file that contains the caller.
-     * @param sourceLineNumber            The line number, for debugging. Defaults
-     *                                    to the line number in the source file at
-     *                                    which the method is called.
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public QnAMakerDialog(String dialogId, String withKnowledgeBaseId, String withEndpointKey, String withHostName,
                           @Nullable Activity withNoAnswer, Float withThreshold, String withActiveLearningCardTitle,
                           String withCardNoMatchText, Integer withTop, @Nullable Activity withCardNoMatchResponse,
-                          @Nullable Metadata[] withStrictFilters, @Nullable OkHttpClient withHttpClient,
-                          String sourceFilePath, Integer sourceLineNumber) {
+                          @Nullable Metadata[] withStrictFilters, @Nullable OkHttpClient withHttpClient) {
         super(dialogId, null);
-        sourceFilePath = sourceFilePath != null ? sourceFilePath : "";
-        sourceLineNumber = sourceLineNumber != null ? sourceLineNumber : 0;
         if (knowledgeBaseId == null) {
             throw new IllegalArgumentException("knowledgeBaseId");
         }
@@ -549,23 +540,16 @@ public class QnAMakerDialog extends WaterfallDialog {
      * @param withHttpClient              An HTTP client to use for requests to the
      *                                    QnA Maker Service; or `null` to use a
      *                                    default client.
-     * @param sourceFilePath              The source file path, for debugging.
-     *                                    Defaults to the full path of the source
-     *                                    file that contains the caller.
-     * @param sourceLineNumber            The line number, for debugging. Defaults
-     *                                    to the line number in the source file at
-     *                                    which the method is called.
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public QnAMakerDialog(String withKnowledgeBaseId, String withEndpointKey, String withHostName,
                           @Nullable Activity withNoAnswer, Float withThreshold, String withActiveLearningCardTitle,
                           String withCardNoMatchText, Integer withTop, @Nullable Activity withCardNoMatchResponse,
                           @Nullable Metadata[] withStrictFilters,
-                          @Nullable OkHttpClient withHttpClient, String sourceFilePath,
-                          Integer sourceLineNumber) {
+                          @Nullable OkHttpClient withHttpClient) {
         this(QnAMakerDialog.class.getName(), withKnowledgeBaseId, withEndpointKey, withHostName, withNoAnswer,
                 withThreshold, withActiveLearningCardTitle, withCardNoMatchText, withTop, withCardNoMatchResponse,
-                withStrictFilters, withHttpClient, sourceFilePath, sourceLineNumber);
+                withStrictFilters, withHttpClient);
     }
 
     /**

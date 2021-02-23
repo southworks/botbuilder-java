@@ -29,29 +29,29 @@ public class CosmosDBKeyEscapeTests {
     @Test
     public void Long_Key_Should_Be_Truncated() {
         StringBuilder tooLongKey = new StringBuilder();
-        for (int i = 0; i < CosmosDbKeyEscape.MAX_LENGTH + 1; i++) {
+        for (int i = 0; i < CosmosDbKeyEscape.MAX_KEY_LENGTH + 1; i++) {
             tooLongKey.append("a");
         }
 
         String sanitizedKey = CosmosDbKeyEscape.escapeKey(tooLongKey.toString());
-        Assert.assertTrue(sanitizedKey.length() <= CosmosDbKeyEscape.MAX_LENGTH);
+        Assert.assertTrue(sanitizedKey.length() <= CosmosDbKeyEscape.MAX_KEY_LENGTH);
 
         String hash = String.format("%x", tooLongKey.toString().hashCode());
-        String correctKey = sanitizedKey.substring(0, CosmosDbKeyEscape.MAX_LENGTH - hash.length()) + hash;
+        String correctKey = sanitizedKey.substring(0, CosmosDbKeyEscape.MAX_KEY_LENGTH - hash.length()) + hash;
         Assert.assertEquals(correctKey, sanitizedKey);
     }
 
     @Test
     public void Long_Key_With_Illegal_Characters_Should_Be_Truncated() {
         StringBuilder tooLongKey = new StringBuilder();
-        for (int i = 0; i < CosmosDbKeyEscape.MAX_LENGTH + 1; i++) {
+        for (int i = 0; i < CosmosDbKeyEscape.MAX_KEY_LENGTH + 1; i++) {
             tooLongKey.append("a");
         }
 
         String tooLongKeyWithIllegalCharacters = "?test?" + tooLongKey.toString();
 
         String sanitizedKey = CosmosDbKeyEscape.escapeKey(tooLongKeyWithIllegalCharacters);
-        Assert.assertTrue(sanitizedKey.length() <= CosmosDbKeyEscape.MAX_LENGTH);
+        Assert.assertTrue(sanitizedKey.length() <= CosmosDbKeyEscape.MAX_KEY_LENGTH);
 
         Assert.assertTrue(sanitizedKey.startsWith("*3ftest*3f"));
     }
@@ -105,7 +105,7 @@ public class CosmosDBKeyEscapeTests {
     public void Long_Key_With_Illegal_Characters_Should_Not_Be_Truncated_With_False_CompatibilityMode()
     {
         StringBuilder tooLongKey = new StringBuilder();
-        for (int i = 0; i < CosmosDbKeyEscape.MAX_LENGTH + 1; i++) {
+        for (int i = 0; i < CosmosDbKeyEscape.MAX_KEY_LENGTH + 1; i++) {
             tooLongKey.append("a");
         }
 

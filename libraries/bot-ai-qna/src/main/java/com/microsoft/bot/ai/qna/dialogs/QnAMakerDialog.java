@@ -12,7 +12,6 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.microsoft.bot.ai.qna.QnADialogResponseOptions;
@@ -590,7 +589,7 @@ public class QnAMakerDialog extends WaterfallDialog {
             throw new IllegalArgumentException("dc");
         }
 
-        if (dc.getContext().getActivity().getType() != ActivityTypes.MESSAGE) {
+        if (!dc.getContext().getActivity().isType(ActivityTypes.MESSAGE)) {
             return CompletableFuture.completedFuture(END_OF_TURN);
         }
 
@@ -632,7 +631,7 @@ public class QnAMakerDialog extends WaterfallDialog {
      */
     @Override
     protected CompletableFuture<Boolean> onPreBubbleEvent(DialogContext dc, DialogEvent e) {
-        if (dc.getContext().getActivity().getType() == ActivityTypes.MESSAGE) {
+        if (dc.getContext().getActivity().isType(ActivityTypes.MESSAGE)) {
             // decide whether we want to allow interruption or not.
             // if we don't get a response from QnA which signifies we expected it,
             // then we allow interruption.

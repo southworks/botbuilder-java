@@ -201,7 +201,7 @@ public class QnAMaker implements QnAMakerClient, TelemetryQnAMaker {
                     String.format("The %1$s property for %2$s can't be null.", "Activity", "turnContext"));
         }
         Activity messageActivity = turnContext.getActivity();
-        if (messageActivity == null || messageActivity.getType() != ActivityTypes.MESSAGE) {
+        if (messageActivity == null || !messageActivity.isType(ActivityTypes.MESSAGE)) {
             throw new IllegalArgumentException("Activity type is not a message");
         }
 

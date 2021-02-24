@@ -271,7 +271,7 @@ public class CosmosDbPartitionStorageTests extends StorageBaseTests {
         dialogs.add(new WaterfallDialog("WaterfallDialog", Arrays.asList(steps)));
 
         new TestFlow(adapter, (turnContext -> {
-            if (StringUtils.equals(turnContext.getActivity().getText(), "reset")) {
+            if (turnContext.getActivity().getText().equals("reset")) {
                 return dialogState.delete(turnContext);
             }
             else {

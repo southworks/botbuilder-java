@@ -4,7 +4,8 @@
 package com.microsoft.bot.azure;
 
 import com.microsoft.azure.documentdb.*;
-import com.microsoft.bot.builder.*;
+import com.microsoft.bot.builder.Storage;
+import com.microsoft.bot.builder.StorageBaseTests;
 import com.microsoft.bot.builder.adapters.TestAdapter;
 import com.microsoft.bot.builder.adapters.TestFlow;
 import com.microsoft.bot.dialogs.*;
@@ -18,7 +19,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.*;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**

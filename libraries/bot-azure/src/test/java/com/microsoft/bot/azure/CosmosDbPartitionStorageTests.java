@@ -4,6 +4,10 @@
 package com.microsoft.bot.azure;
 
 import com.microsoft.azure.documentdb.*;
+import com.microsoft.bot.builder.AutoSaveStateMiddleware;
+import com.microsoft.bot.builder.ConversationState;
+import com.microsoft.bot.builder.MessageFactory;
+import com.microsoft.bot.builder.StatePropertyAccessor;
 import com.microsoft.bot.builder.Storage;
 import com.microsoft.bot.builder.StorageBaseTests;
 import com.microsoft.bot.builder.adapters.TestAdapter;
@@ -19,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -237,11 +242,11 @@ public class CosmosDbPartitionStorageTests extends StorageBaseTests {
                 if (value.length() > 3) {
                     StringBuilder sb = new StringBuilder("You got it at the ").append(promptContext.getAttemptCount()).append("th try!");
                     Activity succeededMessage = MessageFactory.text(sb.toString());
-                    return promptContext.getContext().sendActivities(succeededMessage).thenApply(resourceResponses -> true);
+                    return promptContext.getContext().sendActivity(succeededMessage).thenApply(resourceResponses -> true);
                 }
 
                 Activity reply = MessageFactory.text("Please send a name that is longer than 3 characters. " + promptContext.getAttemptCount());
-                return promptContext.getContext().sendActivities(reply).thenApply(resourceResponses -> false);
+                return promptContext.getContext().sendActivity(reply).thenApply(resourceResponses -> false);
             }
         }));
 
@@ -301,7 +306,6 @@ public class CosmosDbPartitionStorageTests extends StorageBaseTests {
             .startTest().join();
     }
     @Test
-
     public void ReadingEmptyKeysReturnsEmptyDictionary() {
         Map<String, Object> state = storage.read(new String[] {}).join();
         Assert.assertNotNull(state);

@@ -31,7 +31,6 @@ public class CosmosDbPartitionedStorageOptions {
         connectionPolicy = ConnectionPolicy.GetDefault();
         consistencyLevel = DEFAULT_CONSISTENCY;
         containerThroughput = DEFAULT_THROUGHPUT;
-        compatibilityMode = true;
     }
 
     /**

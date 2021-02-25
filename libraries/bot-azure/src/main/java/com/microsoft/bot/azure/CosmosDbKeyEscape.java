@@ -81,7 +81,7 @@ public final class CosmosDbKeyEscape {
             throw new IllegalArgumentException("key");
         }
 
-        suffix = suffix == null ? StringUtils.EMPTY : suffix;
+        suffix = suffix == null ? new String() : suffix;
 
         Integer firstIllegalCharIndex = StringUtils.indexOfAny(key, new String(ILLEGAL_KEYS));
 

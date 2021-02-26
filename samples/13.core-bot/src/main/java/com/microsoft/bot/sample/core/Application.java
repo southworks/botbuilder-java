@@ -53,9 +53,24 @@ public class Application extends BotDependencyConfiguration {
         UserState userState,
         FlightBookingRecognizer flightBookingRecognizer,
         BookingDialog bookingDialog,
-        MainDialog dialog
+        Dialog rootDialog
     ) {
-        return new CoreBot(conversationState, userState, flightBookingRecognizer, bookingDialog, new MainDialog(configuration));
+        return new DialogAndWelcomeBot(conversationState, userState, flightBookingRecognizer, bookingDialog, rootDialog);
+    }
+
+    /**
+     * Returns the starting Dialog for this application.
+     *
+     * <p>
+     *     The @Component annotation could be used on the Dialog class instead of this method
+     *     with the @Bean annotation.
+     * </p>
+     *
+     * @return The Dialog implementation for this application.
+     */
+    @Bean
+    public Dialog getRootDialog(Configuration configuration) {
+        return new MainDialog(configuration);
     }
 
     /**

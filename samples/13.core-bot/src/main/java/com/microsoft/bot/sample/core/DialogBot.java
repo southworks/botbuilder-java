@@ -94,7 +94,7 @@ public class DialogBot<T extends Dialog> extends ActivityHandler {
     }
 
     /**
-     * Saves the BotState objects at the end of each turn.     *
+     * Saves the BotState objects at the end of each turn.
      * @param turnContext
      * @return
      */
@@ -106,7 +106,7 @@ public class DialogBot<T extends Dialog> extends ActivityHandler {
     }
 
     /**
-     * This method is executed when the turnContext receives a message activity.     *
+     * This method is executed when the turnContext receives a message activity.
      * @param turnContext
      * @return
      */

@@ -78,7 +78,7 @@ fi
 # Deployment
 # ----------
 
-echo Handling Java Core Web Application deployment.
+echo Handling Java Web Application deployment.
 
 # 1. KuduSync
 "$KUDU_SYNC_CMD" -v 50 -f "./publishedbot" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;deploy.sh"

@@ -89,6 +89,14 @@
         <artifactId>bot-dialogs</artifactId>
         <version>4.6.0-preview9</version>
       </dependency>
+      <dependency>
+        <groupId>com.microsoft.bot</groupId>
+        <artifactId>bot-ai-qna</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>com.microsoft.bot</groupId>
+        <artifactId>bot-ai-luis-v3</artifactId>
+      </dependency>
   </dependencies>
 
   <profiles>

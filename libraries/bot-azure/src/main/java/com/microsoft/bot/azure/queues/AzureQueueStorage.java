@@ -1,0 +1,91 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+package com.microsoft.bot.azure.queues;
+
+import com.azure.storage.queue.QueueClient;
+import com.azure.storage.queue.QueueClientBuilder;
+import com.azure.storage.queue.models.QueueStorageException;
+import com.azure.storage.queue.models.SendMessageResult;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.bot.builder.QueueStorage;
+import com.microsoft.bot.schema.Activity;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Base64;
+import java.util.concurrent.CompletableFuture;
+
+/**
+ * Service used to add messages to an Azure.Storage.Queues.
+ */
+public class AzureQueueStorage extends QueueStorage {
+    private boolean _createQueueIfNotExists = true;
+    private final QueueClient _queueClient;
+
+    /**
+     * Initializes a new instance of the @see AzureQueueStorage class.
+     *
+     * recommend the following settings:
+     * jsonSerializer.TypeNameHandling = TypeNameHandling.None.
+     * jsonSerializer.NullValueHandling = NullValueHandling.Ignore.
+     * @param queuesStorageConnectionString Azure Storage connection string.
+     * @param queueName Name of the storage queue where entities will be queued.
+     */
+    public AzureQueueStorage(String queuesStorageConnectionString, String queueName) {
+        if (StringUtils.isBlank(queuesStorageConnectionString)) {
+            throw new IllegalArgumentException("queuesStorageConnectionString is required.");
+        }
+
+        if (StringUtils.isBlank(queueName)) {
+            throw new IllegalArgumentException("queueName is required.");
+        }
+
+        _queueClient = new QueueClientBuilder()
+            .connectionString(queuesStorageConnectionString)
+            .queueName(queueName)
+            .buildClient();
+    }
+
+    /**
+     * Queue an Activity to an Azure.Storage.Queues.QueueClient. The visibility timeout specifies how long the message should be invisible
+     * to Dequeue and Peek operations. The message content must be a UTF-8 encoded string that is up to 64KB in size.
+     * @param activity This is expected to be an @see Activity retrieved from a call to
+     *                 activity.GetConversationReference().GetContinuationActivity(). This enables restarting the conversation
+     *                 using BotAdapter.ContinueConversationAsync.
+     * @param visibilityTimeout Default value of 0. Cannot be larger than 7 days.
+     * @param timeToLive Specifies the time-to-live interval for the message.
+     * @return @see SendReceipt as a Json string, from the QueueClient SendMessageAsync operation.
+     */
+    @Override
+    public CompletableFuture<String> QueueActivity(Activity activity, @Nullable Duration visibilityTimeout, @Nullable Duration timeToLive) {
+        return CompletableFuture.supplyAsync(() -> {
+            if (_createQueueIfNotExists) {
+                // This is an optimization flag to check if the container creation call has been made.
+                // It is okay if this is called more than once.
+                _createQueueIfNotExists = false;
+                try {
+                    _queueClient.create();
+                } catch (QueueStorageException e) {
+
+                }
+            }
+
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                String serializedActivity = objectMapper.writeValueAsString(activity);
+                byte[] encodedBytes = serializedActivity.getBytes(StandardCharsets.UTF_8);
+                String encodedString = Base64.getEncoder().encodeToString(encodedBytes);
+
+                SendMessageResult receipt = _queueClient.sendMessage(encodedString);
+                return objectMapper.writeValueAsString(receipt);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            return null;
+        });
+    }
+}

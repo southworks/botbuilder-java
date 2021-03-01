@@ -28,6 +28,7 @@ public class DialogBot<T extends Dialog> extends ActivityHandler {
     private BotState userState;
 
     /**
+     * Gets the dialog in use.
      *
      * @return instance of dialog
      */
@@ -36,6 +37,7 @@ public class DialogBot<T extends Dialog> extends ActivityHandler {
     }
 
     /**
+     * Gets the conversation state.
      *
      * @return instance of conversationState
      */
@@ -44,6 +46,7 @@ public class DialogBot<T extends Dialog> extends ActivityHandler {
     }
 
     /**
+     * Gets the user state.
      *
      * @return instance of userState
      */
@@ -52,6 +55,7 @@ public class DialogBot<T extends Dialog> extends ActivityHandler {
     }
 
     /**
+     * Sets the dialog in use.
      *
      * @param withDialog the dialog (of Dialog type) to be set
      */
@@ -60,6 +64,7 @@ public class DialogBot<T extends Dialog> extends ActivityHandler {
     }
 
     /**
+     * Sets the conversation state.
      *
      * @param withConversationState the conversationState (of BotState type) to be set
      */
@@ -68,6 +73,7 @@ public class DialogBot<T extends Dialog> extends ActivityHandler {
     }
 
     /**
+     * Sets the user state.
      *
      * @param withUserState the userState (of BotState type) to be set
      */
@@ -76,7 +82,7 @@ public class DialogBot<T extends Dialog> extends ActivityHandler {
     }
 
     /**
-     *
+     * Creates a DialogBot.
      * @param withConversationState ConversationState to use in the bot
      * @param withUserState UserState to use
      * @param withDialog Param inheriting from Dialog class
@@ -88,7 +94,7 @@ public class DialogBot<T extends Dialog> extends ActivityHandler {
     }
 
     /**
-     *
+     * Saves the BotState objects at the end of each turn.     *
      * @param turnContext
      * @return
      */
@@ -100,7 +106,7 @@ public class DialogBot<T extends Dialog> extends ActivityHandler {
     }
 
     /**
-     *
+     * This method is executed when the turnContext receives a message activity.     *
      * @param turnContext
      * @return
      */

@@ -17,7 +17,7 @@ public abstract class QueueStorage {
     /**
      * Enqueues an Activity for later processing. The visibility timeout specifies how long the message should be invisible
      * to Dequeue and Peek operations.
-     * @param activity The @see Activity to be queued for later processing.
+     * @param activity The {@link Activity} to be queued for later processing.
      * @param visibilityTimeout Visibility timeout. Optional with a default value of 0. Cannot be larger than 7 days.
      * @param timeToLive Specifies the time-to-live interval for the message.
      * @return A result string.

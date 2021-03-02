@@ -27,7 +27,7 @@ public class AzureQueueStorage extends QueueStorage {
     private final QueueClient queueClient;
 
     /**
-     * Initializes a new instance of the @see AzureQueueStorage class.
+     * Initializes a new instance of the {@link AzureQueueStorage} class.
      *
      * recommend the following settings:
      * jsonSerializer.TypeNameHandling = TypeNameHandling.None.
@@ -53,12 +53,12 @@ public class AzureQueueStorage extends QueueStorage {
     /**
      * Queue an Activity to an Azure.Storage.Queues.QueueClient. The visibility timeout specifies how long the message should be invisible
      * to Dequeue and Peek operations. The message content must be a UTF-8 encoded string that is up to 64KB in size.
-     * @param activity This is expected to be an @see Activity retrieved from a call to
+     * @param activity This is expected to be an {@link Activity} retrieved from a call to
      *                 activity.GetConversationReference().GetContinuationActivity(). This enables restarting the conversation
      *                 using BotAdapter.ContinueConversationAsync.
      * @param visibilityTimeout Default value of 0. Cannot be larger than 7 days.
      * @param timeToLive Specifies the time-to-live interval for the message.
-     * @return @see SendReceipt as a Json string, from the QueueClient SendMessageAsync operation.
+     * @return {@link SendMessageResult} as a Json string, from the QueueClient SendMessageAsync operation.
      */
     @Override
     public CompletableFuture<String> queueActivity(Activity activity, @Nullable Duration visibilityTimeout, @Nullable Duration timeToLive) {

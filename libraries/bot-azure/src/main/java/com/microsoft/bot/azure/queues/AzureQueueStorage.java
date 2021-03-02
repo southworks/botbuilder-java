@@ -44,7 +44,7 @@ public class AzureQueueStorage extends QueueStorage {
             throw new IllegalArgumentException("queueName is required.");
         }
 
-        _queueClient = new QueueClientBuilder()
+        queueClient = new QueueClientBuilder()
             .connectionString(queuesStorageConnectionString)
             .queueName(queueName)
             .buildClient();

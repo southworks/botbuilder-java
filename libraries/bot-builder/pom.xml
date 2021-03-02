@@ -92,6 +92,12 @@
       <groupId>com.microsoft.bot</groupId>
       <artifactId>bot-connector</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-queue</artifactId>
+      <version>12.8.0</version>
+    </dependency>
   </dependencies>
 
   <profiles>

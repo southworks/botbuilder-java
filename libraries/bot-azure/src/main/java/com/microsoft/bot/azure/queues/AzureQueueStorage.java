@@ -61,7 +61,7 @@ public class AzureQueueStorage extends QueueStorage {
      * @return @see SendReceipt as a Json string, from the QueueClient SendMessageAsync operation.
      */
     @Override
-    public CompletableFuture<String> QueueActivity(Activity activity, @Nullable Duration visibilityTimeout, @Nullable Duration timeToLive) {
+    public CompletableFuture<String> queueActivity(Activity activity, @Nullable Duration visibilityTimeout, @Nullable Duration timeToLive) {
         return CompletableFuture.supplyAsync(() -> {
             if (_createQueueIfNotExists) {
                 // This is an optimization flag to check if the container creation call has been made.

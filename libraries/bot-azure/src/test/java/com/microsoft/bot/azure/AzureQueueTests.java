@@ -8,8 +8,10 @@ import com.azure.storage.queue.QueueClientBuilder;
 import com.azure.storage.queue.models.QueueMessageItem;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.microsoft.azure.documentdb.DocumentClientException;
+import com.microsoft.bot.azure.queues.AzureQueueStorage;
 import com.microsoft.bot.builder.ConversationState;
 import com.microsoft.bot.builder.MemoryStorage;
+import com.microsoft.bot.builder.QueueStorage;
 import com.microsoft.bot.builder.UserState;
 import com.microsoft.bot.builder.adapters.TestAdapter;
 import com.microsoft.bot.builder.adapters.TestFlow;
@@ -166,12 +168,14 @@ public class AzureQueueTests {
             Activity activity = dc.getContext().getActivity().getConversationReference().getContinuationActivity();
             activity.setValue(this.value);
 
-            Duration difference = Duration.between(zonedDate, now);
-            ZonedDateTime visibility = zonedDate.minus(difference);
-            ZonedDateTime ttl = visibility.plusMinutes(2);
+            Duration visibility = Duration.between(zonedDate, now);
+            Duration ttl = visibility.plusMinutes(2);
 
-            QueueStorage queueStorage = dc.getContext().getTurnState().get();
-            return queueStorage.queueActivity(activity, visibility, ttl).thenCombine(receipt -> {
+            QueueStorage queueStorage = dc.getContext().getTurnState().get(QueueStorage.class);
+            if (queueStorage == null) {
+                throw new NullPointerException("Unable to locate QueueStorage in HostContext");
+            }
+            return queueStorage.queueActivity(activity, visibility, ttl).thenCompose(receipt -> {
                 // return the receipt as the result
                 return dc.endDialog(receipt);
             });

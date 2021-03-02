@@ -22,5 +22,5 @@ public abstract class QueueStorage {
      * @param timeToLive Specifies the time-to-live interval for the message.
      * @return A result string.
      */
-    public abstract CompletableFuture<String> QueueActivity(Activity activity, @Nullable Duration visibilityTimeout, @Nullable Duration timeToLive);
+    public abstract CompletableFuture<String> queueActivity(Activity activity, @Nullable Duration visibilityTimeout, @Nullable Duration timeToLive);
 }

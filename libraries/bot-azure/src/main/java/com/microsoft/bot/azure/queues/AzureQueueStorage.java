@@ -63,12 +63,12 @@ public class AzureQueueStorage extends QueueStorage {
     @Override
     public CompletableFuture<String> queueActivity(Activity activity, @Nullable Duration visibilityTimeout, @Nullable Duration timeToLive) {
         return CompletableFuture.supplyAsync(() -> {
-            if (_createQueueIfNotExists) {
+            if (createQueueIfNotExists) {
                 // This is an optimization flag to check if the container creation call has been made.
                 // It is okay if this is called more than once.
-                _createQueueIfNotExists = false;
+                createQueueIfNotExists = false;
                 try {
-                    _queueClient.create();
+                    queueClient.create();
                 } catch (QueueStorageException e) {
 
                 }
@@ -80,7 +80,7 @@ public class AzureQueueStorage extends QueueStorage {
                 byte[] encodedBytes = serializedActivity.getBytes(StandardCharsets.UTF_8);
                 String encodedString = Base64.getEncoder().encodeToString(encodedBytes);
 
-                SendMessageResult receipt = _queueClient.sendMessage(encodedString);
+                SendMessageResult receipt = queueClient.sendMessage(encodedString);
                 return objectMapper.writeValueAsString(receipt);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();

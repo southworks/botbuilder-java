@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
  * Service used to add messages to an Azure.Storage.Queues.
  */
 public class AzureQueueStorage extends QueueStorage {
-    private boolean _createQueueIfNotExists = true;
+    private Boolean createQueueIfNotExists = true;
     private final QueueClient queueClient;
 
     /**

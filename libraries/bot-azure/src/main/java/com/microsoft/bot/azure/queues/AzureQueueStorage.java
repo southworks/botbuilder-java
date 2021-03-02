@@ -28,10 +28,6 @@ public class AzureQueueStorage extends QueueStorage {
 
     /**
      * Initializes a new instance of the {@link AzureQueueStorage} class.
-     *
-     * recommend the following settings:
-     * jsonSerializer.TypeNameHandling = TypeNameHandling.None.
-     * jsonSerializer.NullValueHandling = NullValueHandling.Ignore.
      * @param queuesStorageConnectionString Azure Storage connection string.
      * @param queueName Name of the storage queue where entities will be queued.
      */

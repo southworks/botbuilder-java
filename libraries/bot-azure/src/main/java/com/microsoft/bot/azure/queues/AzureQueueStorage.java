@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class AzureQueueStorage extends QueueStorage {
     private boolean _createQueueIfNotExists = true;
-    private final QueueClient _queueClient;
+    private final QueueClient queueClient;
 
     /**
      * Initializes a new instance of the @see AzureQueueStorage class.

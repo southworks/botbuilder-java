@@ -46,6 +46,7 @@ public class DateResolverDialog extends CancelAndHelpDialog {
         };
         addDialog(new WaterfallDialog(WaterfallDialog.class.getName(), Arrays.asList(waterfallSteps)));
 
+        // The initial child Dialog to run.
         setInitialDialogId(WaterfallDialog.class.getName());
     }
 

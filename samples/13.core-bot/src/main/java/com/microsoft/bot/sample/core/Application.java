@@ -5,6 +5,7 @@ package com.microsoft.bot.sample.core;
 
 import com.microsoft.bot.builder.Bot;
 import com.microsoft.bot.builder.ConversationState;
+import com.microsoft.bot.builder.Storage;
 import com.microsoft.bot.builder.UserState;
 import com.microsoft.bot.dialogs.Dialog;
 import com.microsoft.bot.integration.AdapterWithErrorHandler;
@@ -51,14 +52,31 @@ public class Application extends BotDependencyConfiguration {
      */
     @Bean
     public Bot getBot(
-        Configuration configuration,
-        ConversationState conversationState,
-        UserState userState,
-        FlightBookingRecognizer flightBookingRecognizer,
-        BookingDialog bookingDialog,
-        Dialog rootDialog
     ) {
-        return new DialogAndWelcomeBot(conversationState, userState, flightBookingRecognizer, bookingDialog, rootDialog);
+        Storage storage = this.getStorage();
+        UserState userState = this.getUserState(storage);
+        ConversationState conversationState = this.getConversationState(storage);
+        Dialog rootDialog = this.getRootDialog();
+        return new DialogAndWelcomeBot(conversationState, userState, rootDialog);
+    }
+
+    /**
+     * Returns a FlightBookingRecognizer object.
+     * @return The FlightBookingRecognizer.
+     */
+    @Bean
+    public FlightBookingRecognizer getFlightBookingRecognizer() {
+        Configuration configuration = this.getConfiguration();
+        return new FlightBookingRecognizer(configuration);
+    }
+
+    /**
+     * Returns a BookingDialog object.
+     * @return The BookingDialog.
+     */
+    @Bean
+    public BookingDialog getBookingDialog() {
+        return new BookingDialog();
     }
 
     /**
@@ -72,8 +90,10 @@ public class Application extends BotDependencyConfiguration {
      * @return The Dialog implementation for this application.
      */
     @Bean
-    public Dialog getRootDialog(FlightBookingRecognizer withLuisRecognizer, BookingDialog bookingDialog) {
-        return new MainDialog(withLuisRecognizer, bookingDialog);
+    public Dialog getRootDialog() {
+        FlightBookingRecognizer flightBookingRecognizer = this.getFlightBookingRecognizer();
+        BookingDialog bookingDialog = this.getBookingDialog();
+        return new MainDialog(flightBookingRecognizer, bookingDialog);
     }
 
     /**

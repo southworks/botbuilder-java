@@ -23,18 +23,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-/**
- *
- */
+
 public class DateResolverDialog extends CancelAndHelpDialog {
     private final String promptMsgText = "When would you like to travel?";
     private final String repromptMsgText =
         "I'm sorry, to make your booking please enter a full travel date including Day Month and Year.";
 
-    /**
-     *
-     * @param id
-     */
+
     public DateResolverDialog(@Nullable String id) {
         super(id != null ? id : DateResolverDialog.class.getName());
 

@@ -19,16 +19,12 @@ import com.microsoft.recognizers.datatypes.timex.expression.TimexProperty;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
-/**
- *
- */
+
 public class BookingDialog extends CancelAndHelpDialog {
     private final String destinationStepMsgText = "Where would you like to travel to?";
     private final String originStepMsgText = "Where are you traveling from?";
 
-    /**
-     *
-     */
+
     public BookingDialog() {
         super(BookingDialog.class.getName());
 
@@ -48,9 +44,7 @@ public class BookingDialog extends CancelAndHelpDialog {
         setInitialDialogId(WaterfallDialog.class.getName());
     }
 
-    /**
-     * If a destination city has not been provided, prompt for one.
-     */
+
     private CompletableFuture<DialogTurnResult> destinationStep(WaterfallStepContext stepContext) {
         BookingDetails bookingDetails = (BookingDetails) stepContext.getOptions();
 
@@ -65,9 +59,7 @@ public class BookingDialog extends CancelAndHelpDialog {
         return stepContext.next(bookingDetails.getDestination());
     }
 
-    /**
-     * If an origin city has not been provided, prompt for one.
-     */
+
     private CompletableFuture<DialogTurnResult> originStep(WaterfallStepContext stepContext) {
         BookingDetails bookingDetails = (BookingDetails) stepContext.getOptions();
 
@@ -84,10 +76,7 @@ public class BookingDialog extends CancelAndHelpDialog {
         return stepContext.next(bookingDetails.getOrigin());
     }
 
-    /**
-     * If a travel date has not been provided, prompt for one.
-     * This will use the DATE_RESOLVER_DIALOG.
-     */
+
     private CompletableFuture<DialogTurnResult> travelDateStep(WaterfallStepContext stepContext) {
         BookingDetails bookingDetails = (BookingDetails) stepContext.getOptions();
 
@@ -100,9 +89,7 @@ public class BookingDialog extends CancelAndHelpDialog {
         return stepContext.next(bookingDetails.getTravelDate());
     }
 
-    /**
-     * Confirm the information the user has provided.
-     */
+
     private CompletableFuture<DialogTurnResult> confirmStep(WaterfallStepContext stepContext) {
         BookingDetails bookingDetails = (BookingDetails) stepContext.getOptions();
 
@@ -118,9 +105,7 @@ public class BookingDialog extends CancelAndHelpDialog {
         }});
     }
 
-    /**
-     * Complete the interaction and end the dialog.
-     */
+
     private CompletableFuture<DialogTurnResult> finalStep(WaterfallStepContext stepContext) {
         if ((Boolean) stepContext.getResult()) {
             BookingDetails bookingDetails = (BookingDetails) stepContext.getOptions();

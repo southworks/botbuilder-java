@@ -16,7 +16,6 @@ import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.InputHints;
 import com.microsoft.recognizers.datatypes.timex.expression.Constants;
 import com.microsoft.recognizers.datatypes.timex.expression.TimexProperty;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -56,7 +55,7 @@ public class DateResolverDialog extends CancelAndHelpDialog {
         Activity promptMessage = MessageFactory.text(promptMsgText, promptMsgText, InputHints.EXPECTING_INPUT);
         Activity repromptMessage = MessageFactory.text(repromptMsgText, repromptMsgText, InputHints.EXPECTING_INPUT);
 
-        if (StringUtils.isBlank(timex)) {
+        if (timex == null) {
             // We were not given any date at all so prompt the user.
             return stepContext.prompt(DateTimePrompt.class.getName(),
             new PromptOptions() {

@@ -15,7 +15,6 @@ import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.InputHints;
 import com.microsoft.recognizers.datatypes.timex.expression.Constants;
 import com.microsoft.recognizers.datatypes.timex.expression.TimexProperty;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -74,7 +73,7 @@ public class BookingDialog extends CancelAndHelpDialog {
 
         bookingDetails.setDestination(stepContext.getResult().toString());
 
-        if (StringUtils.isNotBlank(bookingDetails.getOrigin())) {
+        if (bookingDetails.getOrigin() == null) {
             Activity promptMessage =
                 MessageFactory.text(originStepMsgText, originStepMsgText, InputHints.EXPECTING_INPUT);
             return stepContext.prompt(TextPrompt.class.getName(), new PromptOptions() {{
@@ -94,7 +93,7 @@ public class BookingDialog extends CancelAndHelpDialog {
 
         bookingDetails.setOrigin(stepContext.getResult().toString());
 
-        if (StringUtils.isNotBlank(bookingDetails.getTravelDate()) || isAmbiguous(bookingDetails.getTravelDate())) {
+        if (bookingDetails.getTravelDate() == null || isAmbiguous(bookingDetails.getTravelDate())) {
             return stepContext.beginDialog(DateResolverDialog.class.getName(), bookingDetails.getTravelDate());
         }
 

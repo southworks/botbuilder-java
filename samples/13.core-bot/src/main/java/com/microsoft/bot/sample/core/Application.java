@@ -4,6 +4,9 @@
 package com.microsoft.bot.sample.core;
 
 import com.microsoft.bot.builder.Bot;
+import com.microsoft.bot.builder.ConversationState;
+import com.microsoft.bot.builder.UserState;
+import com.microsoft.bot.dialogs.Dialog;
 import com.microsoft.bot.integration.AdapterWithErrorHandler;
 import com.microsoft.bot.integration.BotFrameworkHttpAdapter;
 import com.microsoft.bot.integration.Configuration;
@@ -69,8 +72,8 @@ public class Application extends BotDependencyConfiguration {
      * @return The Dialog implementation for this application.
      */
     @Bean
-    public Dialog getRootDialog(Configuration configuration) {
-        return new MainDialog(configuration);
+    public Dialog getRootDialog(FlightBookingRecognizer withLuisRecognizer, BookingDialog bookingDialog) {
+        return new MainDialog(withLuisRecognizer, bookingDialog);
     }
 
     /**

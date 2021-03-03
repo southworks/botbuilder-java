@@ -57,11 +57,11 @@ public class FlightBookingRecognizer implements Recognizer {
 
     public ObjectNode getFromEntities(RecognizerResult result) {
         JsonNode fromValue = null, fromAirportValue = null;
-        if (result.getEntities().get("$instance").get("From") != null) {
-            fromValue = result.getEntities().get("$instance").get("From").get(0);
+        if (result.getEntities().get("$instance").get("from") != null) {
+            fromValue = result.getEntities().get("$instance").get("from").get(0);
         }
-        if (fromValue != null && result.getEntities().get("From").get(0).get("Airport") != null) {
-            fromAirportValue = result.getEntities().get("From").get("Airport").get(0);
+        if (fromValue != null && result.getEntities().get("from").get(0).get("airport") != null) {
+            fromAirportValue = result.getEntities().get("from").get("airport").get(0);
         }
 
         ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
@@ -73,16 +73,16 @@ public class FlightBookingRecognizer implements Recognizer {
 
     public ObjectNode getToEntities(RecognizerResult result) {
         JsonNode toValue = null, toAirportValue = null;
-        if (result.getEntities().get("$instance").get("To") != null) {
-            toValue = result.getEntities().get("$instance").get("To").get(0);
+        if (result.getEntities().get("$instance").get("to") != null) {
+            toValue = result.getEntities().get("$instance").get("to").get(0);
         }
-        if (toValue != null && result.getEntities().get("To").get(0).get("Airport") != null) {
-            toAirportValue = result.getEntities().get("To").get("Airport").get(0);
+        if (toValue != null && result.getEntities().get("to").get(0).get("airport") != null) {
+            toAirportValue = result.getEntities().get("to").get("airport").get(0);
         }
 
         ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
         ObjectNode entitiesNode = mapper.createObjectNode();
-        entitiesNode.put("To", toValue);
+        entitiesNode.put("to", toValue);
         entitiesNode.put("airport", toAirportValue);
         return entitiesNode;
     }

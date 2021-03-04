@@ -66,11 +66,9 @@ public class MainDialog extends ComponentDialog {
         String weekLaterDate = LocalDateTime.now().plusDays(7).format(formatter);
         String messageText = stepContext.getOptions() != null ? stepContext.getOptions().toString() : String.format("What can I help you with today?\nSay something like \"Book a flight from Paris to Berlin on %s\"", weekLaterDate);
         Activity promptMessage = MessageFactory.text(messageText, messageText, InputHints.EXPECTING_INPUT);
-        return stepContext.prompt(TextPrompt.class.getName(), new PromptOptions(){
-                {
-                    setPrompt(promptMessage);
-                }
-        });
+        PromptOptions promptOptions = new PromptOptions();
+        promptOptions.setPrompt(promptMessage);
+        return stepContext.prompt(TextPrompt.class.getName(), promptOptions);
     }
 
     /**

@@ -94,7 +94,7 @@ public class FlightBookingRecognizer implements Recognizer {
      * @return The Timex value without the Time model
      */
     public String getTravelDate(RecognizerResult result) {
-        JsonNode datetimeEntity = result.getEntities().get("entities").get("datetime");
+        JsonNode datetimeEntity = result.getEntities().get("datetime");
         if (datetimeEntity == null || datetimeEntity.get(0) == null) {
             return null;
         }

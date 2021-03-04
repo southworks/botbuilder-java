@@ -106,6 +106,5 @@ public class Application extends BotDependencyConfiguration {
     public BotFrameworkHttpAdapter getBotFrameworkHttpAdaptor(Configuration configuration) {
         return new AdapterWithErrorHandler(configuration);
     }
-
 }
 

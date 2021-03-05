@@ -94,14 +94,10 @@ public class MainDialog extends ComponentDialog {
                     // Show a warning for Origin and Destination if we can't resolve them.
                     return showWarningForUnsupportedCities(stepContext.getContext(), fromEntities, toEntities).thenCompose(showResult -> {
                             // Initialize BookingDetails with any entities we may have found in the response.
-                            BookingDetails bookingDetails = new BookingDetails() {
-                                {
-                                    // Get destination and origin from the composite entities arrays.
-                                    setDestination(toEntities.get("airport").toString());
-                                    setOrigin(fromEntities.get("airport").toString());
-                                    setTravelDate(luisRecognizer.getTravelDate(luisResult));
-                                }
-                            };
+                            BookingDetails bookingDetails = new BookingDetails();
+                            bookingDetails.setDestination(toEntities.get("airport").toString());
+                            bookingDetails.setOrigin(fromEntities.get("airport").toString());
+                            bookingDetails.setTravelDate(luisRecognizer.getTravelDate(luisResult));
                             // Run the BookingDialog giving it whatever details we have from the LUIS call, it will fill out the remainder.
                             return stepContext.beginDialog(BookingDialog.class.getName(), bookingDetails);
                         }

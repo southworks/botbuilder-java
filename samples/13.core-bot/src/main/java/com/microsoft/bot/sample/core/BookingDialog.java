@@ -19,10 +19,16 @@ import com.microsoft.recognizers.datatypes.timex.expression.TimexProperty;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * The class which contains the booking dialogs.
+ */
 public class BookingDialog extends CancelAndHelpDialog {
     private final String destinationStepMsgText = "Where would you like to travel to?";
     private final String originStepMsgText = "Where are you traveling from?";
 
+    /**
+     * The constructor of the Booking Dialog class.
+     */
     public BookingDialog() {
         super(BookingDialog.class.getName());
 

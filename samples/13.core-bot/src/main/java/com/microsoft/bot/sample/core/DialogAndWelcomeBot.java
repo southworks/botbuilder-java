@@ -6,9 +6,15 @@ package com.microsoft.bot.sample.core;
 import com.codepoetics.protonpack.collectors.CompletableFutures;
 import com.microsoft.applicationinsights.core.dependencies.apachecommons.io.IOUtils;
 import com.microsoft.applicationinsights.core.dependencies.apachecommons.lang3.StringUtils;
-import com.microsoft.bot.builder.*;
+import com.microsoft.bot.builder.ConversationState;
+import com.microsoft.bot.builder.MessageFactory;
+import com.microsoft.bot.builder.TurnContext;
+import com.microsoft.bot.builder.UserState;
 import com.microsoft.bot.dialogs.Dialog;
-import com.microsoft.bot.schema.*;
+import com.microsoft.bot.schema.Activity;
+import com.microsoft.bot.schema.Attachment;
+import com.microsoft.bot.schema.ChannelAccount;
+import com.microsoft.bot.schema.Serialization;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +22,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * The class which contains the welcome dialog.
+ * @param <T>
+ */
 public class DialogAndWelcomeBot<T extends Dialog> extends DialogBot {
     /**
      * Creates a DialogBot.
@@ -27,6 +37,15 @@ public class DialogAndWelcomeBot<T extends Dialog> extends DialogBot {
         super(withConversationState, withUserState, withDialog);
     }
 
+    /**
+     * When the {@link #onConversationUpdateActivity(TurnContext)} method receives a
+     * conversation update activity that indicates one or more users other than the
+     * bot are joining the conversation, it calls this method.
+     * @param membersAdded A list of all the members added to the conversation,
+     *                     as described by the conversation update activity
+     * @param turnContext The context object for this turn.
+     * @return A task that represents the work queued to execute.
+     */
     @Override
     protected CompletableFuture<Void> onMembersAdded(List<ChannelAccount> membersAdded, TurnContext turnContext) {
         return turnContext.getActivity().getMembersAdded().stream()
@@ -47,10 +66,9 @@ public class DialogAndWelcomeBot<T extends Dialog> extends DialogBot {
     }
 
     // Load attachment from embedded resource.
-    private Attachment createAdaptiveCardAttachment()
-    {
-        try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("cards/welcomeCard.json"))
-        {
+    private Attachment createAdaptiveCardAttachment() {
+        try (InputStream inputStream = Thread.currentThread().
+            getContextClassLoader().getResourceAsStream("cards/welcomeCard.json")) {
             String adaptiveCardJson = IOUtils.toString(inputStream, StandardCharsets.UTF_8.toString());
 
                 return new Attachment() {{
@@ -58,8 +76,7 @@ public class DialogAndWelcomeBot<T extends Dialog> extends DialogBot {
                     setContent(Serialization.jsonToTree(adaptiveCardJson));
                 }};
 
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return new Attachment();
         }

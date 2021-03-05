@@ -2,4 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for
 // license information.
 
+/**
+ * This package contains the classes for the core-bot sample.
+ */
 package com.microsoft.bot.sample.core;

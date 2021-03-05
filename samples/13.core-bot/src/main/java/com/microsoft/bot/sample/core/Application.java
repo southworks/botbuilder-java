@@ -18,9 +18,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-//
-// This is the starting point of the Sprint Boot Bot application.
-//
+/**
+ * This is the starting point of the Sprint Boot Bot application.
+ */
 @SpringBootApplication
 
 // Use the default BotController to receive incoming Channel messages. A custom
@@ -36,6 +36,10 @@ import org.springframework.context.annotation.Import;
  * override methods in order to provide custom implementations.
  */
 public class Application extends BotDependencyConfiguration {
+    /**
+     * The start method.
+     * @param args The args.
+     */
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }

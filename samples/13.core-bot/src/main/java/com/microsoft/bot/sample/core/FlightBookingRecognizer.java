@@ -3,10 +3,8 @@
 
 package com.microsoft.bot.sample.core;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.microsoft.bot.ai.luis.LuisApplication;
 import com.microsoft.bot.ai.luis.LuisRecognizer;
@@ -19,21 +17,29 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * The class in charge of recognize the booking information.
+ */
 public class FlightBookingRecognizer implements Recognizer {
     private LuisRecognizer recognizer;
 
+    /**
+     * The constructor of the FlightBookingRecognizer class.
+     * @param configuration The Configuration object to use.
+     */
     public FlightBookingRecognizer(Configuration configuration) {
-        Boolean luisIsConfigured = StringUtils.isNotBlank(configuration.getProperty("LuisAppId")) &&
-            StringUtils.isNotBlank(configuration.getProperty("LuisAPIKey")) &&
-            StringUtils.isNotBlank(configuration.getProperty("LuisAPIHostName"));
+        Boolean luisIsConfigured = StringUtils.isNotBlank(configuration.getProperty("LuisAppId"))
+            && StringUtils.isNotBlank(configuration.getProperty("LuisAPIKey"))
+            && StringUtils.isNotBlank(configuration.getProperty("LuisAPIHostName"));
         if (luisIsConfigured) {
             LuisApplication luisApplication = new LuisApplication(
                 configuration.getProperty("LuisAppId"),
                 configuration.getProperty("LuisAPIKey"),
                 String.format("https://%s", configuration.getProperty("LuisAPIHostName")));
             // Set the recognizer options depending on which endpoint version you want to use.
-            // More details can be found in https://docs.microsoft.com/en-gb/azure/cognitive-services/luis/luis-migration-api-v3
-            LuisRecognizerOptionsV3 recognizerOptions = new LuisRecognizerOptionsV3(luisApplication){
+            // More details can be found in
+            // https://docs.microsoft.com/en-gb/azure/cognitive-services/luis/luis-migration-api-v3
+            LuisRecognizerOptionsV3 recognizerOptions = new LuisRecognizerOptionsV3(luisApplication) {
                 {
                     setIncludeInstanceData(true);
                 }
@@ -43,6 +49,10 @@ public class FlightBookingRecognizer implements Recognizer {
         }
     }
 
+    /**
+     * Verify is the recognizer is configured.
+     * @return True: if is configured, False if it's not.
+     */
     public Boolean isConfigured() {
         return this.recognizer != null;
     }
@@ -57,6 +67,11 @@ public class FlightBookingRecognizer implements Recognizer {
         return this.recognizer.recognize(context);
     }
 
+    /**
+     * Gets the From data from the entities which is part of the result.
+     * @param result The recognizer result.
+     * @return The object node representing the From data.
+     */
     public ObjectNode getFromEntities(RecognizerResult result) {
         String fromValue = "", fromAirportValue = "";
         if (result.getEntities().get("$instance").get("From") != null) {
@@ -73,6 +88,11 @@ public class FlightBookingRecognizer implements Recognizer {
         return entitiesNode;
     }
 
+    /**
+     * Gets the To data from the entities which is part of the result.
+     * @param result The recognizer result.
+     * @return The object node representing the To data.
+     */
     public ObjectNode getToEntities(RecognizerResult result) {
         String toValue = "", toAirportValue = "";
         if (result.getEntities().get("$instance").get("To") != null) {
@@ -110,6 +130,11 @@ public class FlightBookingRecognizer implements Recognizer {
         return datetime;
     }
 
+    /**
+     * Runs an utterance through a recognizer and returns a generic recognizer result.
+     * @param turnContext Turn context.
+     * @return Analysis of utterance.
+     */
     @Override
     public CompletableFuture<RecognizerResult> recognize(TurnContext turnContext) {
         return this.recognizer.recognize(turnContext);

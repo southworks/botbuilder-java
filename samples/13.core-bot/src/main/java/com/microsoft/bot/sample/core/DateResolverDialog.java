@@ -23,18 +23,25 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-
+/**
+ * The class which contains the date resolver dialogs.
+ */
 public class DateResolverDialog extends CancelAndHelpDialog {
     private final String promptMsgText = "When would you like to travel?";
     private final String repromptMsgText =
         "I'm sorry, to make your booking please enter a full travel date including Day Month and Year.";
 
 
+    /**
+     * The constructor of the DateResolverDialog class.
+     * @param id The dialog's id.
+     */
     public DateResolverDialog(@Nullable String id) {
         super(id != null ? id : DateResolverDialog.class.getName());
 
 
-        addDialog(new DateTimePrompt(DateTimePrompt.class.getName(), DateResolverDialog::dateTimePromptValidator, null));
+        addDialog(new DateTimePrompt(DateTimePrompt.class.getName(),
+            DateResolverDialog::dateTimePromptValidator, null));
         WaterfallStep[] waterfallSteps = {
             this::initialStep,
             this::finalStep
@@ -86,7 +93,8 @@ public class DateResolverDialog extends CancelAndHelpDialog {
         return stepContext.endDialog(timex);
     }
 
-    private static CompletableFuture<Boolean> dateTimePromptValidator(PromptValidatorContext<List<DateTimeResolution>> promptContext) {
+    private static CompletableFuture<Boolean> dateTimePromptValidator(PromptValidatorContext<List<DateTimeResolution>>
+                                                                          promptContext) {
         if (promptContext.getRecognized().getSucceeded()) {
             // This value will be a TIMEX. And we are only interested in a Date so grab the first result and drop the
             // Time part. TIMEX is a format that represents DateTime expressions that include some ambiguity.

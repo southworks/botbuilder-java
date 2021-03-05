@@ -5,6 +5,7 @@ package com.microsoft.bot.azure.queues;
 
 import com.azure.storage.queue.QueueClient;
 import com.azure.storage.queue.QueueClientBuilder;
+import com.azure.storage.queue.models.QueueStorageException;
 import com.azure.storage.queue.models.SendMessageResult;
 import com.microsoft.bot.builder.QueueStorage;
 import com.microsoft.bot.restclient.serializer.JacksonAdapter;
@@ -65,8 +66,10 @@ public class AzureQueueStorage extends QueueStorage {
                 // This is an optimization flag to check if the container creation call has been made.
                 // It is okay if this is called more than once.
                 createQueueIfNotExists = false;
-                if (queueClient.getProperties() == null) {
+                try {
                     queueClient.create();
+                } catch (QueueStorageException e) {
+                    e.printStackTrace();
                 }
             }
 

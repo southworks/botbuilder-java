@@ -72,9 +72,17 @@ public class DateResolverDialog extends CancelAndHelpDialog {
             }});
         }
 
-        return stepContext.next(new ArrayList<DateTimeResolution>() {
-            { new DateTimeResolution() {{ setTimex(timex); }}; }
-        });
+        DateTimeResolution dateTimeResolution = new DateTimeResolution() {
+            {
+                setTimex(timex);
+            }
+        };
+        List<DateTimeResolution> dateTimeResolutions = new ArrayList<DateTimeResolution>() {
+            {
+                add(dateTimeResolution);
+            }
+        };
+        return stepContext.next(dateTimeResolutions);
     }
 
     private CompletableFuture<DialogTurnResult> finalStep(WaterfallStepContext stepContext) {

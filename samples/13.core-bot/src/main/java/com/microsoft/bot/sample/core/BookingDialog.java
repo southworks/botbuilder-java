@@ -98,9 +98,10 @@ public class BookingDialog extends CancelAndHelpDialog {
                 bookingDetails.getDestination(), bookingDetails.getOrigin(), bookingDetails.getTravelDate());
         Activity promptMessage = MessageFactory.text(messageText, messageText, InputHints.EXPECTING_INPUT);
 
-        return stepContext.prompt(ConfirmPrompt.class.getName(), new PromptOptions() {{
-            setPrompt(promptMessage);
-        }});
+        PromptOptions promptOptions = new PromptOptions();
+        promptOptions.setPrompt(promptMessage);
+
+        return stepContext.prompt(ConfirmPrompt.class.getName(), promptOptions);
     }
 
 

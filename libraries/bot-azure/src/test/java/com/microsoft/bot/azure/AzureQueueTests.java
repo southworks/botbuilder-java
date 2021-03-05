@@ -119,7 +119,6 @@ public class AzureQueueTests {
         Assert.assertEquals(ActivityEventNames.CONTINUE_CONVERSATION, activity.getName());
         Assert.assertEquals("foo", activity.getValue());
         Assert.assertNotNull(activity.getRelatesTo());
-        activity.getConversation().getProperties().remove("group");
         ConversationReference cr2 = activity.getConversationReference();
         cr.setActivityId(null);
         cr2.setActivityId(null);

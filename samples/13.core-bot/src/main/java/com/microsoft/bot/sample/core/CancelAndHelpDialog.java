@@ -42,6 +42,7 @@ public class CancelAndHelpDialog extends ComponentDialog {
                     Activity helpMessage = MessageFactory.text(helpMsgText, helpMsgText, InputHints.EXPECTING_INPUT);
                     return innerDc.getContext().sendActivity(helpMessage).thenCompose(sendResult -> CompletableFuture.completedFuture(new DialogTurnResult(DialogTurnStatus.WAITING)));
                 case "cancel":
+                case "quit":
                     Activity cancelMessage = MessageFactory.text(cancelMsgText, cancelMsgText, InputHints.IGNORING_INPUT);
                     return innerDc.getContext().sendActivity(cancelMessage).thenCompose(sendResult -> innerDc.cancelAllDialogs());
             }

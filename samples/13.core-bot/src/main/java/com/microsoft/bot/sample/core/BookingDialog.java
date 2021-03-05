@@ -30,10 +30,10 @@ public class BookingDialog extends CancelAndHelpDialog {
      * The constructor of the Booking Dialog class.
      */
     public BookingDialog() {
-        super(BookingDialog.class.getName());
+        super("BookingDialog");
 
-        addDialog(new TextPrompt(TextPrompt.class.getName()));
-        addDialog(new ConfirmPrompt(ConfirmPrompt.class.getName()));
+        addDialog(new TextPrompt("TextPrompt"));
+        addDialog(new ConfirmPrompt("ConfirmPrompt"));
         addDialog(new DateResolverDialog(null));
         WaterfallStep[] waterfallSteps = {
             this::destinationStep,
@@ -42,10 +42,10 @@ public class BookingDialog extends CancelAndHelpDialog {
             this::confirmStep,
             this::finalStep
         };
-        addDialog(new WaterfallDialog(WaterfallDialog.class.getName(), Arrays.asList(waterfallSteps)));
+        addDialog(new WaterfallDialog("WaterfallDialog", Arrays.asList(waterfallSteps)));
 
         // The initial child Dialog to run.
-        setInitialDialogId(WaterfallDialog.class.getName());
+        setInitialDialogId("WaterfallDialog");
     }
 
 
@@ -57,7 +57,7 @@ public class BookingDialog extends CancelAndHelpDialog {
                 MessageFactory.text(destinationStepMsgText, destinationStepMsgText, InputHints.EXPECTING_INPUT);
             PromptOptions promptOptions = new PromptOptions();
             promptOptions.setPrompt(promptMessage);
-            return stepContext.prompt(TextPrompt.class.getName(), promptOptions);
+            return stepContext.prompt("TextPrompt", promptOptions);
         }
 
         return stepContext.next(bookingDetails.getDestination());
@@ -74,7 +74,7 @@ public class BookingDialog extends CancelAndHelpDialog {
                 MessageFactory.text(originStepMsgText, originStepMsgText, InputHints.EXPECTING_INPUT);
             PromptOptions promptOptions = new PromptOptions();
             promptOptions.setPrompt(promptMessage);
-            return stepContext.prompt(TextPrompt.class.getName(), promptOptions);
+            return stepContext.prompt("TextPrompt", promptOptions);
         }
 
         return stepContext.next(bookingDetails.getOrigin());
@@ -87,7 +87,7 @@ public class BookingDialog extends CancelAndHelpDialog {
         bookingDetails.setOrigin(stepContext.getResult().toString());
 
         if (bookingDetails.getTravelDate() == null || isAmbiguous(bookingDetails.getTravelDate())) {
-            return stepContext.beginDialog(DateResolverDialog.class.getName(), bookingDetails.getTravelDate());
+            return stepContext.beginDialog("DateResolverDialog", bookingDetails.getTravelDate());
         }
 
         return stepContext.next(bookingDetails.getTravelDate());
@@ -107,7 +107,7 @@ public class BookingDialog extends CancelAndHelpDialog {
         PromptOptions promptOptions = new PromptOptions();
         promptOptions.setPrompt(promptMessage);
 
-        return stepContext.prompt(ConfirmPrompt.class.getName(), promptOptions);
+        return stepContext.prompt("ConfirmPrompt", promptOptions);
     }
 
 

@@ -39,21 +39,21 @@ public class MainDialog extends ComponentDialog {
      * @param bookingDialog The BookingDialog object with booking dialogs.
      */
     public MainDialog(FlightBookingRecognizer withLuisRecognizer, BookingDialog bookingDialog) {
-        super(MainDialog.class.getName());
+        super("MainDialog");
 
         luisRecognizer = withLuisRecognizer;
 
-        addDialog(new TextPrompt(TextPrompt.class.getName()));
+        addDialog(new TextPrompt("TextPrompt"));
         addDialog(bookingDialog);
         WaterfallStep[] waterfallSteps = {
             this::introStep,
             this::actStep,
             this::finalStep
         };
-        addDialog(new WaterfallDialog(WaterfallDialog.class.getName(), Arrays.asList(waterfallSteps)));
+        addDialog(new WaterfallDialog("WaterfallDialog", Arrays.asList(waterfallSteps)));
 
         // The initial child Dialog to run.
-        setInitialDialogId(WaterfallDialog.class.getName());
+        setInitialDialogId("WaterfallDialog");
     }
 
     /**
@@ -82,7 +82,7 @@ public class MainDialog extends ComponentDialog {
         Activity promptMessage = MessageFactory.text(messageText, messageText, InputHints.EXPECTING_INPUT);
         PromptOptions promptOptions = new PromptOptions();
         promptOptions.setPrompt(promptMessage);
-        return stepContext.prompt(TextPrompt.class.getName(), promptOptions);
+        return stepContext.prompt("TextPrompt", promptOptions);
     }
 
     /**
@@ -94,7 +94,7 @@ public class MainDialog extends ComponentDialog {
     private CompletableFuture<DialogTurnResult> actStep(WaterfallStepContext stepContext) {
         if (!luisRecognizer.isConfigured()) {
             // LUIS is not configured, we just run the BookingDialog path with an empty BookingDetailsInstance.
-            return stepContext.beginDialog(BookingDialog.class.getName(), new BookingDetails());
+            return stepContext.beginDialog("BookingDialog", new BookingDetails());
         }
 
         // Call LUIS and gather any potential booking details. (Note the TurnContext has the response to the prompt.)
@@ -116,7 +116,7 @@ public class MainDialog extends ComponentDialog {
                             bookingDetails.setTravelDate(luisRecognizer.getTravelDate(luisResult));
                             // Run the BookingDialog giving it whatever details we have from the LUIS call,
                             // it will fill out the remainder.
-                            return stepContext.beginDialog(BookingDialog.class.getName(), bookingDetails);
+                            return stepContext.beginDialog("BookingDialog", bookingDetails);
                         }
                     );
                 case "GetWeather":

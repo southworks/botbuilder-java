@@ -37,19 +37,19 @@ public class DateResolverDialog extends CancelAndHelpDialog {
      * @param id The dialog's id.
      */
     public DateResolverDialog(@Nullable String id) {
-        super(id != null ? id : DateResolverDialog.class.getName());
+        super(id != null ? id : "DateResolverDialog");
 
 
-        addDialog(new DateTimePrompt(DateTimePrompt.class.getName(),
+        addDialog(new DateTimePrompt("DateTimePrompt",
             DateResolverDialog::dateTimePromptValidator, null));
         WaterfallStep[] waterfallSteps = {
             this::initialStep,
             this::finalStep
         };
-        addDialog(new WaterfallDialog(WaterfallDialog.class.getName(), Arrays.asList(waterfallSteps)));
+        addDialog(new WaterfallDialog("WaterfallDialog", Arrays.asList(waterfallSteps)));
 
         // The initial child Dialog to run.
-        setInitialDialogId(WaterfallDialog.class.getName());
+        setInitialDialogId("WaterfallDialog");
     }
 
     private CompletableFuture<DialogTurnResult> initialStep(WaterfallStepContext stepContext) {
@@ -63,7 +63,7 @@ public class DateResolverDialog extends CancelAndHelpDialog {
             PromptOptions promptOptions = new PromptOptions();
             promptOptions.setPrompt(promptMessage);
             promptOptions.setRetryPrompt(repromptMessage);
-            return stepContext.prompt(DateTimePrompt.class.getName(), promptOptions);
+            return stepContext.prompt("DateTimePrompt", promptOptions);
         }
 
         // We have a Date we just need to check it is unambiguous.
@@ -72,7 +72,7 @@ public class DateResolverDialog extends CancelAndHelpDialog {
             // This is essentially a "reprompt" of the data we were given up front.
             PromptOptions promptOptions = new PromptOptions();
             promptOptions.setPrompt(repromptMessage);
-            return stepContext.prompt(DateTimePrompt.class.getName(), promptOptions);
+            return stepContext.prompt("DateTimePrompt", promptOptions);
         }
 
         DateTimeResolution dateTimeResolution = new DateTimeResolution() {

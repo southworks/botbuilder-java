@@ -46,12 +46,12 @@ public class BookingDialog extends CancelAndHelpDialog {
     private CompletableFuture<DialogTurnResult> destinationStep(WaterfallStepContext stepContext) {
         BookingDetails bookingDetails = (BookingDetails) stepContext.getOptions();
 
-        if (bookingDetails.getDestination() == null) {
+        if (bookingDetails.getDestination().isEmpty()) {
             Activity promptMessage =
                 MessageFactory.text(destinationStepMsgText, destinationStepMsgText, InputHints.EXPECTING_INPUT);
-            return stepContext.prompt(TextPrompt.class.getName(), new PromptOptions() {{
-                setPrompt(promptMessage);
-            }});
+            PromptOptions promptOptions = new PromptOptions();
+            promptOptions.setPrompt(promptMessage);
+            return stepContext.prompt(TextPrompt.class.getName(), promptOptions);
         }
 
         return stepContext.next(bookingDetails.getDestination());
@@ -63,12 +63,12 @@ public class BookingDialog extends CancelAndHelpDialog {
 
         bookingDetails.setDestination(stepContext.getResult().toString());
 
-        if (bookingDetails.getOrigin() == null) {
+        if (bookingDetails.getOrigin().isEmpty()) {
             Activity promptMessage =
                 MessageFactory.text(originStepMsgText, originStepMsgText, InputHints.EXPECTING_INPUT);
-            return stepContext.prompt(TextPrompt.class.getName(), new PromptOptions() {{
-                setPrompt(promptMessage);
-            }});
+            PromptOptions promptOptions = new PromptOptions();
+            promptOptions.setPrompt(promptMessage);
+            return stepContext.prompt(TextPrompt.class.getName(), promptOptions);
         }
 
         return stepContext.next(bookingDetails.getOrigin());

@@ -53,23 +53,19 @@ public class DateResolverDialog extends CancelAndHelpDialog {
 
         if (timex == null) {
             // We were not given any date at all so prompt the user.
-            return stepContext.prompt(DateTimePrompt.class.getName(),
-            new PromptOptions() {
-            {
-               setPrompt(promptMessage);
-               setRetryPrompt(repromptMessage);
-            }});
+            PromptOptions promptOptions = new PromptOptions();
+            promptOptions.setPrompt(promptMessage);
+            promptOptions.setRetryPrompt(repromptMessage);
+            return stepContext.prompt(DateTimePrompt.class.getName(), promptOptions);
         }
 
         // We have a Date we just need to check it is unambiguous.
         TimexProperty timexProperty = new TimexProperty(timex);
         if (!timexProperty.getTypes().contains(Constants.TimexTypes.DEFINITE)) {
             // This is essentially a "reprompt" of the data we were given up front.
-            return stepContext.prompt(DateTimePrompt.class.getName(),
-            new PromptOptions() {
-            {
-                setPrompt(repromptMessage);
-            }});
+            PromptOptions promptOptions = new PromptOptions();
+            promptOptions.setPrompt(repromptMessage);
+            return stepContext.prompt(DateTimePrompt.class.getName(), promptOptions);
         }
 
         DateTimeResolution dateTimeResolution = new DateTimeResolution() {

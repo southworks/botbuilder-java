@@ -3,8 +3,10 @@
 
 package com.microsoft.bot.sample.core;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.microsoft.bot.ai.luis.LuisApplication;
 import com.microsoft.bot.ai.luis.LuisRecognizer;
@@ -56,12 +58,12 @@ public class FlightBookingRecognizer implements Recognizer {
     }
 
     public ObjectNode getFromEntities(RecognizerResult result) {
-        JsonNode fromValue = null, fromAirportValue = null;
+        String fromValue = "", fromAirportValue = "";
         if (result.getEntities().get("$instance").get("From") != null) {
-            fromValue = result.getEntities().get("$instance").get("From").get(0);
+            fromValue = result.getEntities().get("$instance").get("From").get(0).get("text").asText();
         }
-        if (fromValue != null && result.getEntities().get("From").get(0).get("Airport") != null) {
-            fromAirportValue = result.getEntities().get("From").get(0).get("Airport").get(0).get(0);
+        if (!fromValue.isEmpty() && result.getEntities().get("From").get(0).get("Airport") != null) {
+            fromAirportValue = result.getEntities().get("From").get(0).get("Airport").get(0).get(0).asText();
         }
 
         ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
@@ -72,12 +74,12 @@ public class FlightBookingRecognizer implements Recognizer {
     }
 
     public ObjectNode getToEntities(RecognizerResult result) {
-        JsonNode toValue = null, toAirportValue = null;
+        String toValue = "", toAirportValue = "";
         if (result.getEntities().get("$instance").get("To") != null) {
-            toValue = result.getEntities().get("$instance").get("To").get(0);
+            toValue = result.getEntities().get("$instance").get("To").get(0).get("text").asText();
         }
-        if (toValue != null && result.getEntities().get("To").get(0).get("Airport") != null) {
-            toAirportValue = result.getEntities().get("To").get(0).get("Airport").get(0).get(0);
+        if (!toValue.isEmpty() && result.getEntities().get("To").get(0).get("Airport") != null) {
+            toAirportValue = result.getEntities().get("To").get(0).get("Airport").get(0).get(0).asText();
         }
 
         ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();

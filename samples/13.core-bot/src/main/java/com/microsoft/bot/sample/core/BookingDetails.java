@@ -54,7 +54,7 @@ public class BookingDetails {
 
     /**
      * Sets the travel date of the booking.
-     * @param withTravelDate The new travel data.
+     * @param withTravelDate The new travel date.
      */
     public void setTravelDate(String withTravelDate) {
         this.travelDate = withTravelDate;

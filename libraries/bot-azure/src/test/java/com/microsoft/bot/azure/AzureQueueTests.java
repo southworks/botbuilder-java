@@ -115,7 +115,7 @@ public class AzureQueueTests {
             Assert.fail();
         }
 
-        Assert.assertEquals(ActivityTypes.EVENT, activity.getType());
+        Assert.assertTrue(activity.isType(ActivityTypes.EVENT));
         Assert.assertEquals(ActivityEventNames.CONTINUE_CONVERSATION, activity.getName());
         Assert.assertEquals("foo", activity.getValue());
         Assert.assertNotNull(activity.getRelatesTo());

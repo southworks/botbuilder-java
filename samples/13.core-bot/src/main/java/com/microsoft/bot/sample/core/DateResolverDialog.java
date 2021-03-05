@@ -53,7 +53,7 @@ public class DateResolverDialog extends CancelAndHelpDialog {
     }
 
     private CompletableFuture<DialogTurnResult> initialStep(WaterfallStepContext stepContext) {
-        String timex = (String)stepContext.getOptions();
+        String timex = (String) stepContext.getOptions();
 
         Activity promptMessage = MessageFactory.text(promptMsgText, promptMsgText, InputHints.EXPECTING_INPUT);
         Activity repromptMessage = MessageFactory.text(repromptMsgText, repromptMsgText, InputHints.EXPECTING_INPUT);

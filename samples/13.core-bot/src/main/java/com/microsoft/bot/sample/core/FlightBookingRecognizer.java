@@ -104,7 +104,7 @@ public class FlightBookingRecognizer implements Recognizer {
             return null;
         }
 
-        String datetime = timex.get(0).toString().split("T")[0];
+        String datetime = timex.get(0).asText().split("T")[0];
         return datetime;
     }
 

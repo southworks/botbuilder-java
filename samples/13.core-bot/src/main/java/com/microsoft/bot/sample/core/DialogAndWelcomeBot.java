@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * The class which contains the welcome dialog.
+ * The class containing the welcome dialog.
  * @param <T> is a Dialog.
  */
 public class DialogAndWelcomeBot<T extends Dialog> extends DialogBot {

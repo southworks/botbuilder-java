@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * The class which contains the main dialog for the sample.
+ * The class containing the main dialog for the sample.
  */
 public class MainDialog extends ComponentDialog {
     private final FlightBookingRecognizer luisRecognizer;

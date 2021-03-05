@@ -15,7 +15,7 @@ import com.microsoft.bot.schema.InputHints;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * The class in charge of the dialogs interruptions.
+ * The class in charge of the dialog interruptions.
  */
 public class CancelAndHelpDialog extends ComponentDialog {
     private final String helpMsgText = "Show help here";

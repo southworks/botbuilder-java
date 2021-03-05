@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * The class which contains the booking dialogs.
+ * The class containing the booking dialogs.
  */
 public class BookingDialog extends CancelAndHelpDialog {
     private final String destinationStepMsgText = "Where would you like to travel to?";

@@ -18,7 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * The class in charge of recognize the booking information.
+ * The class in charge of recognizing the booking information.
  */
 public class FlightBookingRecognizer implements Recognizer {
     private LuisRecognizer recognizer;
@@ -51,7 +51,7 @@ public class FlightBookingRecognizer implements Recognizer {
 
     /**
      * Verify if the recognizer is configured.
-     * @return True: if it's configured, False if it's not.
+     * @return True if it's configured, False if it's not.
      */
     public Boolean isConfigured() {
         return this.recognizer != null;

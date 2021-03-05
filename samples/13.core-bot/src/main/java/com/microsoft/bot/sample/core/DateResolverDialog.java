@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * The class which contains the date resolver dialogs.
+ * The class containing the date resolver dialogs.
  */
 public class DateResolverDialog extends CancelAndHelpDialog {
     private final String promptMsgText = "When would you like to travel?";

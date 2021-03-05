@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * The class which contains the main dialogs.
+ * The class which contains the main dialog for the sample.
  */
 public class MainDialog extends ComponentDialog {
     private final FlightBookingRecognizer luisRecognizer;
@@ -155,14 +155,14 @@ public class MainDialog extends ComponentDialog {
                                                                            ObjectNode toEntities) {
         List<String> unsupportedCities = new ArrayList<String>();
 
-        if (StringUtils.isNotBlank(fromEntities.get("from").toString())
-            && StringUtils.isBlank(fromEntities.get("airport").toString())) {
-            unsupportedCities.add(fromEntities.get("from").toString());
+        if (StringUtils.isNotBlank(fromEntities.get("from").asText())
+            && StringUtils.isBlank(fromEntities.get("airport").asText())) {
+            unsupportedCities.add(fromEntities.get("from").asText());
         }
 
-        if (StringUtils.isNotBlank(toEntities.get("to").toString())
-            && StringUtils.isBlank(toEntities.get("airport").toString())) {
-            unsupportedCities.add(toEntities.get("to").toString());
+        if (StringUtils.isNotBlank(toEntities.get("to").asText())
+            && StringUtils.isBlank(toEntities.get("airport").asText())) {
+            unsupportedCities.add(toEntities.get("to").asText());
         }
 
         if (!unsupportedCities.isEmpty()) {

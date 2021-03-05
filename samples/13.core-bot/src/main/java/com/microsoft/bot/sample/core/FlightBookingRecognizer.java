@@ -50,8 +50,8 @@ public class FlightBookingRecognizer implements Recognizer {
     }
 
     /**
-     * Verify is the recognizer is configured.
-     * @return True: if is configured, False if it's not.
+     * Verify if the recognizer is configured.
+     * @return True: if it's configured, False if it's not.
      */
     public Boolean isConfigured() {
         return this.recognizer != null;

@@ -45,8 +45,14 @@ public class Application extends BotDependencyConfiguration {
      * @return The Bot implementation for this application.
      */
     @Bean
-    public Bot getBot(ActivityLog log) {
+    public Bot getBot(){
+        ActivityLog log = this.getActivityLog();
         return new MessageReactionBot(log);
+    }
+
+    @Bean
+    public ActivityLog getActivityLog(){
+        return new ActivityLog();
     }
 
     /**

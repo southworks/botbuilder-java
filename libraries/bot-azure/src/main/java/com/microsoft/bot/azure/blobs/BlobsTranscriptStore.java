@@ -175,7 +175,7 @@ public class BlobsTranscriptStore implements TranscriptStore {
         String token = null;
         List<BlobItem> blobs = new ArrayList<BlobItem>();
         do {
-            String prefix = String.format("{%1$s}/{%2$s}/", sanitizeKey(channelId), sanitizeKey(conversationId));
+            String prefix = String.format("%1$s/%2$s/", sanitizeKey(channelId), sanitizeKey(conversationId));
             Iterable<PagedResponse<BlobItem>> resultSegment = containerClient.listBlobsByHierarchy(prefix)
                 .iterableByPage(token);
             token = null;
@@ -290,7 +290,7 @@ public class BlobsTranscriptStore implements TranscriptStore {
 
         String token = null;
         do {
-            String prefix = String.format("{%1$s}/{%2$s}/", sanitizeKey(channelId), sanitizeKey(conversationId));
+            String prefix = String.format("%1$s/%2$s/", sanitizeKey(channelId), sanitizeKey(conversationId));
             Iterable<PagedResponse<BlobItem>> resultSegment = containerClient
                 .listBlobsByHierarchy(prefix).iterableByPage(token);
             token = null;
@@ -316,7 +316,7 @@ public class BlobsTranscriptStore implements TranscriptStore {
             try {
                 String token = null;
                 do {
-                    String prefix = String.format("{%1$s}/{%2$s}/",
+                    String prefix = String.format("%1$s/%2$s/",
                         sanitizeKey(activity.getChannelId()), sanitizeKey(activity.getConversation().getId()));
                     Iterable<PagedResponse<BlobItem>> resultSegment = containerClient
                         .listBlobsByHierarchy(prefix).iterableByPage(token);
@@ -393,7 +393,7 @@ public class BlobsTranscriptStore implements TranscriptStore {
     }
 
     private String getBlobName(Activity activity) {
-        String blobName = String.format("{%1$s}/{%2$s}/{%3$s}-{%4$s}.json",
+        String blobName = String.format("%1$s/%2$s/%3$s-%4$s.json",
             sanitizeKey(activity.getChannelId()), activity.getConversation().getId(),
             this.formatTicks(activity.getTimestamp()), sanitizeKey(activity.getId()));
 

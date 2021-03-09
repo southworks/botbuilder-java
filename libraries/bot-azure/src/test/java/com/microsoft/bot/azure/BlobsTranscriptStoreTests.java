@@ -1,24 +1,24 @@
 package com.microsoft.bot.azure;
 
+import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.microsoft.bot.builder.TranscriptStore;
 import com.microsoft.bot.schema.Activity;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import com.azure.storage.blob.BlobClient;
 
-import java.io.File;
 import java.io.IOException;
 
 //TODO this class need TranscriptStoreBaseTests and BlobsTranscriptStore
 public class BlobsTranscriptStoreTests extends TranscriptStoreBaseTests {
 
-    private static boolean emulatorIsRunning = false;
+    private static Boolean EMULATOR_IS_RUNNING = false;
 
     @Rule
     private static final TestName testName = new TestName();
@@ -29,21 +29,28 @@ public class BlobsTranscriptStoreTests extends TranscriptStoreBaseTests {
     @Override
     protected TranscriptStore transcriptStore = new BlobsTranscriptStore(blobStorageEmulatorConnectionString, containerName);
 
-    private static BlobClient testBlobClient;
+    private static BlobContainerClient testBlobClient;
 
     @BeforeClass
     public static void allTestsInit() throws IOException, InterruptedException {
-        File emulator = new File(System.getenv("Program Files (x86)") + "\\Microsoft SDKs\\Azure\\Storage Emulator\\AzureStorageEmulator.exe");
-        if (emulator.exists()) {
-            Process p = Runtime.getRuntime().exec
-                ("cmd /C \"" + emulator.getAbsolutePath() + " /GetStatus");
-            int result = p.waitFor();
-            if (result == 2) {
-                emulatorIsRunning = true;
-                testBlobClient = new BlobContainerClientBuilder()
-                    .connectionString(blobStorageEmulatorConnectionString)
-                    .containerName(containerName)
-                    .buildClient();
+        Process p = Runtime.getRuntime().exec
+            ("cmd /C \"" + System.getenv("Program Files (x86)") + "\\Microsoft SDKs\\Azure\\Storage Emulator\\AzureStorageEmulator.exe");
+        int result = p.waitFor();
+        // status = 0: the service was started.
+        // status = -5: the service is already started. Only one instance of the application
+        // can be run at the same time.
+        EMULATOR_IS_RUNNING = result == 0 || result == -5;
+    }
+
+    @Before
+    public void testInit() {
+        if (EMULATOR_IS_RUNNING) {
+            testBlobClient = new BlobContainerClientBuilder()
+                .connectionString(blobStorageEmulatorConnectionString)
+                .containerName(containerName)
+                .buildClient();
+            if (!testBlobClient.exists()) {
+                testBlobClient.create();
             }
         }
     }
@@ -58,7 +65,7 @@ public class BlobsTranscriptStoreTests extends TranscriptStoreBaseTests {
     // These tests require Azure Storage Emulator v5.7
     @Test
     public void longIdAddTest() {
-        if(emulatorIsRunning) {
+        if(EMULATOR_IS_RUNNING) {
             try {
                 Activity a = this.createActivity(0 ,0 , longId);
 
@@ -78,7 +85,7 @@ public class BlobsTranscriptStoreTests extends TranscriptStoreBaseTests {
 
     @Test
     public void blobTranscriptParamTest() {
-        if(emulatorIsRunning) {
+        if(EMULATOR_IS_RUNNING) {
             try {
                 new BlobsTranscriptStore(null, containerName);
                 Assert.fail("should have thrown for null connection string");

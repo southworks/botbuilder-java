@@ -64,12 +64,13 @@ the Teams service needs to call into the bot.
 - File -> Open Bot
 - Enter a Bot URL of `http://localhost:3978/api/messages`
 
+## Interacting with the bot in Teams
+
+Message the bot and it will respond with an 'Echo: [your message]'.  Add a message reaction to the bots response, and the bot will reply accordingly.
+
 ## Deploy the bot to Azure
 
 To learn more about deploying a bot to Azure, see [Deploy your bot to Azure](https://aka.ms/azuredeployment) for a complete list of deployment instructions.
-
-## Interacting with the bot in Teams
-Message the bot and it will respond with an 'Echo: [your message]'.  Add a message reaction to the bots response, and the bot will reply accordingly.
 
 ## Further reading
 

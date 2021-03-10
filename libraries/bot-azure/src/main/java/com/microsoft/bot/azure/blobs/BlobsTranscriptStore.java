@@ -382,9 +382,10 @@ public class BlobsTranscriptStore implements TranscriptStore {
                 if (ex.getResponse().getStatusCode() == HttpStatus.SC_PRECONDITION_FAILED) {
                     // additional retry logic,
                     // even though this is a read operation blob storage can return 412 if there is contention
-                    if (i++ < retryTimes) {
+                    if (i < retryTimes) {
                         try {
                             TimeUnit.MILLISECONDS.sleep(milisecondsTimeout);
+                            i++;
                             continue;
                         } catch (InterruptedException e) {
                             break;

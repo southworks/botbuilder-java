@@ -29,8 +29,8 @@ import java.io.InputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,12 +48,12 @@ import java.util.stream.Collectors;
 public class BlobsTranscriptStore implements TranscriptStore {
 
     // Containers checked for creation.
-    private static HashSet<String> checkedContainers = new HashSet<String>();
+    private static HashSet<String> CHECKED_CONTAINERS = new HashSet<String>();
 
     private final Integer milisecondsTimeout = 2000;
     private final Integer retryTimes = 3;
 
-    private final JacksonAdapter jacksonAdapter = new JacksonAdapter();;
+    private final JacksonAdapter jacksonAdapter = new JacksonAdapter();
     private BlobContainerClient containerClient;
 
     /**
@@ -72,25 +72,6 @@ public class BlobsTranscriptStore implements TranscriptStore {
 
         // Triggers a check for the existence of the container
         containerClient = this.getContainerClient(dataConnectionString, containerName);
-    }
-
-    private BlobContainerClient getContainerClient(String dataConnectionString, String containerName) {
-        containerName = containerName.toLowerCase();
-        containerClient = new BlobContainerClientBuilder()
-            .connectionString(dataConnectionString)
-            .containerName(containerName)
-            .buildClient();
-        if (!checkedContainers.contains(containerName)) {
-            checkedContainers.add(containerName);
-            if (!containerClient.exists()) {
-                try {
-                    containerClient.create();
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        }
-        return containerClient;
     }
 
     /**
@@ -154,7 +135,7 @@ public class BlobsTranscriptStore implements TranscriptStore {
                        };
 
                        logActivityToBlobClient(tombstonedActivity, activityAndBlob.getRight(), true)
-                           .thenAcceptAsync(task -> CompletableFuture.completedFuture(null));
+                           .thenAccept(task -> CompletableFuture.completedFuture(null));
                    }
                 });
 
@@ -180,9 +161,11 @@ public class BlobsTranscriptStore implements TranscriptStore {
     public CompletableFuture<PagedResult<Activity>> getTranscriptActivities(String channelId, String conversationId,
                                                                             @Nullable String continuationToken,
                                                                             OffsetDateTime startDate) {
+        Duration startDateDuration;
         if (startDate == null) {
-            startDate = OffsetDateTime.now(ZoneId.of("UTC"));
+            startDate = OffsetDateTime.now();
         }
+        startDateDuration = Duration.ofMillis(startDate.toInstant().toEpochMilli());
 
         final int pageSize = 20;
 
@@ -206,9 +189,9 @@ public class BlobsTranscriptStore implements TranscriptStore {
 
             for (PagedResponse<BlobItem> blobPage: resultSegment) {
                 for (BlobItem blobItem: blobPage.getValue()) {
-                    OffsetDateTime parseDateTime = OffsetDateTime.parse(blobItem.getMetadata().get("Timestamp"));
-                    if (parseDateTime.isAfter(startDate)
-                        || parseDateTime.isEqual(startDate)) {
+                    Duration durationTimeStamp = Duration.parse(blobItem.getMetadata().get("Timestamp"));
+                    if (durationTimeStamp.compareTo(startDateDuration) > 0
+                        || durationTimeStamp.compareTo(startDateDuration) == 0) {
                         if (continuationToken != null) {
                             if (blobItem.getName().equals(continuationToken)) {
                                 // we found continuation token
@@ -237,9 +220,7 @@ public class BlobsTranscriptStore implements TranscriptStore {
             .map(t -> t.join()).collect(Collectors.toList()));
 
         if (pagedResult.getItems().size() == pageSize) {
-            if (!blobs.isEmpty() && blobs.get(blobs.size() - 1) != null) {
-                pagedResult.setContinuationToken(blobs.get(blobs.size() - 1).getName());
-            }
+            pagedResult.setContinuationToken(blobs.get(blobs.size() - 1).getName());
         }
 
         return CompletableFuture.completedFuture(pagedResult);
@@ -306,10 +287,7 @@ public class BlobsTranscriptStore implements TranscriptStore {
         };
 
         if (pagedResult.getItems().size() == pageSize) {
-            if (!pagedResult.getItems().isEmpty()
-                && pagedResult.getItems().get(pagedResult.getItems().size() - 1) != null) {
-                pagedResult.setContinuationToken(pagedResult.getItems().get(pagedResult.getItems().size() - 1).getId());
-            }
+            pagedResult.setContinuationToken(pagedResult.getItems().get(pagedResult.getItems().size() - 1).getId());
         }
 
         return CompletableFuture.completedFuture(pagedResult);
@@ -354,6 +332,25 @@ public class BlobsTranscriptStore implements TranscriptStore {
         } while (!StringUtils.isBlank(token));
 
         return CompletableFuture.completedFuture(null);
+    }
+
+    private BlobContainerClient getContainerClient(String dataConnectionString, String containerName) {
+        containerName = containerName.toLowerCase();
+        containerClient = new BlobContainerClientBuilder()
+            .connectionString(dataConnectionString)
+            .containerName(containerName)
+            .buildClient();
+        if (!CHECKED_CONTAINERS.contains(containerName)) {
+            CHECKED_CONTAINERS.add(containerName);
+            if (!containerClient.exists()) {
+                try {
+                    containerClient.create();
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+        return containerClient;
     }
 
     private CompletableFuture<Pair<Activity, BlobClient>> innerReadBlob(Activity activity) {

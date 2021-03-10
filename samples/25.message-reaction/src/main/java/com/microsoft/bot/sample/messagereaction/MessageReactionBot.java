@@ -11,7 +11,6 @@ import com.microsoft.bot.schema.MessageReaction;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-
 public class MessageReactionBot extends ActivityHandler {
     private final ActivityLog log;
 
@@ -38,7 +37,6 @@ public class MessageReactionBot extends ActivityHandler {
                 }
 
                 return sendMessageAndLogActivityId(turnContext, String.format("You added '%s' regarding '%s'", reaction.getType(), resultActivity.getText()));
-                
             });
         }
 

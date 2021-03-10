@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package com.microsoft.bot.sample.messagereaction;
 
 import com.microsoft.bot.builder.Storage;
@@ -16,11 +19,11 @@ public class ActivityLog {
 
     public CompletableFuture<Void> Append(String activityId, Activity activity) throws IllegalAccessException {
         if (activityId == null) {
-            throw new IllegalAccessException("activityId");
+            throw new NullPointerException("activityId");
         }
 
         if (activity == null) {
-            throw new IllegalArgumentException("activity");
+            throw new NullPointerException("activity");
         }
 
         Map<String, Object> dictionary = new HashMap<String, Object>();
@@ -29,7 +32,7 @@ public class ActivityLog {
 
     public CompletableFuture<Activity> Find(String activityId) {
         if (activityId == null) {
-            throw new IllegalArgumentException("activityId");
+            throw new NullPointerException("activityId");
         }
 
         return _storage.read(new String[]{activityId}).thenApply(activitiesResult -> {

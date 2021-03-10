@@ -19,11 +19,11 @@ public class ActivityLog {
 
     public CompletableFuture<Void> Append(String activityId, Activity activity) throws IllegalAccessException {
         if (activityId == null) {
-            throw new NullPointerException("activityId");
+            throw new IllegalArgumentException("activityId");
         }
 
         if (activity == null) {
-            throw new NullPointerException("activity");
+            throw new IllegalArgumentException("activity");
         }
 
         Map<String, Object> dictionary = new HashMap<String, Object>();
@@ -32,7 +32,7 @@ public class ActivityLog {
 
     public CompletableFuture<Activity> Find(String activityId) {
         if (activityId == null) {
-            throw new NullPointerException("activityId");
+            throw new IllegalArgumentException("activityId");
         }
 
         return _storage.read(new String[]{activityId}).thenApply(activitiesResult -> {

@@ -1,12 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-pakcage com.microsoft.bot.sample.messagereaction;
+package com.microsoft.bot.sample.messagereaction;
 
+import com.microsoft.bot.builder.Bot;
 import com.microsoft.bot.integration.AdapterWithErrorHandler;
 import com.microsoft.bot.integration.BotFrameworkHttpAdapter;
+import com.microsoft.bot.integration.Configuration;
 import com.microsoft.bot.integration.spring.BotController;
 import com.microsoft.bot.integration.spring.BotDependencyConfiguration;
+import com.microsoft.bot.sample.messagereaction.ActivityLog;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -45,13 +48,13 @@ public class Application extends BotDependencyConfiguration {
      * @return The Bot implementation for this application.
      */
     @Bean
-    public Bot getBot(){
+    public Bot getBot() {
         ActivityLog log = this.getActivityLog();
         return new MessageReactionBot(log);
     }
 
     @Bean
-    public ActivityLog getActivityLog(){
+    public ActivityLog getActivityLog() {
         return new ActivityLog();
     }
 

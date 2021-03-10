@@ -29,8 +29,7 @@ public class MessageReactionBot extends ActivityHandler {
             // The ReplyToId property of the inbound MessageReaction Activity will correspond to a Message Activity which
             // had previously been sent from this bot.
             log.find(turnContext.getActivity().getReplyToId()).thenCompose(resultActivity -> {
-                if (resultActivity == null)
-                {
+                if (resultActivity == null) {
                     // If we had sent the message from the error handler we wouldn't have recorded the Activity Id and so we
                     // shouldn't expect to see it in the log.
                     return sendMessageAndLogActivityId(turnContext, String.format("Activity %s not found in the log.", turnContext.getActivity().getReplyToId()));
@@ -44,14 +43,12 @@ public class MessageReactionBot extends ActivityHandler {
     }
 
     @Override
-    protected CompletableFuture<Void> onReactionsRemoved(List<MessageReaction> messageReactions, TurnContext turnContext)
-    {
-        for (MessageReaction reaction : messageReactions) {        
+    protected CompletableFuture<Void> onReactionsRemoved(List<MessageReaction> messageReactions, TurnContext turnContext) {
+        for (MessageReaction reaction : messageReactions) {
             // The ReplyToId property of the inbound MessageReaction Activity will correspond to a Message Activity which
             // was previously sent from this bot.
             log.find(turnContext.getActivity().getReplyToId()).thenCompose(resultActivity -> {
-                if (resultActivity == null)
-                {
+                if (resultActivity == null) {
                     // If we had sent the message from the error handler we wouldn't have recorded the Activity Id and so we
                     // shouldn't expect to see it in the log.
                     return sendMessageAndLogActivityId(turnContext, String.format("Activity %s not found in the log.", turnContext.getActivity().getReplyToId()));
@@ -60,17 +57,17 @@ public class MessageReactionBot extends ActivityHandler {
                 return sendMessageAndLogActivityId(turnContext, String.format("You removed '%s' regarding '%s'", reaction.getType(), resultActivity.getText()));
             });
         }
-        
-        return CompletableFuture.completedFuture(null);   
+
+        return CompletableFuture.completedFuture(null);
     }
 
-    private CompletableFuture<Void> sendMessageAndLogActivityId(TurnContext turnContext, String text)
-    {
-        // We need to record the Activity Id from the Activity just sent in order to understand what the reaction is a reaction too. 
+    private CompletableFuture<Void> sendMessageAndLogActivityId(TurnContext turnContext, String text) {
+        // We need to record the Activity Id from the Activity just sent in order to understand what the reaction is a reaction too.
         Activity replyActivity = MessageFactory.text(text);
         return turnContext.sendActivity(replyActivity).thenCompose(resourceResponse -> {
                 log.append(resourceResponse.getId(), replyActivity).thenApply(result -> null);
+                return null;
             }
-        );            
+        );
     }
 }

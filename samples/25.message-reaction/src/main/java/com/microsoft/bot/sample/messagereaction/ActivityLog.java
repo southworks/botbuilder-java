@@ -2,11 +2,9 @@ package com.microsoft.bot.sample.messagereaction;
 
 import com.microsoft.bot.builder.Storage;
 import com.microsoft.bot.schema.Activity;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 public class ActivityLog {
 

@@ -6,12 +6,13 @@ import com.microsoft.bot.schema.Activity;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
-public class activityLog {
+public class ActivityLog {
 
     private Storage _storage;
 
-    public void activityLog(Storage storage) {
+    public void ActivityLog(Storage storage) {
         _storage = storage;
     }
 
@@ -33,8 +34,8 @@ public class activityLog {
             throw new IllegalArgumentException("activityId");
         }
 
-        _storage.read(new String[]{activityId}).thenCompose(activitiesResult -> {
-        return activitiesResult.size() >= 1 ? (Activity) activitiesResult.get(activityId) : null;
+        return _storage.read(new String[]{activityId}).thenApply(activitiesResult -> {
+        return activitiesResult.size() >= 1 ? ((Activity) activitiesResult.get(activityId)) : null;
         });
     }
 }

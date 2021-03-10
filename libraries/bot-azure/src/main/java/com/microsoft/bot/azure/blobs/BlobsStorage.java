@@ -129,7 +129,7 @@ public class BlobsStorage implements Storage {
                 String json = jacksonAdapter.serialize(newValue);
                 InputStream stream = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
                 //verify the corresponding length
-                blobReference.uploadWithResponse(stream, 41, null, null, null, null, accessCondition, null, Context.NONE);
+                blobReference.uploadWithResponse(stream, stream.available(), null, null, null, null, accessCondition, null, Context.NONE);
             } catch(HttpResponseException e) {
                 if (e.getResponse().getStatusCode() == HttpStatus.SC_BAD_REQUEST) {
                     StringBuilder sb = new StringBuilder("An error occurred while trying to write an object. The underlying ");

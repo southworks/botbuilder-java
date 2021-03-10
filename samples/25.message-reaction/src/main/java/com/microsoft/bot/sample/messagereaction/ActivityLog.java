@@ -17,7 +17,7 @@ public class ActivityLog {
         storage = withStorage;
     }
 
-    public CompletableFuture<Void> append(String activityId, Activity activity) throws IllegalArgumentException {
+    public CompletableFuture<Void> append(String activityId, Activity activity) {
         if (activityId == null) {
             throw new IllegalArgumentException("activityId");
         }

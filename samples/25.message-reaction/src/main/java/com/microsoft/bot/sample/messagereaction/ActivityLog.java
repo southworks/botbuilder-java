@@ -11,13 +11,13 @@ import java.util.concurrent.CompletableFuture;
 
 public class ActivityLog {
 
-    private Storage _storage;
+    private Storage storage;
 
-    public void ActivityLog(Storage storage) {
-        _storage = storage;
+    public void ActivityLog(Storage withStorage) {
+        storage = withStorage;
     }
 
-    public CompletableFuture<Void> Append(String activityId, Activity activity) throws IllegalAccessException {
+    public CompletableFuture<Void> append(String activityId, Activity activity) throws IllegalAccessException {
         if (activityId == null) {
             throw new IllegalArgumentException("activityId");
         }
@@ -27,18 +27,16 @@ public class ActivityLog {
         }
 
         Map<String, Object> dictionary = new HashMap<String, Object>();
-        return _storage.write((Map<String, Object>) dictionary.put(activityId, activity));
+        return storage.write((Map<String, Object>) dictionary.put(activityId, activity));
     }
 
-    public CompletableFuture<Activity> Find(String activityId) {
+    public CompletableFuture<Activity> find(String activityId) {
         if (activityId == null) {
             throw new IllegalArgumentException("activityId");
         }
 
-        return _storage.read(new String[]{activityId}).thenApply(activitiesResult -> {
-        return activitiesResult.size() >= 1 ? ((Activity) activitiesResult.get(activityId)) : null;
+        return storage.read(new String[]{activityId}).thenApply(activitiesResult -> {
+            return activitiesResult.size() >= 1 ? ((Activity) activitiesResult.get(activityId)) : null;
         });
     }
 }
-
-

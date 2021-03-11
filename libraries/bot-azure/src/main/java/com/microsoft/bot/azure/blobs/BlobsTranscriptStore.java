@@ -26,6 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -91,10 +92,10 @@ public class BlobsTranscriptStore implements TranscriptStore {
                         try {
                             updateActivity = jacksonAdapter
                                 .deserialize(jacksonAdapter.serialize(activity), Activity.class);
-                        } catch (IOException exception) {
-                            exception.printStackTrace();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
                         }
-                        updateActivity.setType(ActivityTypes.MESSAGE);
+                        updateActivity.setType(ActivityTypes.MESSAGE); // fixup original type (should be Message)
                         updateActivity.setLocalTimestamp(activityAndBlob.getLeft().getLocalTimestamp());
                         updateActivity.setTimestamp(activityAndBlob.getLeft().getTimestamp());
                         logActivityToBlobClient(updateActivity, activityAndBlob.getRight(), true)
@@ -106,34 +107,28 @@ public class BlobsTranscriptStore implements TranscriptStore {
             case ActivityTypes.MESSAGE_DELETE:
                 innerReadBlob(activity).thenAccept(activityAndBlob -> {
                    if (activityAndBlob.getLeft() != null) {
-                       ChannelAccount from = new ChannelAccount() {
-                           {
-                               setId("deleted");
-                               setRole(activityAndBlob.getLeft().getFrom().getRole());
-                           }
-                       };
-                       ChannelAccount recipient = new ChannelAccount() {
-                           {
-                               setId("deleted");
-                               setRole(activityAndBlob.getLeft().getRecipient().getRole());
-                           }
-                       };
+                       ChannelAccount from = new ChannelAccount() {{
+                           setId("deleted");
+                           setRole(activityAndBlob.getLeft().getFrom().getRole());
+                       }};
+                       ChannelAccount recipient = new ChannelAccount() {{
+                           setId("deleted");
+                           setRole(activityAndBlob.getLeft().getRecipient().getRole());
+                       }};
                        // tombstone the original message
-                       Activity tombstonedActivity = new Activity() {
-                           {
-                               setType(ActivityTypes.MESSAGE_DELETE);
-                               setId(activityAndBlob.getLeft().getId());
-                               setFrom(from);
-                               setRecipient(recipient);
-                               setLocale(activityAndBlob.getLeft().getLocale());
-                               setLocalTimestamp(activityAndBlob.getLeft().getTimestamp());
-                               setTimestamp(activityAndBlob.getLeft().getTimestamp());
-                               setChannelId(activityAndBlob.getLeft().getChannelId());
-                               setConversation(activityAndBlob.getLeft().getConversation());
-                               setServiceUrl(activityAndBlob.getLeft().getServiceUrl());
-                               setReplyToId(activityAndBlob.getLeft().getReplyToId());
-                           }
-                       };
+                       Activity tombstonedActivity = new Activity() {{
+                           setType(ActivityTypes.MESSAGE_DELETE);
+                           setId(activityAndBlob.getLeft().getId());
+                           setFrom(from);
+                           setRecipient(recipient);
+                           setLocale(activityAndBlob.getLeft().getLocale());
+                           setLocalTimestamp(activityAndBlob.getLeft().getTimestamp());
+                           setTimestamp(activityAndBlob.getLeft().getTimestamp());
+                           setChannelId(activityAndBlob.getLeft().getChannelId());
+                           setConversation(activityAndBlob.getLeft().getConversation());
+                           setServiceUrl(activityAndBlob.getLeft().getServiceUrl());
+                           setReplyToId(activityAndBlob.getLeft().getReplyToId());
+                       }};
 
                        logActivityToBlobClient(tombstonedActivity, activityAndBlob.getRight(), true)
                            .thenApply(task -> CompletableFuture.completedFuture(null));
@@ -255,7 +250,7 @@ public class BlobsTranscriptStore implements TranscriptStore {
                         .reduce((first, second) -> second.length() > 0 ? second : first).get();
                     try {
                         conversationId = URLDecoder.decode(lastName, StandardCharsets.UTF_8.name());
-                    } catch (Exception ex) {
+                    } catch (UnsupportedEncodingException ex) {
                         ex.printStackTrace();
                     }
                     TranscriptInfo conversation =
@@ -311,8 +306,9 @@ public class BlobsTranscriptStore implements TranscriptStore {
             Iterable<PagedResponse<BlobItem>> resultSegment = containerClient
                 .listBlobsByHierarchy(prefix).iterableByPage(token);
             token = null;
+
             for (PagedResponse<BlobItem> blobPage: resultSegment) {
-                for (BlobItem blobItem : blobPage.getValue()) {
+                for (BlobItem blobItem: blobPage.getValue()) {
                     BlobClient blobClient = containerClient.getBlobClient(blobItem.getName());
                     if (blobClient.exists()) {
                         try {
@@ -331,25 +327,6 @@ public class BlobsTranscriptStore implements TranscriptStore {
         return CompletableFuture.completedFuture(null);
     }
 
-    private BlobContainerClient getContainerClient(String dataConnectionString, String containerName) {
-        containerName = containerName.toLowerCase();
-        containerClient = new BlobContainerClientBuilder()
-            .connectionString(dataConnectionString)
-            .containerName(containerName)
-            .buildClient();
-        if (!CHECKED_CONTAINERS.contains(containerName)) {
-            CHECKED_CONTAINERS.add(containerName);
-            if (!containerClient.exists()) {
-                try {
-                    containerClient.create();
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        }
-        return containerClient;
-    }
-
     private CompletableFuture<Pair<Activity, BlobClient>> innerReadBlob(Activity activity) {
         int i = 0;
         while (true) {
@@ -361,9 +338,10 @@ public class BlobsTranscriptStore implements TranscriptStore {
                     Iterable<PagedResponse<BlobItem>> resultSegment = containerClient
                         .listBlobsByHierarchy(prefix).iterableByPage(token);
                     token = null;
+
                     for (PagedResponse<BlobItem> blobPage: resultSegment) {
-                        for (BlobItem blobItem : blobPage.getValue()) {
-                            if (blobItem.getMetadata().get("id").equals(activity.getId())) {
+                        for (BlobItem blobItem: blobPage.getValue()) {
+                            if (blobItem.getMetadata().get("Id").equals(activity.getId())) {
                                 BlobClient blobClient = containerClient.getBlobClient(blobItem.getName());
                                 this.getActivityFromBlobClient(blobClient).thenApply(blobActivity -> CompletableFuture
                                     .completedFuture(new Pair<Activity, BlobClient>(blobActivity, blobClient)));
@@ -397,7 +375,7 @@ public class BlobsTranscriptStore implements TranscriptStore {
         String contentString = new String(content.toByteArray());
         try {
             return jacksonAdapter.deserialize(contentString, Activity.class);
-        } catch (IOException exception) {
+        } catch (IOException ex) {
             return CompletableFuture.completedFuture(null);
         }
     }
@@ -410,8 +388,8 @@ public class BlobsTranscriptStore implements TranscriptStore {
         String activityJson = null;
         try {
             activityJson = jacksonAdapter.serialize(activity);
-        } catch (IOException exception) {
-            exception.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
         InputStream data = new ByteArrayInputStream(activityJson.getBytes(StandardCharsets.UTF_8));
 
@@ -452,6 +430,25 @@ public class BlobsTranscriptStore implements TranscriptStore {
             ex.printStackTrace();
         }
         return "";
+    }
+
+    private BlobContainerClient getContainerClient(String dataConnectionString, String containerName) {
+        containerName = containerName.toLowerCase();
+        containerClient = new BlobContainerClientBuilder()
+            .connectionString(dataConnectionString)
+            .containerName(containerName)
+            .buildClient();
+        if (!CHECKED_CONTAINERS.contains(containerName)) {
+            CHECKED_CONTAINERS.add(containerName);
+            if (!containerClient.exists()) {
+                try {
+                    containerClient.create();
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+        return containerClient;
     }
 
     /**

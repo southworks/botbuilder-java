@@ -3,6 +3,8 @@
 
 package com.microsoft.bot.azure.blobs;
 
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.microsoft.bot.builder.BotAdapter;
 import com.microsoft.bot.builder.ConversationState;
 import com.microsoft.bot.builder.StatePropertyAccessor;
@@ -15,6 +17,7 @@ import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ConversationAccount;
 import com.microsoft.bot.schema.ConversationReference;
 import com.microsoft.bot.schema.ResourceResponse;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -37,18 +40,32 @@ public class BlobsStorageTests extends StorageBaseTests {
 
     private static final String NO_EMULATOR_MESSAGE = "This test requires Azure STORAGE Emulator! Go to https://docs.microsoft.com/azure/storage/common/storage-use-emulator to download and install.";
 
-    private String containerName = "blobs" + testName.getMethodName().toLowerCase().replace("_", "");
+    public String getContainerName() {
+        return "blobs" + testName.getMethodName().toLowerCase().replace("_", "");
+    }
 
     @BeforeClass
     public static void allTestsInit() throws IOException, InterruptedException {
         assertEmulator();
     }
 
+    @After
+    public void afterTest() {
+        BlobContainerClient containerClient = new BlobContainerClientBuilder()
+            .connectionString(connectionString)
+            .containerName(getContainerName())
+            .buildClient();
+
+        if (containerClient.exists()) {
+            containerClient.delete();
+        }
+    }
+
     @Test
     public void blobStorageParamTest() {
-        Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsStorage(null, containerName));
+        Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsStorage(null, getContainerName()));
         Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsStorage(connectionString, null));
-        Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsStorage(new String(), containerName));
+        Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsStorage(new String(), getContainerName()));
         Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsStorage(connectionString, new String()));
     }
 
@@ -56,7 +73,7 @@ public class BlobsStorageTests extends StorageBaseTests {
     public void testBlobStorageWriteRead()
     {
         // Arrange
-        Storage storage = new BlobsStorage(connectionString, containerName);
+        Storage storage = new BlobsStorage(connectionString, getContainerName());
 
         Map<String, Object> changes = new HashMap();
         changes.put("x", "hello");
@@ -76,7 +93,7 @@ public class BlobsStorageTests extends StorageBaseTests {
     public void testBlobStorageWriteDeleteRead()
     {
         // Arrange
-        Storage storage = new BlobsStorage(connectionString, containerName);
+        Storage storage = new BlobsStorage(connectionString, getContainerName());
 
         Map<String, Object> changes = new HashMap();
         changes.put("x", "hello");
@@ -95,7 +112,7 @@ public class BlobsStorageTests extends StorageBaseTests {
     @Test
     public void testBlobStorageChanges() {
         // Arrange
-        Storage storage = new BlobsStorage(connectionString, containerName);
+        Storage storage = new BlobsStorage(connectionString, getContainerName());
 
         // Act
         Map<String, Object> changes = new HashMap();
@@ -123,7 +140,8 @@ public class BlobsStorageTests extends StorageBaseTests {
     @Test
     public void testConversationStateBlobStorage() {
         // Arrange
-        Storage storage = new BlobsStorage(connectionString, containerName);
+        Storage storage = new BlobsStorage(connectionString, getContainerName());
+
         ConversationState conversationState = new ConversationState(storage);
         StatePropertyAccessor<Prop> propAccessor = conversationState.createProperty("prop");
 
@@ -153,13 +171,13 @@ public class BlobsStorageTests extends StorageBaseTests {
 
     @Test
     public void testConversationStateBlobStorage_TypeNameHandlingDefault() {
-        Storage storage = new BlobsStorage(connectionString, containerName);
+        Storage storage = new BlobsStorage(connectionString, getContainerName());
         testConversationStateBlobStorage_Method(storage);
     }
 
     @Test
     public void statePersistsThroughMultiTurn_TypeNameHandlingNone() {
-        Storage storage = new BlobsStorage(connectionString, containerName);
+        Storage storage = new BlobsStorage(connectionString, getContainerName());
         statePersistsThroughMultiTurn(storage);
     }
 

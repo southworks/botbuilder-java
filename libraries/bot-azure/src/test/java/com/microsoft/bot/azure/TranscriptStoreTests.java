@@ -24,7 +24,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
@@ -46,8 +46,8 @@ import java.util.concurrent.TimeoutException;
  */
 public class TranscriptStoreTests {
 
-    @Rule
-    private static final TestName TEST_NAME = new TestName();
+    @ClassRule
+    public static final TestName TEST_NAME = new TestName();
 
     protected String blobStorageEmulatorConnectionString =
         "AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;";

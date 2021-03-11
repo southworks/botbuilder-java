@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -40,7 +41,6 @@ import java.util.concurrent.TimeoutException;
  * Since the class AzureBlobTranscriptStore.cs is deprecated we decided to merge the BlobsTranscriptStoreTests
  * and the TranscriptStoreBaseTests in only one class.
  */
-//TODO this class need the BlobsTranscriptStore class
 public class TranscriptStoreTests {
 
     @Rule
@@ -107,7 +107,7 @@ public class TranscriptStoreTests {
     public void longIdAddTest() {
         if(EMULATOR_IS_RUNNING) {
             try {
-                Activity a = TranscriptStoreTests.createActivity(0 ,0 , longId);
+                Activity a = TranscriptStoreTests.createActivity(0, 0 , longId);
 
                 transcriptStore.logActivity(a).join();
                 Assert.fail("Should have thrown an error");
@@ -123,45 +123,33 @@ public class TranscriptStoreTests {
         }
     }
 
+    // These tests require Azure Storage Emulator v5.7
     @Test
     public void blobTranscriptParamTest() {
         if(EMULATOR_IS_RUNNING) {
-            try {
-                new BlobsTranscriptStore(null, containerName);
-                Assert.fail("should have thrown for null connection string");
-            } catch (Exception ex) {
-                // all good
-            }
-
-            try {
-                new BlobsTranscriptStore(blobStorageEmulatorConnectionString, null);
-                Assert.fail("should have thrown for null containerName");
-            } catch (Exception ex) {
-                // all good
-            }
-
-            try {
-                new BlobsTranscriptStore(new String(), containerName);
-                Assert.fail("should have thrown for empty connection string");
-            } catch (Exception ex) {
-                // all good
-            }
-
-            try {
-                new BlobsTranscriptStore(blobStorageEmulatorConnectionString, new String());
-                Assert.fail("should have thrown for empty container name");
-            } catch (Exception ex) {
-                // all good
-            }
+            Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsTranscriptStore(null, containerName));
+            Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsTranscriptStore(blobStorageEmulatorConnectionString, null));
+            Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsTranscriptStore(new String(), containerName));
+            Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsTranscriptStore(blobStorageEmulatorConnectionString, new String()));
         }
     }
 
     @Test
-    public void transcriptEmptyTest() {
+    public void transcriptsEmptyTest() {
         if(EMULATOR_IS_RUNNING) {
             String unusedChannelId = UUID.randomUUID().toString();
             PagedResult<TranscriptInfo> transcripts = transcriptStore.listTranscripts(unusedChannelId).join();
-            Assert.assertEquals(transcripts.getItems().size(), 0);
+            Assert.assertEquals(0, transcripts.getItems().size());
+        }
+    }
+
+    @Test
+    public void activityEmptyTest() {
+        if (EMULATOR_IS_RUNNING) {
+            for(String convoId: conversationSpecialIds) {
+                PagedResult<Activity> activities = transcriptStore.getTranscriptActivities(channelId, convoId).join();
+                Assert.assertEquals(0, activities.getItems().size());
+            }
         }
     }
 
@@ -204,7 +192,7 @@ public class TranscriptStoreTests {
             Activity[] loggedActivities = new Activity[conversationSpecialIds.length];
             List<Activity> activities = new ArrayList<Activity>();
             for (int i = 0; i < conversationSpecialIds.length; i++) {
-                Activity a = TranscriptStoreTests.createActivity(i, i, conversationIds);
+                Activity a = TranscriptStoreTests.createActivity(i, i, conversationSpecialIds);
                 transcriptStore.logActivity(a).join();
                 activities.add(a);
                 loggedActivities[i] = transcriptStore.getTranscriptActivities(channelId, conversationSpecialIds[i])
@@ -219,7 +207,7 @@ public class TranscriptStoreTests {
     public void transcriptRemoveSpecialCharsTest() {
         if (EMULATOR_IS_RUNNING) {
             for (int i = 0; i < conversationSpecialIds.length; i++) {
-                Activity a = TranscriptStoreTests.createActivity(i, i, conversationIds);
+                Activity a = TranscriptStoreTests.createActivity(i, i, conversationSpecialIds);
                 transcriptStore.deleteTranscript(a.getChannelId(), a.getConversation().getId());
 
                 PagedResult<Activity> loggedActivities = transcriptStore.
@@ -232,14 +220,14 @@ public class TranscriptStoreTests {
     @Test
     public void activityAddPagedResultTest() {
         if (EMULATOR_IS_RUNNING) {
-            String cleanChanel = UUID.randomUUID().toString();
+            String cleanChannel = UUID.randomUUID().toString();
 
             PagedResult<Activity> loggedPagedResult = new PagedResult<Activity>();
             List<Activity> activities = new ArrayList<Activity>();
 
             for (int i = 0; i < conversationIds.length; i++) {
                 Activity a = TranscriptStoreTests.createActivity(i, i, conversationIds);
-                a.setChannelId(cleanChanel);
+                a.setChannelId(cleanChannel);
 
                 transcriptStore.logActivity(a).join();
                 activities.add(a);
@@ -249,12 +237,12 @@ public class TranscriptStoreTests {
 
             String ct = loggedPagedResult.getContinuationToken();
             Assert.assertEquals(20, loggedPagedResult.getItems().size());
-            Assert.assertTrue(ct != null);
+            Assert.assertNotNull(ct);
             Assert.assertTrue(loggedPagedResult.getContinuationToken().length() > 0);
-            loggedPagedResult = transcriptStore.getTranscriptActivities(cleanChanel, conversationIds[0], ct).join();
+            loggedPagedResult = transcriptStore.getTranscriptActivities(cleanChannel, conversationIds[0], ct).join();
             ct = loggedPagedResult.getContinuationToken();
             Assert.assertEquals(10, loggedPagedResult.getItems().size());
-            Assert.assertTrue(ct != null);
+            Assert.assertNotNull(ct);
         }
     }
 
@@ -264,7 +252,7 @@ public class TranscriptStoreTests {
             PagedResult<Activity> loggedActivities = new PagedResult<Activity>();
             int i;
             for (i = 0; i < conversationSpecialIds.length; i++) {
-                Activity a = TranscriptStoreTests.createActivity(i, i , conversationIds);
+                Activity a = TranscriptStoreTests.createActivity(i ,i , conversationIds);
                 transcriptStore.deleteTranscript(a.getChannelId(), a.getConversation().getId()).join();
             }
 
@@ -278,26 +266,10 @@ public class TranscriptStoreTests {
         if (EMULATOR_IS_RUNNING) {
             TranscriptStore store = transcriptStore;
 
-            try {
-                store.logActivity(null);
-                Assert.fail("should have thrown for null activity in logActivity method");
-            } catch (Exception ex) {
-                // all good
-            }
-
-            try {
-                store.getTranscriptActivities(null, conversationIds[0]);
-                Assert.fail("should have thrown for null channelId in getTranscriptActivities method");
-            } catch (Exception ex) {
-                // all good
-            }
-
-            try {
-                store.getTranscriptActivities(channelId, null);
-                Assert.fail("should have thrown for null conversationId in getTranscriptActivities method");
-            } catch (Exception ex) {
-                // all good
-            }
+            Assert.assertThrows(CompletionException.class, () -> store.logActivity(null));
+            Assert.assertThrows(CompletionException.class,
+                () -> store.getTranscriptActivities(null, conversationIds[0]));
+            Assert.assertThrows(CompletionException.class, () -> store.getTranscriptActivities(channelId, null));
         }
     }
 
@@ -316,19 +288,23 @@ public class TranscriptStoreTests {
                 };
                 turnContext.sendActivity(typingActivity).join();
                 try {
-                    TimeUnit.SECONDS.sleep(5);
+                    TimeUnit.MILLISECONDS.sleep(500);
                 } catch (InterruptedException e) {
                     // Empty error
                 }
                 turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText())).join();
                 return CompletableFuture.completedFuture(null);
             })
-                .send("foo").assertReply(activity -> {
-                    Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
-            }).assertReply("echo:foo")
-                .send("bar").assertReply(activity -> {
-                Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
-            }).assertReply("echo:bar")
+                .send("foo")
+                    .assertReply(activity -> {
+                        Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
+                    })
+                    .assertReply("echo:foo")
+                .send("bar")
+                    .assertReply(activity -> {
+                        Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
+                    })
+                    .assertReply("echo:bar")
                 .startTest().join();
 
             PagedResult<Activity> pagedResult = null;
@@ -338,45 +314,29 @@ public class TranscriptStoreTests {
                 Assert.fail();
             }
             Assert.assertEquals(6, pagedResult.getItems().size());
-            if(pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE)) {
-                Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
-            } else {
-                Assert.fail();
-            }
+            Assert.assertTrue(pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE));
+            Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
 
-            Assert.assertTrue(pagedResult.getItems().get(1) != null);
-            if(!pagedResult.getItems().get(1).isType(ActivityTypes.TYPING)) {
-                Assert.fail();
-            }
 
-            if(pagedResult.getItems().get(2).isType(ActivityTypes.MESSAGE)) {
-                Assert.assertEquals("echo:foo", pagedResult.getItems().get(2).getText());
-            } else {
-                Assert.fail();
-            }
+            Assert.assertNotNull(pagedResult.getItems().get(1));
+            Assert.assertTrue(pagedResult.getItems().get(1).isType(ActivityTypes.TYPING));
 
-            if(pagedResult.getItems().get(3).isType(ActivityTypes.MESSAGE)) {
-                Assert.assertEquals("bar", pagedResult.getItems().get(3).getText());
-            } else {
-                Assert.fail();
-            }
+            Assert.assertTrue(pagedResult.getItems().get(2).isType(ActivityTypes.MESSAGE));
+            Assert.assertEquals("echo:foo", pagedResult.getItems().get(2).getText());
 
-            Assert.assertTrue(pagedResult.getItems().get(4) != null);
-            if(!pagedResult.getItems().get(4).isType(ActivityTypes.TYPING)) {
-                Assert.fail();
-            }
+            Assert.assertTrue(pagedResult.getItems().get(3).isType(ActivityTypes.MESSAGE));
+            Assert.assertEquals("bar", pagedResult.getItems().get(3).getText());
 
-            if(pagedResult.getItems().get(5).isType(ActivityTypes.MESSAGE)) {
-                Assert.assertEquals("echo:bar", pagedResult.getItems().get(3).getText());
-            } else {
-                Assert.fail();
-            }
+
+            Assert.assertNotNull(pagedResult.getItems().get(4));
+            Assert.assertTrue(pagedResult.getItems().get(4).isType(ActivityTypes.TYPING));
+
+            Assert.assertTrue(pagedResult.getItems().get(5).isType(ActivityTypes.MESSAGE));
+            Assert.assertEquals("echo:bar", pagedResult.getItems().get(5).getText());
 
             for (Activity activity: pagedResult.getItems()) {
                 Assert.assertTrue(!StringUtils.isBlank(activity.getId()));
-                //this is the default DateTimeOffset in C#
-                OffsetDateTime defaultDate = OffsetDateTime.of(0001,1,1,12,0,0,0,OffsetDateTime.now().getOffset());
-                Assert.assertTrue(activity.getTimestamp().isAfter(defaultDate));
+                Assert.assertTrue(activity.getTimestamp().isAfter(OffsetDateTime.MIN));
             }
         }
     }
@@ -387,12 +347,11 @@ public class TranscriptStoreTests {
             ConversationReference conversation = TestAdapter
                 .createConversationReference(UUID.randomUUID().toString(), "User1", "Bot");
             TestAdapter adapter = new TestAdapter(conversation).use(new TranscriptLoggerMiddleware(transcriptStore));
-            final Activity[] activityToUpdate = {null};
             new TestFlow(adapter, turnContext -> {
-                activityToUpdate[0] = new Activity(ActivityTypes.MESSAGE);
+                Activity activityToUpdate = new Activity(ActivityTypes.MESSAGE);
                 if(turnContext.getActivity().getText().equals("update")) {
-                    activityToUpdate[0].setText("new response");
-                    turnContext.updateActivity(activityToUpdate[0]).join();
+                    activityToUpdate.setText("new response");
+                    turnContext.updateActivity(activityToUpdate).join();
                 } else {
                     Activity activity = turnContext.getActivity().createReply("response");
                     ResourceResponse response = turnContext.sendActivity(activity).join();
@@ -401,16 +360,33 @@ public class TranscriptStoreTests {
                     // clone the activity, so we can use it to do an update
                     JacksonAdapter jacksonAdapter = new JacksonAdapter();
                     try {
-                        activityToUpdate[0] = jacksonAdapter.deserialize(jacksonAdapter.serialize(activity), Activity.class);
+                        activityToUpdate = jacksonAdapter.deserialize(jacksonAdapter.serialize(activity), Activity.class);
                     } catch (IOException exception) {
                         exception.printStackTrace();
                     }
                 }
                 return CompletableFuture.completedFuture(null);
             }).send("foo")
-                .send("update")
+              .send("update")
                 .assertReply("new response")
-                .startTest().join();
+              .startTest().join();
+
+            PagedResult<Activity> pagedResult = null;
+            try {
+                pagedResult = this.getPagedResult(conversation, 3, null).join();
+            } catch (TimeoutException ex) {
+                Assert.fail();
+            }
+
+            Assert.assertEquals(3, pagedResult.getItems().size());
+            Assert.assertTrue(pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE));
+            Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
+
+            Assert.assertTrue(pagedResult.getItems().get(1).isType(ActivityTypes.MESSAGE));
+            Assert.assertEquals("new response", pagedResult.getItems().get(1).getText());
+
+            Assert.assertTrue(pagedResult.getItems().get(2).isType(ActivityTypes.MESSAGE));
+            Assert.assertEquals("update", pagedResult.getItems().get(2).getText());
         }
     }
 
@@ -421,11 +397,11 @@ public class TranscriptStoreTests {
             ConversationReference conversation = TestAdapter
                 .createConversationReference(UUID.randomUUID().toString(), "User1", "Bot");
             TestAdapter adapter = new TestAdapter(conversation).use(new TranscriptLoggerMiddleware(transcriptStore));
-            final Activity[] activityToUpdate = {null};
             new TestFlow(adapter, turnContext -> {
+                Activity activityToUpdate = new Activity(ActivityTypes.MESSAGE);
                 if (turnContext.getActivity().getText().equals("update")) {
-                    activityToUpdate[0].setText("new response");
-                    turnContext.updateActivity(activityToUpdate[0]).join();
+                    activityToUpdate.setText("new response");
+                    turnContext.updateActivity(activityToUpdate).join();
                 } else {
                     Activity activity = turnContext.getActivity().createReply("response");
                     ResourceResponse response = turnContext.sendActivity(activity).join();
@@ -434,16 +410,16 @@ public class TranscriptStoreTests {
                     // clone the activity, so we can use it to do an update
                     JacksonAdapter jacksonAdapter = new JacksonAdapter();
                     try {
-                        activityToUpdate[0] = jacksonAdapter.deserialize(jacksonAdapter.serialize(activity), Activity.class);
+                        activityToUpdate = jacksonAdapter.deserialize(jacksonAdapter.serialize(activity), Activity.class);
                     } catch (IOException exception) {
                         exception.printStackTrace();
                     }
                 }
                 return CompletableFuture.completedFuture(null);
             }).send("foo")
-                .send("update")
-                .assertReply("new response")
-                .startTest().join();
+              .send("update")
+                    .assertReply("new response")
+              .startTest().join();
 
             try {
                 TimeUnit.MILLISECONDS.sleep(5000);
@@ -455,31 +431,25 @@ public class TranscriptStoreTests {
             PagedResult<Activity> pagedResult = transcriptStore.getTranscriptActivities(conversation.getChannelId(),
                 conversation.getConversation().getId(), null, dateTimeStartOffset1).join();
             Assert.assertEquals(3, pagedResult.getItems().size());
-            if (pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE)) {
-                Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
-                Assert.assertEquals("new response", pagedResult.getItems().get(1).getText());
-                Assert.assertEquals("update", pagedResult.getItems().get(2).getText());
-            } else {
-                Assert.fail();
-            }
+            Assert.assertTrue(pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE));
+            Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
+            Assert.assertEquals("new response", pagedResult.getItems().get(1).getText());
+            Assert.assertEquals("update", pagedResult.getItems().get(2).getText());
+
 
             // Perform some queries
-            //The MinValue in C# is 1/1/0001 12:00:00 AM
-            OffsetDateTime MinDateTime = OffsetDateTime.of(0001,1,1,12,0,0,0,OffsetDateTime.now().getOffset());
             pagedResult = transcriptStore.getTranscriptActivities(conversation.getChannelId(),
-                conversation.getConversation().getId(), null, MinDateTime).join();
+                conversation.getConversation().getId(), null, OffsetDateTime.MIN).join();
             Assert.assertEquals(3, pagedResult.getItems().size());
-            if (pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE)) {
-                Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
-                Assert.assertEquals("new response", pagedResult.getItems().get(1).getText());
-                Assert.assertEquals("update", pagedResult.getItems().get(2).getText());
-            } else {
-                Assert.fail();
-            }
+            Assert.assertTrue(pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE));
+            Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
+            Assert.assertEquals("new response", pagedResult.getItems().get(1).getText());
+            Assert.assertEquals("update", pagedResult.getItems().get(2).getText());
+
 
             // Perform some queries
-            //The MaxValue in C# is 12/31/9999 11:59:59 PM +00:00
-            OffsetDateTime MaxDateTime = OffsetDateTime.of(9999,12,31,12,59,59,0,OffsetDateTime.now().getOffset());
+            pagedResult = transcriptStore.getTranscriptActivities(conversation.getChannelId(),
+                conversation.getConversation().getId(), null, OffsetDateTime.MAX).join();
             Assert.assertTrue(pagedResult.getItems().isEmpty());
         }
     }
@@ -490,20 +460,20 @@ public class TranscriptStoreTests {
             ConversationReference conversation = TestAdapter
                 .createConversationReference(UUID.randomUUID().toString(), "User1", "Bot");
             TestAdapter adapter = new TestAdapter(conversation).use(new TranscriptLoggerMiddleware(transcriptStore));
-            final String[] activityId = {null};
             new TestFlow(adapter, turnContext -> {
+                String activityId = null;
                 if (turnContext.getActivity().getText().equals("deleteIt")) {
-                    turnContext.deleteActivity(activityId[0]);
+                    turnContext.deleteActivity(activityId);
                 } else {
                     Activity activity = turnContext.getActivity().createReply("response");
                     ResourceResponse response = turnContext.sendActivity(activity).join();
-                    activityId[0] = response.getId();
+                    activityId = response.getId();
                 }
                 return CompletableFuture.completedFuture(null);
             }).send("foo")
                 .assertReply("response")
-                .send("deleteIt")
-                .startTest().join();
+              .send("deleteIt")
+              .startTest().join();
 
             PagedResult<Activity> pagedResult = null;
             try {
@@ -513,28 +483,22 @@ public class TranscriptStoreTests {
             }
 
             Assert.assertEquals(3, pagedResult.getItems().size());
-            if (pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE)) {
-                Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
-            } else {
-                Assert.fail();
-            }
+            Assert.assertTrue(pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE));
+            Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
 
-            Assert.assertTrue(pagedResult.getItems().get(1) != null);
+            Assert.assertNotNull(pagedResult.getItems().get(1));
             Assert.assertTrue(pagedResult.getItems().get(1).isType(ActivityTypes.MESSAGE_DELETE));
 
-            if (pagedResult.getItems().get(2).isType(ActivityTypes.MESSAGE)) {
-                Assert.assertEquals("deleteIt", pagedResult.getItems().get(2).getText());
-            } else {
-                Assert.fail();
-            }
+            Assert.assertTrue(pagedResult.getItems().get(2).isType(ActivityTypes.MESSAGE));
+            Assert.assertEquals("deleteIt", pagedResult.getItems().get(2).getText());
         }
     }
 
-    protected static Activity createActivity(int i, int j, String[] conversationIds) {
+    protected static Activity createActivity(Integer i, Integer j, String[] conversationIds) {
         return TranscriptStoreTests.createActivity(j, conversationIds[i]);
     }
 
-    private static Activity createActivity(int j, String conversationId) {
+    private static Activity createActivity(Integer j, String conversationId) {
         ConversationAccount conversationAccount = new ConversationAccount() {
             {
                 setId(conversationId);
@@ -554,6 +518,18 @@ public class TranscriptStoreTests {
         };
     }
 
+    /**
+     * There are some async oddities within TranscriptLoggerMiddleware that make it difficult to set a short delay when
+     * running this tests that ensures
+     * the TestFlow completes while also logging transcripts. Some tests will not pass without longer delays,
+     * but this method minimizes the delay required.
+     * @param conversation ConversationReference to pass to GetTranscriptActivitiesAsync()
+     *                     that contains ChannelId and Conversation.Id.
+     * @param expectedLength Expected length of pagedResult array.
+     * @param maxTimeout Maximum time to wait to retrieve pagedResult.
+     * @return PagedResult.
+     * @throws TimeoutException
+     */
     private CompletableFuture<PagedResult<Activity>> getPagedResult(ConversationReference conversation,
                                                                     Integer expectedLength, Integer maxTimeout) throws TimeoutException {
         if (maxTimeout == null) {
@@ -570,7 +546,7 @@ public class TranscriptStoreTests {
             try {
                 pagedResult = transcriptStore
                     .getTranscriptActivities(conversation.getChannelId(), conversation.getConversation().getId()).join();
-                if (pagedResult.getItems().size() > expectedLength) {
+                if (pagedResult.getItems().size() >= expectedLength) {
                     break;
                 }
             } catch (NoSuchElementException ex) {

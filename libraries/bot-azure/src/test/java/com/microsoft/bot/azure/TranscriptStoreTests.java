@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 package com.microsoft.bot.azure;
 
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
+import com.microsoft.bot.azure.blobs.BlobsTranscriptStore;
 import com.microsoft.bot.builder.PagedResult;
 import com.microsoft.bot.builder.TranscriptInfo;
 import com.microsoft.bot.builder.TranscriptLoggerMiddleware;
@@ -38,38 +40,39 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Since the class AzureBlobTranscriptStore.cs is deprecated we decided to merge the BlobsTranscriptStoreTests
- * and the TranscriptStoreBaseTests in only one class.
+ * These tests require Azure Storage Emulator v5.7
+ * The emulator must be installed at this path C:\Program Files (x86)\Microsoft SDKs\Azure\Storage Emulator\AzureStorageEmulator.exe
+ * More info: https://docs.microsoft.com/azure/storage/common/storage-use-emulator
  */
 public class TranscriptStoreTests {
 
     @Rule
-    private static final TestName testName = new TestName();
+    private static final TestName TEST_NAME = new TestName();
 
-    private static String channelId = "test";
+    protected String blobStorageEmulatorConnectionString =
+        "AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;";
 
-    private static final String[] conversationIds = {
+    protected static final String[] LONG_ID = {
+        "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq1234567890Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq098765432112345678900987654321Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq123456789009876543211234567890Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq09876543211234567890098765432112345678900987654321"
+    };
+
+    private String channelId = "test";
+
+    private static final String[] CONVERSATION_IDS = {
         "qaz", "wsx", "edc", "rfv", "tgb", "yhn", "ujm", "123", "456", "789",
         "ZAQ", "XSW", "CDE", "VFR", "BGT", "NHY", "NHY", "098", "765", "432",
         "zxc", "vbn", "mlk", "jhy", "yui", "kly", "asd", "asw", "aaa", "zzz",
     };
 
-    private static final String[] conversationSpecialIds = { "asd !&/#.'+:?\"", "ASD@123<>|}{][", "$%^;\\*()_" };
+    private static final String[] CONVERSATION_SPECIAL_IDS = { "asd !&/#.'+:?\"", "ASD@123<>|}{][", "$%^;\\*()_" };
 
-    private static BlobContainerClient testBlobClient;
-
-    protected static String containerName = String.format("blobstranscript%s", testName.getMethodName());
-
-    protected static String blobStorageEmulatorConnectionString =
-        "AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;";
+    protected String containerName = String.format("blobstranscript%s", TEST_NAME.getMethodName());
 
     protected TranscriptStore transcriptStore = new BlobsTranscriptStore(blobStorageEmulatorConnectionString, containerName);
 
-    protected static Boolean EMULATOR_IS_RUNNING = false;
+    private static BlobContainerClient testBlobClient;
 
-    protected static final String[] longId = {
-        "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq1234567890Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq098765432112345678900987654321Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq123456789009876543211234567890Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq09876543211234567890098765432112345678900987654321"
-    };
+    protected static Boolean EMULATOR_IS_RUNNING = false;
 
     @BeforeClass
     public static void allTestsInit() throws IOException, InterruptedException {
@@ -104,27 +107,6 @@ public class TranscriptStoreTests {
 
     // These tests require Azure Storage Emulator v5.7
     @Test
-    public void longIdAddTest() {
-        if(EMULATOR_IS_RUNNING) {
-            try {
-                Activity a = TranscriptStoreTests.createActivity(0, 0 , longId);
-
-                transcriptStore.logActivity(a).join();
-                Assert.fail("Should have thrown an error");
-            } catch (Exception ex) {
-                // Verify if Java Azure Storage Blobs 12.10.0 has the same behavior
-                // From C#: Unfortunately, Azure.Storage.Blobs v12.4.4 currently throws this XmlException for long keys :(
-                if (StringUtils.equals(ex.getMessage(), "'\\\"' is an unexpected token. Expecting whitespace. Line 1, position 50.")) {
-                    return;
-                }
-            }
-
-            Assert.fail("Should have thrown an error");
-        }
-    }
-
-    // These tests require Azure Storage Emulator v5.7
-    @Test
     public void blobTranscriptParamTest() {
         if(EMULATOR_IS_RUNNING) {
             Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsTranscriptStore(null, containerName));
@@ -146,7 +128,7 @@ public class TranscriptStoreTests {
     @Test
     public void activityEmptyTest() {
         if (EMULATOR_IS_RUNNING) {
-            for(String convoId: conversationSpecialIds) {
+            for(String convoId: CONVERSATION_SPECIAL_IDS) {
                 PagedResult<Activity> activities = transcriptStore.getTranscriptActivities(channelId, convoId).join();
                 Assert.assertEquals(0, activities.getItems().size());
             }
@@ -159,10 +141,10 @@ public class TranscriptStoreTests {
             Activity[] loggedActivities = new Activity[5];
             List<Activity> activities = new ArrayList<Activity>();
             for (int i = 0; i < 5; i++) {
-                Activity a = TranscriptStoreTests.createActivity(i, i, conversationIds);
+                Activity a = TranscriptStoreTests.createActivity(i, i, CONVERSATION_IDS);
                 transcriptStore.logActivity(a).join();
                 activities.add(a);
-                loggedActivities[i] = transcriptStore.getTranscriptActivities(channelId, conversationIds[i])
+                loggedActivities[i] = transcriptStore.getTranscriptActivities(channelId, CONVERSATION_IDS[i])
                     .join().getItems().get(0);
             }
 
@@ -174,14 +156,14 @@ public class TranscriptStoreTests {
     public void transcriptRemoveTest() {
         if (EMULATOR_IS_RUNNING) {
             for (int i = 0; i < 5; i++) {
-                Activity a = TranscriptStoreTests.createActivity(i, i, conversationIds);
+                Activity a = TranscriptStoreTests.createActivity(i, i, CONVERSATION_IDS);
                 transcriptStore.logActivity(a).join();
                 transcriptStore.deleteTranscript(a.getChannelId(), a.getConversation().getId()).join();
 
                 PagedResult<Activity> loggedActivities = transcriptStore
-                    .getTranscriptActivities(channelId, conversationIds[i]).join();
+                    .getTranscriptActivities(channelId, CONVERSATION_IDS[i]).join();
 
-                Assert.assertEquals(loggedActivities.getItems().size(), 0);
+                Assert.assertEquals(0, loggedActivities.getItems().size());
             }
         }
     }
@@ -189,13 +171,13 @@ public class TranscriptStoreTests {
     @Test
     public void activityAddSpecialCharsTest() {
         if (EMULATOR_IS_RUNNING) {
-            Activity[] loggedActivities = new Activity[conversationSpecialIds.length];
+            Activity[] loggedActivities = new Activity[CONVERSATION_SPECIAL_IDS.length];
             List<Activity> activities = new ArrayList<Activity>();
-            for (int i = 0; i < conversationSpecialIds.length; i++) {
-                Activity a = TranscriptStoreTests.createActivity(i, i, conversationSpecialIds);
+            for (int i = 0; i < CONVERSATION_SPECIAL_IDS.length; i++) {
+                Activity a = TranscriptStoreTests.createActivity(i, i, CONVERSATION_SPECIAL_IDS);
                 transcriptStore.logActivity(a).join();
                 activities.add(a);
-                loggedActivities[i] = transcriptStore.getTranscriptActivities(channelId, conversationSpecialIds[i])
+                loggedActivities[i] = transcriptStore.getTranscriptActivities(channelId, CONVERSATION_SPECIAL_IDS[i])
                    .join().getItems().get(0);
             }
 
@@ -206,13 +188,13 @@ public class TranscriptStoreTests {
     @Test
     public void transcriptRemoveSpecialCharsTest() {
         if (EMULATOR_IS_RUNNING) {
-            for (int i = 0; i < conversationSpecialIds.length; i++) {
-                Activity a = TranscriptStoreTests.createActivity(i, i, conversationSpecialIds);
-                transcriptStore.deleteTranscript(a.getChannelId(), a.getConversation().getId());
+            for (int i = 0; i < CONVERSATION_SPECIAL_IDS.length; i++) {
+                Activity a = TranscriptStoreTests.createActivity(i, i, CONVERSATION_SPECIAL_IDS);
+                transcriptStore.deleteTranscript(a.getChannelId(), a.getConversation().getId()).join();
 
                 PagedResult<Activity> loggedActivities = transcriptStore.
-                    getTranscriptActivities(channelId, conversationSpecialIds[i]).join();
-                Assert.assertEquals(loggedActivities.getItems().size(), 0);
+                    getTranscriptActivities(channelId, CONVERSATION_SPECIAL_IDS[i]).join();
+                Assert.assertEquals(0, loggedActivities.getItems().size());
             }
         }
     }
@@ -222,53 +204,50 @@ public class TranscriptStoreTests {
         if (EMULATOR_IS_RUNNING) {
             String cleanChannel = UUID.randomUUID().toString();
 
-            PagedResult<Activity> loggedPagedResult = new PagedResult<Activity>();
             List<Activity> activities = new ArrayList<Activity>();
 
-            for (int i = 0; i < conversationIds.length; i++) {
-                Activity a = TranscriptStoreTests.createActivity(i, i, conversationIds);
+            for (int i = 0; i < CONVERSATION_IDS.length; i++) {
+                Activity a = TranscriptStoreTests.createActivity(i, i, CONVERSATION_IDS);
                 a.setChannelId(cleanChannel);
 
                 transcriptStore.logActivity(a).join();
                 activities.add(a);
             }
 
-            loggedPagedResult = transcriptStore.getTranscriptActivities(channelId, conversationIds[0]).join();
-
+            PagedResult<Activity> loggedPagedResult = transcriptStore.getTranscriptActivities(channelId, CONVERSATION_IDS[0]).join();
             String ct = loggedPagedResult.getContinuationToken();
             Assert.assertEquals(20, loggedPagedResult.getItems().size());
             Assert.assertNotNull(ct);
             Assert.assertTrue(loggedPagedResult.getContinuationToken().length() > 0);
-            loggedPagedResult = transcriptStore.getTranscriptActivities(cleanChannel, conversationIds[0], ct).join();
+            loggedPagedResult = transcriptStore.getTranscriptActivities(cleanChannel, CONVERSATION_IDS[0], ct).join();
             ct = loggedPagedResult.getContinuationToken();
             Assert.assertEquals(10, loggedPagedResult.getItems().size());
-            Assert.assertNotNull(ct);
+            Assert.assertNull(ct);
         }
     }
 
     @Test
     public void transcriptRemovePagedTest() {
         if (EMULATOR_IS_RUNNING) {
-            PagedResult<Activity> loggedActivities = new PagedResult<Activity>();
             int i;
-            for (i = 0; i < conversationSpecialIds.length; i++) {
-                Activity a = TranscriptStoreTests.createActivity(i ,i , conversationIds);
+            for (i = 0; i < CONVERSATION_SPECIAL_IDS.length; i++) {
+                Activity a = TranscriptStoreTests.createActivity(i ,i , CONVERSATION_IDS);
                 transcriptStore.deleteTranscript(a.getChannelId(), a.getConversation().getId()).join();
             }
 
-            loggedActivities = transcriptStore.getTranscriptActivities(channelId, conversationIds[i]).join();
-            Assert.assertTrue(loggedActivities.getItems().size() == 0);
+            PagedResult<Activity> loggedActivities = transcriptStore.getTranscriptActivities(channelId, CONVERSATION_IDS[i]).join();
+            Assert.assertEquals(0, loggedActivities.getItems().size());
         }
     }
 
     @Test
-    public void nullParameterTest() {
+    public void nullParameterTests() {
         if (EMULATOR_IS_RUNNING) {
             TranscriptStore store = transcriptStore;
 
             Assert.assertThrows(CompletionException.class, () -> store.logActivity(null));
             Assert.assertThrows(CompletionException.class,
-                () -> store.getTranscriptActivities(null, conversationIds[0]));
+                () -> store.getTranscriptActivities(null, CONVERSATION_IDS[0]));
             Assert.assertThrows(CompletionException.class, () -> store.getTranscriptActivities(channelId, null));
         }
     }
@@ -278,14 +257,13 @@ public class TranscriptStoreTests {
         if (EMULATOR_IS_RUNNING) {
             ConversationReference conversation = TestAdapter
                 .createConversationReference(UUID.randomUUID().toString(), "User1", "Bot");
-            TestAdapter adapter = new TestAdapter(conversation).use(new TranscriptLoggerMiddleware(transcriptStore));
+            TestAdapter adapter = new TestAdapter(conversation)
+                .use(new TranscriptLoggerMiddleware(transcriptStore));
             new TestFlow(adapter, turnContext -> {
-                Activity typingActivity = new Activity() {
-                    {
-                        setType(ActivityTypes.TYPING);
-                        setRelatesTo(turnContext.getActivity().getRelatesTo());
-                    }
-                };
+                Activity typingActivity = new Activity() {{
+                    setType(ActivityTypes.TYPING);
+                    setRelatesTo(turnContext.getActivity().getRelatesTo());
+                }};
                 turnContext.sendActivity(typingActivity).join();
                 try {
                     TimeUnit.MILLISECONDS.sleep(500);
@@ -296,14 +274,14 @@ public class TranscriptStoreTests {
                 return CompletableFuture.completedFuture(null);
             })
                 .send("foo")
-                    .assertReply(activity -> {
-                        Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
-                    })
+                    .assertReply(activity ->
+                        Assert.assertTrue(activity.isType(ActivityTypes.TYPING))
+                    )
                     .assertReply("echo:foo")
                 .send("bar")
-                    .assertReply(activity -> {
-                        Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
-                    })
+                    .assertReply(activity ->
+                        Assert.assertTrue(activity.isType(ActivityTypes.TYPING))
+                    )
                     .assertReply("echo:bar")
                 .startTest().join();
 
@@ -316,27 +294,19 @@ public class TranscriptStoreTests {
             Assert.assertEquals(6, pagedResult.getItems().size());
             Assert.assertTrue(pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
-
-
             Assert.assertNotNull(pagedResult.getItems().get(1));
             Assert.assertTrue(pagedResult.getItems().get(1).isType(ActivityTypes.TYPING));
-
             Assert.assertTrue(pagedResult.getItems().get(2).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("echo:foo", pagedResult.getItems().get(2).getText());
-
             Assert.assertTrue(pagedResult.getItems().get(3).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("bar", pagedResult.getItems().get(3).getText());
-
-
             Assert.assertNotNull(pagedResult.getItems().get(4));
             Assert.assertTrue(pagedResult.getItems().get(4).isType(ActivityTypes.TYPING));
-
             Assert.assertTrue(pagedResult.getItems().get(5).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("echo:bar", pagedResult.getItems().get(5).getText());
-
             for (Activity activity: pagedResult.getItems()) {
                 Assert.assertTrue(!StringUtils.isBlank(activity.getId()));
-                Assert.assertTrue(activity.getTimestamp().isAfter(OffsetDateTime.MIN));
+                Assert.assertTrue(activity.getTimestamp().isAfter(OffsetDateTime.now()));
             }
         }
     }
@@ -346,7 +316,8 @@ public class TranscriptStoreTests {
         if (EMULATOR_IS_RUNNING) {
             ConversationReference conversation = TestAdapter
                 .createConversationReference(UUID.randomUUID().toString(), "User1", "Bot");
-            TestAdapter adapter = new TestAdapter(conversation).use(new TranscriptLoggerMiddleware(transcriptStore));
+            TestAdapter adapter = new TestAdapter(conversation)
+                .use(new TranscriptLoggerMiddleware(transcriptStore));
             new TestFlow(adapter, turnContext -> {
                 Activity activityToUpdate = new Activity(ActivityTypes.MESSAGE);
                 if(turnContext.getActivity().getText().equals("update")) {
@@ -357,12 +328,12 @@ public class TranscriptStoreTests {
                     ResourceResponse response = turnContext.sendActivity(activity).join();
                     activity.setId(response.getId());
 
-                    // clone the activity, so we can use it to do an update
                     JacksonAdapter jacksonAdapter = new JacksonAdapter();
                     try {
+                        // clone the activity, so we can use it to do an update
                         activityToUpdate = jacksonAdapter.deserialize(jacksonAdapter.serialize(activity), Activity.class);
-                    } catch (IOException exception) {
-                        exception.printStackTrace();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
                     }
                 }
                 return CompletableFuture.completedFuture(null);
@@ -381,10 +352,8 @@ public class TranscriptStoreTests {
             Assert.assertEquals(3, pagedResult.getItems().size());
             Assert.assertTrue(pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
-
             Assert.assertTrue(pagedResult.getItems().get(1).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("new response", pagedResult.getItems().get(1).getText());
-
             Assert.assertTrue(pagedResult.getItems().get(2).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("update", pagedResult.getItems().get(2).getText());
         }
@@ -396,7 +365,8 @@ public class TranscriptStoreTests {
             OffsetDateTime dateTimeStartOffset1 = OffsetDateTime.now();
             ConversationReference conversation = TestAdapter
                 .createConversationReference(UUID.randomUUID().toString(), "User1", "Bot");
-            TestAdapter adapter = new TestAdapter(conversation).use(new TranscriptLoggerMiddleware(transcriptStore));
+            TestAdapter adapter = new TestAdapter(conversation)
+                .use(new TranscriptLoggerMiddleware(transcriptStore));
             new TestFlow(adapter, turnContext -> {
                 Activity activityToUpdate = new Activity(ActivityTypes.MESSAGE);
                 if (turnContext.getActivity().getText().equals("update")) {
@@ -404,15 +374,16 @@ public class TranscriptStoreTests {
                     turnContext.updateActivity(activityToUpdate).join();
                 } else {
                     Activity activity = turnContext.getActivity().createReply("response");
+
                     ResourceResponse response = turnContext.sendActivity(activity).join();
                     activity.setId(response.getId());
 
-                    // clone the activity, so we can use it to do an update
                     JacksonAdapter jacksonAdapter = new JacksonAdapter();
                     try {
+                        // clone the activity, so we can use it to do an update
                         activityToUpdate = jacksonAdapter.deserialize(jacksonAdapter.serialize(activity), Activity.class);
-                    } catch (IOException exception) {
-                        exception.printStackTrace();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
                     }
                 }
                 return CompletableFuture.completedFuture(null);
@@ -428,29 +399,40 @@ public class TranscriptStoreTests {
             }
 
             // Perform some queries
-            PagedResult<Activity> pagedResult = transcriptStore.getTranscriptActivities(conversation.getChannelId(),
-                conversation.getConversation().getId(), null, dateTimeStartOffset1).join();
+            PagedResult<Activity> pagedResult = transcriptStore.getTranscriptActivities(
+                conversation.getChannelId(),
+                conversation.getConversation().getId(),
+                null,
+                dateTimeStartOffset1).join();
             Assert.assertEquals(3, pagedResult.getItems().size());
             Assert.assertTrue(pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
+            Assert.assertTrue(pagedResult.getItems().get(1).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("new response", pagedResult.getItems().get(1).getText());
+            Assert.assertTrue(pagedResult.getItems().get(2).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("update", pagedResult.getItems().get(2).getText());
 
-
             // Perform some queries
-            pagedResult = transcriptStore.getTranscriptActivities(conversation.getChannelId(),
-                conversation.getConversation().getId(), null, OffsetDateTime.MIN).join();
+            pagedResult = transcriptStore.getTranscriptActivities(
+                conversation.getChannelId(),
+                conversation.getConversation().getId(),
+                null,
+                OffsetDateTime.MIN).join();
             Assert.assertEquals(3, pagedResult.getItems().size());
             Assert.assertTrue(pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
+            Assert.assertTrue(pagedResult.getItems().get(1).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("new response", pagedResult.getItems().get(1).getText());
+            Assert.assertTrue(pagedResult.getItems().get(2).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("update", pagedResult.getItems().get(2).getText());
 
-
             // Perform some queries
-            pagedResult = transcriptStore.getTranscriptActivities(conversation.getChannelId(),
-                conversation.getConversation().getId(), null, OffsetDateTime.MAX).join();
-            Assert.assertTrue(pagedResult.getItems().isEmpty());
+            pagedResult = transcriptStore.getTranscriptActivities(
+                conversation.getChannelId(),
+                conversation.getConversation().getId(),
+                null,
+                OffsetDateTime.MAX).join();
+            Assert.assertEquals(0, pagedResult.getItems().size());
         }
     }
 
@@ -459,11 +441,12 @@ public class TranscriptStoreTests {
         if (EMULATOR_IS_RUNNING) {
             ConversationReference conversation = TestAdapter
                 .createConversationReference(UUID.randomUUID().toString(), "User1", "Bot");
-            TestAdapter adapter = new TestAdapter(conversation).use(new TranscriptLoggerMiddleware(transcriptStore));
+            TestAdapter adapter = new TestAdapter(conversation)
+                .use(new TranscriptLoggerMiddleware(transcriptStore));
             new TestFlow(adapter, turnContext -> {
                 String activityId = null;
                 if (turnContext.getActivity().getText().equals("deleteIt")) {
-                    turnContext.deleteActivity(activityId);
+                    turnContext.deleteActivity(activityId).join();
                 } else {
                     Activity activity = turnContext.getActivity().createReply("response");
                     ResourceResponse response = turnContext.sendActivity(activity).join();
@@ -485,37 +468,31 @@ public class TranscriptStoreTests {
             Assert.assertEquals(3, pagedResult.getItems().size());
             Assert.assertTrue(pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
-
             Assert.assertNotNull(pagedResult.getItems().get(1));
             Assert.assertTrue(pagedResult.getItems().get(1).isType(ActivityTypes.MESSAGE_DELETE));
-
             Assert.assertTrue(pagedResult.getItems().get(2).isType(ActivityTypes.MESSAGE));
             Assert.assertEquals("deleteIt", pagedResult.getItems().get(2).getText());
         }
     }
 
-    protected static Activity createActivity(Integer i, Integer j, String[] conversationIds) {
-        return TranscriptStoreTests.createActivity(j, conversationIds[i]);
+    protected static Activity createActivity(Integer i, Integer j, String[] CONVERSATION_IDS) {
+        return TranscriptStoreTests.createActivity(j, CONVERSATION_IDS[i]);
     }
 
     private static Activity createActivity(Integer j, String conversationId) {
-        ConversationAccount conversationAccount = new ConversationAccount() {
-            {
-                setId(conversationId);
-            }
-        };
-        return new Activity() {
-            {
-                setId(StringUtils.leftPad(String.valueOf(j + 1), 2, "0"));
-                setChannelId("test");
-                setText("test");
-                setType(ActivityTypes.MESSAGE);
-                setConversation(conversationAccount);
-                setTimestamp(OffsetDateTime.now());
-                setFrom(new ChannelAccount("testUser"));
-                setRecipient(new ChannelAccount("testBot"));
-            }
-        };
+        ConversationAccount conversationAccount = new ConversationAccount() {{
+            setId(conversationId);
+        }};
+        return new Activity() {{
+            setId(StringUtils.leftPad(String.valueOf(j + 1), 2, "0"));
+            setChannelId("test");
+            setText("test");
+            setType(ActivityTypes.MESSAGE);
+            setConversation(conversationAccount);
+            setTimestamp(OffsetDateTime.now());
+            setFrom(new ChannelAccount("testUser"));
+            setRecipient(new ChannelAccount("testBot"));
+        }};
     }
 
     /**

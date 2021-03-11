@@ -188,6 +188,8 @@ public class BlobsStorage implements Storage {
                         }
                     }
                     throw e;
+                } else {
+                    break;
                 }
             } catch (IOException e) {
                 e.printStackTrace();

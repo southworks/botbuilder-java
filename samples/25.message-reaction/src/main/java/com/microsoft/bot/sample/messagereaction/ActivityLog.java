@@ -27,7 +27,8 @@ public class ActivityLog {
         }
 
         Map<String, Object> dictionary = new HashMap<String, Object>();
-        return storage.write((Map<String, Object>) dictionary.put(activityId, activity));
+        dictionary.put(activityId, activity);
+        return storage.write((Map<String, Object>) dictionary);
     }
 
     public CompletableFuture<Activity> find(String activityId) {

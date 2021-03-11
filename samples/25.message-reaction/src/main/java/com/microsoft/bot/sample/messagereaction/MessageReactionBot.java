@@ -65,8 +65,7 @@ public class MessageReactionBot extends ActivityHandler {
         // We need to record the Activity Id from the Activity just sent in order to understand what the reaction is a reaction too.
         Activity replyActivity = MessageFactory.text(text);
         return turnContext.sendActivity(replyActivity).thenCompose(resourceResponse -> {
-                log.append(resourceResponse.getId(), replyActivity).thenApply(result -> null);
-                return null;
+                return log.append(resourceResponse.getId(), replyActivity).thenApply(result -> null);
             }
         );
     }

@@ -86,15 +86,13 @@ public class BlobsStorage implements Storage {
         Map<String, Object> items = new HashMap<>();
 
         for (String key : keys) {
-            try {
-                String blobName = getBlobName(key);
-                BlobClient blobClient = containerClient.getBlobClient(blobName);
-                innerReadBlob(blobClient).thenAccept(value -> items.put(key, value));
-            } catch (HttpResponseException e) {
-                if (e.getResponse().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                    continue;
+            String blobName = getBlobName(key);
+            BlobClient blobClient = containerClient.getBlobClient(blobName);
+            innerReadBlob(blobClient).thenAccept(value -> {
+                if (value != null) {
+                    items.put(key, value);
                 }
-            }
+            });
         }
         return CompletableFuture.completedFuture(items);
     }

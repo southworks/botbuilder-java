@@ -13,7 +13,7 @@ public class ActivityLog {
 
     private Storage storage;
 
-    public void ActivityLog(Storage withStorage) {
+    public ActivityLog(Storage withStorage) {
         storage = withStorage;
     }
 

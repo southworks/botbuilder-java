@@ -4,6 +4,7 @@
 package com.microsoft.bot.sample.messagereaction;
 
 import com.microsoft.bot.builder.Bot;
+import com.microsoft.bot.builder.Storage;
 import com.microsoft.bot.integration.AdapterWithErrorHandler;
 import com.microsoft.bot.integration.BotFrameworkHttpAdapter;
 import com.microsoft.bot.integration.Configuration;
@@ -48,14 +49,14 @@ public class Application extends BotDependencyConfiguration {
      * @return The Bot implementation for this application.
      */
     @Bean
-    public Bot getBot() {
-        ActivityLog log = this.getActivityLog();
+    public Bot getBot(Storage storage) {
+        ActivityLog log = this.getActivityLog(storage);
         return new MessageReactionBot(log);
     }
 
     @Bean
-    public ActivityLog getActivityLog() {
-        return new ActivityLog();
+    public ActivityLog getActivityLog(Storage storage) {
+        return new ActivityLog(storage);
     }
 
     /**

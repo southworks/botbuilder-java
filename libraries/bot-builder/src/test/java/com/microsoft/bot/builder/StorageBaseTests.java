@@ -247,20 +247,19 @@ public class StorageBaseTests {
     protected void statePersistsThroughMultiTurn(Storage storage) {
         UserState userState = new UserState(storage);
         StatePropertyAccessor<TestPocoState> testProperty = userState.createProperty("test");
-        TestAdapter adapter = new TestAdapter().use(new AutoSaveStateMiddleware(userState));
+        TestAdapter adapter = new TestAdapter()
+            .use(new AutoSaveStateMiddleware(userState));
 
         new TestFlow(adapter, context -> {
-           TestPocoState state = testProperty.get(context, TestPocoState::new).join();
-            state = state != null ? state : new TestPocoState();
-
+            TestPocoState state = testProperty.get(context, TestPocoState::new).join();
             Assert.assertNotNull(state);
             switch (context.getActivity().getText()) {
                 case "set value":
                     state.setValue("test");
-                    context.sendActivity("value saved");
+                    context.sendActivity("value saved").join();
+                    break;
                 case "get value":
-                    context.sendActivity(state.getValue());
-                default:
+                    context.sendActivity(state.getValue()).join();
                     break;
             }
 
@@ -268,7 +267,7 @@ public class StorageBaseTests {
         })
         .test("set value", "value saved")
         .test("get value", "test")
-        .startTest();
+        .startTest().join();
     }
 
     private static class PocoItem {

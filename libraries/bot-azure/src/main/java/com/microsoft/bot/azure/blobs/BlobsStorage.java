@@ -28,10 +28,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Implements {@link Storage} using Azure Storage Blobs.
+ * This class uses a single Azure Storage Blob Container.
+ * Each entity or {@link StoreItem} is serialized into a JSON string and stored in an individual text blob.
+ * Each blob is named after the store item key,  which is encoded so that it conforms a valid blob name.
+ * an entity is an {@link StoreItem}, the storage object will set the entity's {@link StoreItem}
+ * property value to the blob's ETag upon read. Afterward, an {@link BlobRequestConditions} with the ETag value
+ * will be generated during Write. New entities start with a null ETag.
+ */
 public class BlobsStorage implements Storage {
+
     private final JacksonAdapter jacksonAdapter = new JacksonAdapter();
     private final BlobContainerClient containerClient;
 
+    /**
+     * Initializes a new instance of the {@link BlobsStorage} class.
+     * @param dataConnectionString Azure Storage connection string.
+     * @param containerName Name of the Blob container where entities will be stored.
+     */
     public BlobsStorage(String dataConnectionString, String containerName) {
         if (StringUtils.isBlank(dataConnectionString)) {
             throw new IllegalArgumentException("dataConnectionString is required.");
@@ -47,20 +62,25 @@ public class BlobsStorage implements Storage {
                             .buildClient();
     }
 
+    /**
+     * Deletes entity blobs from the configured container.
+     * @param keys An array of entity keys.
+     * @return A task that represents the work queued to execute.
+     */
     @Override
     public CompletableFuture<Void> delete(String[] keys) {
         if (keys == null) {
             throw new IllegalArgumentException("The 'keys' parameter is required.");
         }
 
-        for (String key : keys) {
+        for (String key: keys) {
             String blobName = getBlobName(key);
             BlobClient blobClient = containerClient.getBlobClient(blobName);
-
-            try {
-                blobClient.delete();
-            } catch (BlobStorageException e) {
-                if (e.getErrorCode().equals(BlobErrorCode.CONTAINER_NOT_FOUND)) {
+            if (blobClient.exists()) {
+                try {
+                    blobClient.delete();
+                } catch (BlobStorageException e) {
+                    e.printStackTrace();
                     throw new RuntimeException(e);
                 }
             }
@@ -69,6 +89,11 @@ public class BlobsStorage implements Storage {
         return CompletableFuture.completedFuture(null);
     }
 
+    /**
+     * Retrieve entities from the configured blob container.
+     * @param keys An array of entity keys.
+     * @return A task that represents the work queued to execute.
+     */
     @Override
     public CompletableFuture<Map<String, Object>> read(String[] keys) {
         if (keys == null) {
@@ -79,6 +104,7 @@ public class BlobsStorage implements Storage {
             try {
                 containerClient.create();
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }
@@ -97,6 +123,11 @@ public class BlobsStorage implements Storage {
         return CompletableFuture.completedFuture(items);
     }
 
+    /**
+     * Stores a new entity in the configured blob container.
+     * @param changes The changes to write to storage.
+     * @return A task that represents the work queued to execute.
+     */
     public CompletableFuture<Void> write(Map<String, Object> changes) {
         if (changes == null) {
             throw new IllegalArgumentException("The 'changes' parameter is required.");
@@ -147,7 +178,7 @@ public class BlobsStorage implements Storage {
     private static String getBlobName(String key)
     {
         if (StringUtils.isBlank(key)) {
-            throw new IllegalArgumentException("key");
+            throw new IllegalArgumentException("The 'key' parameter is required.");
         }
 
         String blobName;

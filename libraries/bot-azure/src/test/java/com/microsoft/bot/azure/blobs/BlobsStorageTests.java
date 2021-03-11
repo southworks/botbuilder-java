@@ -29,16 +29,15 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class BlobsStorageTests extends StorageBaseTests {
-    protected static Boolean EMULATOR_IS_RUNNING = false;
-    private static final String connectionString = "AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;";
-    private static final String NO_EMULATOR_MESSAGE = "This test requires Azure STORAGE Emulator! Go to https://docs.microsoft.com/azure/storage/common/storage-use-emulator to download and install.";
 
     @Rule
     public TestName testName = new TestName();
 
-    public String getContainerName() {
-        return "blobs" + testName.getMethodName().toLowerCase().replace("_", "");
-    }
+    private final String connectionString = "AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;";
+
+    private static final String NO_EMULATOR_MESSAGE = "This test requires Azure STORAGE Emulator! Go to https://docs.microsoft.com/azure/storage/common/storage-use-emulator to download and install.";
+
+    private String containerName = "blobs" + testName.getMethodName().toLowerCase().replace("_", "");
 
     @BeforeClass
     public static void allTestsInit() throws IOException, InterruptedException {
@@ -47,47 +46,24 @@ public class BlobsStorageTests extends StorageBaseTests {
 
     @Test
     public void blobStorageParamTest() {
-        try {
-            new BlobsStorage(null, getContainerName());
-            Assert.fail();
-        } catch (IllegalArgumentException ex) {
-            Assert.assertEquals("dataConnectionString is required.", ex.getMessage());
-        }
-
-        try {
-            new BlobsStorage(connectionString, null);
-            Assert.fail();
-        } catch (IllegalArgumentException ex) {
-            Assert.assertEquals("containerName is required.", ex.getMessage());
-        }
-
-        try {
-            new BlobsStorage("", getContainerName());
-            Assert.fail();
-        } catch (IllegalArgumentException ex) {
-            Assert.assertEquals("dataConnectionString is required.", ex.getMessage());
-        }
-
-        try {
-            new BlobsStorage(connectionString, "");
-            Assert.fail();
-        } catch (IllegalArgumentException ex) {
-            Assert.assertEquals("containerName is required.", ex.getMessage());
-        }
+        Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsStorage(null, containerName));
+        Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsStorage(connectionString, null));
+        Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsStorage(new String(), containerName));
+        Assert.assertThrows(IllegalArgumentException.class, () -> new BlobsStorage(connectionString, new String()));
     }
 
     @Test
     public void testBlobStorageWriteRead()
     {
         // Arrange
-        Storage storage = new BlobsStorage(connectionString, getContainerName());
+        Storage storage = new BlobsStorage(connectionString, containerName);
 
         Map<String, Object> changes = new HashMap();
         changes.put("x", "hello");
         changes.put("y", "world");
 
         // Act
-        storage.write(changes);
+        storage.write(changes).join();
         Map<String, Object> result = storage.read(new String[] {"x", "y"}).join();
 
         // Assert
@@ -100,15 +76,15 @@ public class BlobsStorageTests extends StorageBaseTests {
     public void testBlobStorageWriteDeleteRead()
     {
         // Arrange
-        Storage storage = new BlobsStorage(connectionString, getContainerName());
+        Storage storage = new BlobsStorage(connectionString, containerName);
 
         Map<String, Object> changes = new HashMap();
         changes.put("x", "hello");
         changes.put("y", "world");
 
         // Act
-        storage.write(changes);
-        storage.delete(new String[] { "x" });
+        storage.write(changes).join();
+        storage.delete(new String[] { "x" }).join();
         Map<String, Object> result = storage.read(new String[] {"x", "y"}).join();
 
         // Assert
@@ -119,23 +95,22 @@ public class BlobsStorageTests extends StorageBaseTests {
     @Test
     public void testBlobStorageChanges() {
         // Arrange
-        Storage storage = new BlobsStorage(connectionString, getContainerName());
+        Storage storage = new BlobsStorage(connectionString, containerName);
 
         // Act
         Map<String, Object> changes = new HashMap();
         changes.put("a", "1.0");
         changes.put("b", "2.0");
-        storage.write(changes);
+        storage.write(changes).join();
 
         changes.clear();
         changes.put("c", "3.0");
-        storage.write(changes);
-
-        storage.delete(new String[] { "b" });
+        storage.write(changes).join();
+        storage.delete(new String[] { "b" }).join();
 
         changes.clear();
         changes.put("a", "1.1");
-        storage.write(changes);
+        storage.write(changes).join();
 
         Map<String, Object> result = storage.read(new String[] { "a", "b", "c", "d", "e" }).join();
 
@@ -148,17 +123,15 @@ public class BlobsStorageTests extends StorageBaseTests {
     @Test
     public void testConversationStateBlobStorage() {
         // Arrange
-        Storage storage = new BlobsStorage(connectionString, getContainerName());
+        Storage storage = new BlobsStorage(connectionString, containerName);
         ConversationState conversationState = new ConversationState(storage);
         StatePropertyAccessor<Prop> propAccessor = conversationState.createProperty("prop");
 
         TestStorageAdapter adapter = new TestStorageAdapter();
-        Activity activity = new Activity() {
-            {
-                setChannelId("123");
-                setConversation(new ConversationAccount() {{ setId("abc"); }});
-            }
-        };
+        Activity activity = new Activity() {{
+            setChannelId("123");
+            setConversation(new ConversationAccount() {{ setId("abc"); }});
+        }};
 
         // Act
         TurnContext turnContext1 = new TurnContextImpl(adapter, activity);
@@ -175,19 +148,18 @@ public class BlobsStorageTests extends StorageBaseTests {
         Assert.assertEquals("world", propValue2.getY());
 
         propAccessor.delete(turnContext1).join();
-        conversationState.saveChanges(turnContext1);
+        conversationState.saveChanges(turnContext1).join();
     }
 
     @Test
     public void testConversationStateBlobStorage_TypeNameHandlingDefault() {
-        Storage storage = new BlobsStorage(connectionString, getContainerName());
+        Storage storage = new BlobsStorage(connectionString, containerName);
         testConversationStateBlobStorage_Method(storage);
     }
 
     @Test
     public void statePersistsThroughMultiTurn_TypeNameHandlingNone() {
-        Storage storage = new BlobsStorage(connectionString, getContainerName());
-
+        Storage storage = new BlobsStorage(connectionString, containerName);
         statePersistsThroughMultiTurn(storage);
     }
 
@@ -224,7 +196,7 @@ public class BlobsStorageTests extends StorageBaseTests {
         }
     }
 
-    public static Boolean checkEmulator() throws IOException, InterruptedException {
+    private  static Boolean checkEmulator() throws IOException, InterruptedException {
         Process p = Runtime.getRuntime().exec
             ("cmd /C \"" + System.getenv("ProgramFiles") + " (x86)\\Microsoft SDKs\\Azure\\Storage Emulator\\AzureStorageEmulator.exe\" start");
         int result = p.waitFor();

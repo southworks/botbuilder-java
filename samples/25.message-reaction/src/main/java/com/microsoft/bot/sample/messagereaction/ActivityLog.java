@@ -36,8 +36,6 @@ public class ActivityLog {
             throw new IllegalArgumentException("activityId");
         }
 
-        return storage.read(new String[]{activityId}).thenApply(activitiesResult -> {
-            return activitiesResult.size() >= 1 ? ((Activity) activitiesResult.get(activityId)) : null;
-        });
+        return storage.read(new String[]{activityId}).thenApply(activitiesResult -> activitiesResult.size() >= 1 ? ((Activity) activitiesResult.get(activityId)) : null);
     }
 }

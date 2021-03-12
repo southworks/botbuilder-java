@@ -5,5 +5,4 @@
 /**
  * This package contains the classes for the message reaction sample.
  */
-
 package com.microsoft.bot.sample.messagereaction;

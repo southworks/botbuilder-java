@@ -11,9 +11,10 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.azure.storage.blob.models.BlobErrorCode;
 import com.azure.storage.blob.models.BlobRequestConditions;
 import com.azure.storage.blob.models.BlobStorageException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.bot.builder.Storage;
 import com.microsoft.bot.builder.StoreItem;
-import com.microsoft.bot.restclient.serializer.JacksonAdapter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 
@@ -39,7 +40,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class BlobsStorage implements Storage {
 
-    private final JacksonAdapter jacksonAdapter = new JacksonAdapter();
+    private ObjectMapper objectMapper;
     private final BlobContainerClient containerClient;
 
     /**
@@ -55,6 +56,11 @@ public class BlobsStorage implements Storage {
         if (StringUtils.isBlank(containerName)) {
             throw new IllegalArgumentException("containerName is required.");
         }
+
+        objectMapper = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .findAndRegisterModules()
+            .enableDefaultTyping();
 
         containerClient = new BlobContainerClientBuilder()
                             .connectionString(dataConnectionString)
@@ -155,7 +161,7 @@ public class BlobsStorage implements Storage {
             BlobClient blobReference = containerClient.getBlobClient(blobName);
 
             try {
-                String json = jacksonAdapter.serialize(newValue);
+                String json = objectMapper.writeValueAsString(newValue);
                 InputStream stream = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
                 //verify the corresponding length
                 blobReference.uploadWithResponse(stream, stream.available(), null, null, null, null, accessCondition, null, Context.NONE);
@@ -197,7 +203,7 @@ public class BlobsStorage implements Storage {
             try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
                 blobReference.download(outputStream);
                 String contentString  = outputStream.toString();
-                Object obj = jacksonAdapter.deserialize(contentString , Object.class);
+                Object obj = objectMapper.readValue(contentString, Object.class);
 
                 if (obj instanceof StoreItem) {
                     String eTag = blobReference.getProperties().getETag();
@@ -222,6 +228,7 @@ public class BlobsStorage implements Storage {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                break;
             }
         }
         return CompletableFuture.completedFuture(null);

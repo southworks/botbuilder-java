@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// Licensed under the MIT License. See License.txt in the project root for
+// license information.
 
 package com.microsoft.bot.applicationinsights.core;
 
@@ -15,9 +16,10 @@ import com.microsoft.bot.schema.Activity;
 import java.util.concurrent.CompletableFuture;
 
 public class TelemetryInitializerMiddleware implements Middleware {
+    
     private HttpContext httpContext;
-    private TelemetryLoggerMiddleware telemetryLoggerMiddleware;
-    private Boolean logActivityTelemetry;
+    private final TelemetryLoggerMiddleware telemetryLoggerMiddleware;
+    private final Boolean logActivityTelemetry;
 
     public TelemetryInitializerMiddleware(TelemetryLoggerMiddleware withTelemetryLoggerMiddleware, Boolean withLogActivityTelemetry) {
         telemetryLoggerMiddleware = withTelemetryLoggerMiddleware;

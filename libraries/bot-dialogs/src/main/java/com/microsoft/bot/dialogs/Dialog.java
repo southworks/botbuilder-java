@@ -351,8 +351,8 @@ public abstract class Dialog {
     }
 
     private static CompletableFuture<Void> processEOC(DialogTurnResult result, TurnContext turnContext) {
-        if (result.getStatus() == DialogTurnStatus.COMPLETE
-            || result.getStatus() == DialogTurnStatus.CANCELLED
+        if ((result.getStatus() == DialogTurnStatus.COMPLETE
+            || result.getStatus() == DialogTurnStatus.CANCELLED)
             && sendEoCToParent(turnContext)) {
                 EndOfConversationCodes code = result.getStatus() == DialogTurnStatus.COMPLETE
                                                 ? EndOfConversationCodes.COMPLETED_SUCCESSFULLY

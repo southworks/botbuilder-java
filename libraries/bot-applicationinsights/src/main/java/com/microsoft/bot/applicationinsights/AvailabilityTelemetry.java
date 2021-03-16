@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * We took this class from https://github.com/microsoft/ApplicationInsights-Java/issues/1099
- * As this is not migrated already
+ * as this is not already migrated in ApplicationInsights-Java library
  */
 public final class AvailabilityTelemetry extends BaseSampleSourceTelemetry<AvailabilityData> {
     private Double samplingPercentage;
@@ -52,7 +52,6 @@ public final class AvailabilityTelemetry extends BaseSampleSourceTelemetry<Avail
         setRunLocation(runLocation);
         setDuration(duration);
         setSuccess(success);
-
     }
 
     @Override

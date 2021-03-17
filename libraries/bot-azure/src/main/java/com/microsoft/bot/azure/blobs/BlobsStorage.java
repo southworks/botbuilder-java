@@ -13,6 +13,7 @@ import com.azure.storage.blob.models.BlobRequestConditions;
 import com.azure.storage.blob.models.BlobStorageException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.microsoft.bot.builder.Storage;
 import com.microsoft.bot.builder.StoreItem;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implements {@link Storage} using Azure Storage Blobs.
@@ -42,6 +44,9 @@ public class BlobsStorage implements Storage {
 
     private ObjectMapper objectMapper;
     private final BlobContainerClient containerClient;
+
+    private final Integer milisecondsTimeout = 2000;
+    private final Integer retryTimes = 8;
 
     /**
      * Initializes a new instance of the {@link BlobsStorage} class.
@@ -152,24 +157,28 @@ public class BlobsStorage implements Storage {
             StoreItem storeItem = newValue instanceof StoreItem ? (StoreItem) newValue : null;
 
             // "*" eTag in StoreItem converts to null condition for AccessCondition
-            boolean isNullOrEmpty = storeItem == null || StringUtils.isBlank(storeItem.getETag()) || storeItem.getETag().equals("*");
+            boolean isNullOrEmpty = storeItem == null || StringUtils.isBlank(storeItem.getETag())
+                || storeItem.getETag().equals("*");
             BlobRequestConditions accessCondition = !isNullOrEmpty
                 ? new BlobRequestConditions().setIfMatch(storeItem.getETag())
                 : null;
 
             String blobName = getBlobName(keyValuePair.getKey());
             BlobClient blobReference = containerClient.getBlobClient(blobName);
-
             try {
                 String json = objectMapper.writeValueAsString(newValue);
                 InputStream stream = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
                 //verify the corresponding length
-                blobReference.uploadWithResponse(stream, stream.available(), null, null, null, null, accessCondition, null, Context.NONE);
-            } catch(HttpResponseException e) {
+                blobReference.uploadWithResponse(stream, stream.available(),
+                    null, null,
+                    null, null, accessCondition, null, Context.NONE);
+            } catch (HttpResponseException e) {
                 if (e.getResponse().getStatusCode() == HttpStatus.SC_BAD_REQUEST) {
-                    StringBuilder sb = new StringBuilder("An error occurred while trying to write an object. The underlying ");
+                    StringBuilder sb =
+                        new StringBuilder("An error occurred while trying to write an object. The underlying ");
                     sb.append(BlobErrorCode.INVALID_BLOCK_LIST);
-                    sb.append(" error is commonly caused due to concurrently uploading an object larger than 128MB in size.");
+                    sb.append(" error is commonly caused due to "
+                        + "concurrently uploading an object larger than 128MB in size.");
 
                     throw new HttpResponseException(sb.toString(), e.getResponse());
                 }
@@ -181,8 +190,7 @@ public class BlobsStorage implements Storage {
         return CompletableFuture.completedFuture(null);
     }
 
-    private static String getBlobName(String key)
-    {
+    private static String getBlobName(String key) {
         if (StringUtils.isBlank(key)) {
             throw new IllegalArgumentException("The 'key' parameter is required.");
         }
@@ -203,7 +211,17 @@ public class BlobsStorage implements Storage {
             try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
                 blobReference.download(outputStream);
                 String contentString  = outputStream.toString();
-                Object obj = objectMapper.readValue(contentString, Object.class);
+
+                Object obj;
+                // We are doing this try/catch because we are receiving String or HashMap
+                try {
+                    // We need to deserialize to an object class since there are contentString which has a String type
+                    obj = objectMapper.readValue(contentString, String.class);
+                } catch (MismatchedInputException ex) {
+                    // In case of the contentString has the structure of a HashMap,
+                    // we need to deserialize it to a HashMap object
+                    obj = objectMapper.readValue(contentString, HashMap.class);
+                }
 
                 if (obj instanceof StoreItem) {
                     String eTag = blobReference.getProperties().getETag();
@@ -213,10 +231,11 @@ public class BlobsStorage implements Storage {
                 return CompletableFuture.completedFuture(obj);
             } catch (HttpResponseException e) {
                 if (e.getResponse().getStatusCode() == HttpStatus.SC_PRECONDITION_FAILED) {
-                    // additional retry logic, even though this is a read operation blob storage can return 412 if there is contention
-                    if (i++ < 8) {
+                    // additional retry logic,
+                    // even though this is a read operation blob storage can return 412 if there is contention
+                    if (i++ < retryTimes) {
                         try {
-                            Thread.sleep(2000);
+                            TimeUnit.MILLISECONDS.sleep(milisecondsTimeout);
                             continue;
                         } catch (InterruptedException ex) {
                             break;

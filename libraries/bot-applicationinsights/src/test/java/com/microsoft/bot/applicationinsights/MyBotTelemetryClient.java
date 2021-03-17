@@ -19,13 +19,14 @@ public class MyBotTelemetryClient extends BotTelemetryClientImpl {
     public void trackDependency(
         String dependencyTypeName,
         String target,
+        String dependencyName,
         String data,
         OffsetDateTime startTime,
         Duration duration,
         String resultCode,
-        Boolean success)
+        boolean success)
     {
-        super(dependencyName, target, dependencyName, data, startTime, duration, resultCode, success);
+        super.trackDependency(dependencyName, target, dependencyName, data, startTime, duration, resultCode, success);
     }
 
     @Override
@@ -34,7 +35,7 @@ public class MyBotTelemetryClient extends BotTelemetryClientImpl {
         OffsetDateTime timeStamp,
         Duration duration,
         String runLocation,
-        Boolean success,
+        boolean success,
         String message,
         Map<String, String> properties,
         Map<String, Double> metrics)

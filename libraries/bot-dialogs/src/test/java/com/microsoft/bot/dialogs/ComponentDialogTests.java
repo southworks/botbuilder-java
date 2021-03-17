@@ -12,7 +12,6 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.activation.UnsupportedDataTypeException;
 
-import com.microsoft.applicationinsights.telemetry.SeverityLevel;
 import com.microsoft.bot.builder.AutoSaveStateMiddleware;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.ConversationState;
@@ -467,7 +466,7 @@ public class ComponentDialogTests {
         }
 
         @Override
-        public void trackTrace(String message, SeverityLevel severityLevel, Map<String, String> properties) {
+        public void trackTrace(String message, Severity severityLevel, Map<String, String> properties) {
 
         }
 

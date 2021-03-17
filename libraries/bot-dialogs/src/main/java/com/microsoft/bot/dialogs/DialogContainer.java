@@ -4,9 +4,9 @@
 package com.microsoft.bot.dialogs;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.microsoft.applicationinsights.telemetry.SeverityLevel;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.NullBotTelemetryClient;
+import com.microsoft.bot.builder.Severity;
 import com.microsoft.bot.builder.TurnContext;
 import java.util.concurrent.CompletableFuture;
 
@@ -93,7 +93,7 @@ public abstract class DialogContainer extends Dialog {
                 String traceMessage = String.format("Unhandled dialog event: {e.Name}. Active Dialog: %s",
                         dc.getActiveDialog().getId());
 
-                dc.getDialogs().getTelemetryClient().trackTrace(traceMessage, SeverityLevel.Warning, null);
+                dc.getDialogs().getTelemetryClient().trackTrace(traceMessage, Severity.WARNING, null);
 
                 return TurnContext.traceActivity(dc.getContext(), traceMessage).thenApply(response -> handled);
             }

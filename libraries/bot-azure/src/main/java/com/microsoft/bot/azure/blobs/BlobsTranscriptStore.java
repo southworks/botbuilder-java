@@ -34,7 +34,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -178,7 +181,7 @@ public class BlobsTranscriptStore implements TranscriptStore {
         do {
             String prefix = String.format("%s/%s/", sanitizeKey(channelId), sanitizeKey(conversationId));
             Iterable<PagedResponse<BlobItem>> resultSegment = containerClient
-                .listBlobsByHierarchy("/", this.getOptionsWihtMetadata(prefix), null)
+                .listBlobsByHierarchy("/", this.getOptionsWithMetadata(prefix), null)
                 .iterableByPage(token);
             token = null;
             for (PagedResponse<BlobItem> blobPage: resultSegment) {
@@ -241,7 +244,7 @@ public class BlobsTranscriptStore implements TranscriptStore {
         do {
             String prefix = String.format("%s/", sanitizeKey(channelId));
             Iterable<PagedResponse<BlobItem>> resultSegment = containerClient.
-                listBlobsByHierarchy("/", this.getOptionsWihtMetadata(prefix), null)
+                listBlobsByHierarchy("/", this.getOptionsWithMetadata(prefix), null)
                 .iterableByPage(token);
             token = null;
             for (PagedResponse<BlobItem> blobPage: resultSegment) {
@@ -303,7 +306,7 @@ public class BlobsTranscriptStore implements TranscriptStore {
         do {
             String prefix = String.format("%s/%s/", sanitizeKey(channelId), sanitizeKey(conversationId));
             Iterable<PagedResponse<BlobItem>> resultSegment = containerClient
-                .listBlobsByHierarchy("/", this.getOptionsWihtMetadata(prefix), null).iterableByPage(token);
+                .listBlobsByHierarchy("/", this.getOptionsWithMetadata(prefix), null).iterableByPage(token);
             token = null;
 
             for (PagedResponse<BlobItem> blobPage: resultSegment) {
@@ -336,7 +339,7 @@ public class BlobsTranscriptStore implements TranscriptStore {
                         sanitizeKey(activity.getChannelId()), sanitizeKey(activity.getConversation().getId()));
                     Iterable<PagedResponse<BlobItem>> resultSegment = containerClient
                         .listBlobsByHierarchy("/",
-                            this.getOptionsWihtMetadata(prefix), null).iterableByPage(token);
+                            this.getOptionsWithMetadata(prefix), null).iterableByPage(token);
                     token = null;
                     for (PagedResponse<BlobItem> blobPage: resultSegment) {
                         for (BlobItem blobItem: blobPage.getValue()) {
@@ -461,13 +464,16 @@ public class BlobsTranscriptStore implements TranscriptStore {
      * @return The String representing the ticks.
      */
     private String formatTicks(OffsetDateTime dateTime) {
-        final long epochTicks = 621355968000000000L; // the number of .net ticks at the unix epoch
-        final int ticksPerMillisecond = 10000;
-        final Long ticks = epochTicks + dateTime.toInstant().toEpochMilli() * ticksPerMillisecond;
+        final Instant begin = ZonedDateTime.of(1, 1, 1, 0, 0, 0, 0,
+            ZoneOffset.UTC).toInstant();
+        final Instant end = dateTime.toInstant();
+        long secsDiff = Math.subtractExact(end.getEpochSecond(), begin.getEpochSecond());
+        long totalHundredNanos = Math.multiplyExact(secsDiff, 10_000_000);
+        final Long ticks = Math.addExact(totalHundredNanos, (end.getNano() - begin.getNano()) / 100);
         return Long.toString(ticks,16);
     }
 
-    private ListBlobsOptions getOptionsWihtMetadata(String prefix) {
+    private ListBlobsOptions getOptionsWithMetadata(String prefix) {
         BlobListDetails details = new BlobListDetails();
         details.setRetrieveMetadata(true);
         ListBlobsOptions options = new ListBlobsOptions();

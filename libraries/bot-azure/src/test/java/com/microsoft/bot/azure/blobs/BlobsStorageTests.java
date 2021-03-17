@@ -23,7 +23,6 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -228,17 +227,17 @@ public class BlobsStorageTests extends StorageBaseTests {
 
         @Override
         public CompletableFuture<ResourceResponse[]> sendActivities(TurnContext context, List<Activity> activities) {
-            throw new NotImplementedException();
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public CompletableFuture<ResourceResponse> updateActivity(TurnContext context, Activity activity) {
-            throw new NotImplementedException();
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public CompletableFuture<Void> deleteActivity(TurnContext context, ConversationReference reference) {
-            throw new NotImplementedException();
+            throw new UnsupportedOperationException();
         }
     }
 

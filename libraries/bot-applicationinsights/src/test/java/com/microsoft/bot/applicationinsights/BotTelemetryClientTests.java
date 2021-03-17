@@ -48,7 +48,9 @@ public class BotTelemetryCientTests {
         {
             mockTelemetryChannel = Mockito.mock(TelemetryChannel.class);
 
-            TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration("UNITTEST-INSTRUMENTATION-KEY", mockTelemetryChannel.Object);
+            TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();
+            telemetryConfiguration.setInstrumentationKey("UNITTEST-INSTRUMENTATION-KEY");
+            telemetryConfiguration.setChannel(mockTelemetryChannel);
             TelemetryClient telemetryClient = new TelemetryClient(telemetryConfiguration);
 
             botTelemetryClient = new BotTelemetryClient(telemetryClient);

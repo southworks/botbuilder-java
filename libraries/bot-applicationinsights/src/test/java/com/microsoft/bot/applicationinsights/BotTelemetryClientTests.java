@@ -10,6 +10,7 @@ import com.microsoft.applicationinsights.telemetry.*;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.Severity;
 import org.junit.Assert;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.time.Duration;
@@ -22,6 +23,8 @@ import static org.mockito.Mockito.verify;
 
 public class BotTelemetryClientTests {
     public class ConstructorTests {
+
+        @Test
         public void NullTelemetryClientThrows() {
             try {
                 new BotTelemetryClientImpl(null);
@@ -30,12 +33,14 @@ public class BotTelemetryClientTests {
             }
         }
 
+        @Test
         public void NonNullTelemetryClientSucceeds() {
             TelemetryClient telemetryClient = new TelemetryClient();
 
             BotTelemetryClient botTelemetryClient = new BotTelemetryClientImpl(telemetryClient);
         }
 
+        @Test
         public void OverrideTest() {
             TelemetryClient telemetryClient = new TelemetryClient();
             MyBotTelemetryClient botTelemetryClient = new MyBotTelemetryClient(telemetryClient);
@@ -58,6 +63,7 @@ public class BotTelemetryClientTests {
             botTelemetryClient = new BotTelemetryClientImpl(telemetryClient);
         }
 
+        @Test
         public void TrackAvailabilityTest()
         {
             Map<String, String> properties = new HashMap<>();
@@ -81,6 +87,7 @@ public class BotTelemetryClientTests {
             verify(mockTelemetryChannel.send(isA(AvailabilityTelemetry (t -> t.getMetrics["metric"] == 0.6))));
         }
 
+        @Test
         public void TrackEventTest()
         {
             botTelemetryClient.trackEvent("test", new HashMap<String, String>() {{ put("hello", "value"); }}, new HashMap<String, Double>() {{ put("metric", 0.6); }});
@@ -90,6 +97,7 @@ public class BotTelemetryClientTests {
             verify(mockTelemetryChannel.send(isA(EventTelemetry(t -> t.getMetrics["metric"] == 0.6))));
         }
 
+        @Test
         public void TrackDependencyTest()
         {
             botTelemetryClient.trackDependency("test", "target", "dependencyname", "data", OffsetDateTime.now(), Duration.ofSeconds(1000), "result", false);
@@ -102,6 +110,7 @@ public class BotTelemetryClientTests {
             verify(mockTelemetryChannel.send(isA(RemoteDependencyTelemetry(t -> t.isSuccess() == false))));
         }
 
+        @Test
         public void TrackExceptionTest()
         {
             Exception expectedException = new Exception("test-exception");
@@ -112,6 +121,7 @@ public class BotTelemetryClientTests {
             verify(mockTelemetryChannel.send(isA(ExceptionTelemetry(t -> t.getMetrics["metric"] == 0.6))));
         }
 
+        @Test
         public void TrackTraceTest()
         {
             botTelemetryClient.trackTrace("hello", Severity.CRITICAL, new HashMap<String, String>() {{ put("foo", "bar"); }});
@@ -121,6 +131,7 @@ public class BotTelemetryClientTests {
             verify(mockTelemetryChannel.send(isA(TraceTelemetry(t -> t.Properties["foo"] == "bar"))));
         }
 
+        @Test
         public void TrackPageViewTest()
         {
             botTelemetryClient.trackDialogView("test", new HashMap<String, String>() {{ put("hello", "value"); }}, new HashMap<String, Double>() {{ put("metric", 0.6); }});

@@ -10,6 +10,7 @@ import com.microsoft.applicationinsights.telemetry.PageViewTelemetry;
 import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
 import com.microsoft.applicationinsights.telemetry.TraceTelemetry;
 import com.microsoft.bot.builder.BotTelemetryClient;
+import com.microsoft.bot.builder.Severity;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.time.Duration;
@@ -188,14 +189,14 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
      * Send a trace message.
      *
      * @param message Message to display.
-     * @param severityLevel Trace severity level {@link SeverityLevel}.
+     * @param severityLevel Trace severity level {@link Severity}.
      * @param properties Named string values you can use to search and classify events.
      */
     @Override
-    public void trackTrace(String message, SeverityLevel severityLevel, Map<String, String> properties)
+    public void trackTrace(String message, Severity severityLevel, Map<String, String> properties)
     {
         TraceTelemetry telemetry = new TraceTelemetry(message);
-        telemetry.setSeverityLevel(severityLevel);
+        telemetry.setSeverityLevel(SeverityLevel.values()[severityLevel.ordinal()]);
 
         if (properties != null)
         {

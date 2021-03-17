@@ -38,7 +38,12 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -55,6 +60,8 @@ public class BlobsTranscriptStore implements TranscriptStore {
 
     private final Integer milisecondsTimeout = 2000;
     private final Integer retryTimes = 3;
+    private final Integer longRadix = 16;
+    private final Integer multipleProductValue = 10_000_000;
 
     private final ObjectMapper jsonSerializer;
     private BlobContainerClient containerClient;
@@ -468,9 +475,9 @@ public class BlobsTranscriptStore implements TranscriptStore {
             ZoneOffset.UTC).toInstant();
         final Instant end = dateTime.toInstant();
         long secsDiff = Math.subtractExact(end.getEpochSecond(), begin.getEpochSecond());
-        long totalHundredNanos = Math.multiplyExact(secsDiff, 10_000_000);
+        long totalHundredNanos = Math.multiplyExact(secsDiff, multipleProductValue);
         final Long ticks = Math.addExact(totalHundredNanos, (end.getNano() - begin.getNano()) / 100);
-        return Long.toString(ticks,16);
+        return Long.toString(ticks, longRadix);
     }
 
     private ListBlobsOptions getOptionsWithMetadata(String prefix) {

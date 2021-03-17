@@ -517,6 +517,10 @@ public class TranscriptStoreTests {
         return result == 0 || result == -5;
     }
 
+    /**
+     * Time period delay.
+     * @param delay Time to delay.
+     */
     private void delay(Integer delay) {
         try {
             Thread.sleep(delay);

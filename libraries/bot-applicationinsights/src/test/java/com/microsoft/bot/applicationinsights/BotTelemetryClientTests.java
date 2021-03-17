@@ -20,7 +20,7 @@ import java.util.Map;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 
-public class BotTelemetryCientTests {
+public class BotTelemetryClientTests {
     public class ConstructorTests {
         public void NullTelemetryClientThrows() {
             try {

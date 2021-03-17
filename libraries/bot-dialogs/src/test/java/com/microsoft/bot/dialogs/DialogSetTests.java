@@ -8,7 +8,6 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
 
-import com.microsoft.applicationinsights.telemetry.SeverityLevel;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.ConversationState;
 import com.microsoft.bot.builder.MemoryStorage;
@@ -193,7 +192,7 @@ public class DialogSetTests {
         }
 
         @Override
-        public void trackTrace(String message, SeverityLevel severityLevel, Map<String, String> properties) {
+        public void trackTrace(String message, Severity severityLevel, Map<String, String> properties) {
             throw new NotImplementedException("trackTrace is not implemented");
         }
 

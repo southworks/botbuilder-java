@@ -3,6 +3,8 @@
 
 package com.microsoft.bot.builder;
 
+import com.microsoft.applicationinsights.telemetry.SeverityLevel;
+
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -60,7 +62,7 @@ public class NullBotTelemetryClient implements BotTelemetryClient {
     }
 
     @Override
-    public void trackTrace(String message, Severity severityLevel, Map<String, String> properties) {
+    public void trackTrace(String message, SeverityLevel severityLevel, Map<String, String> properties) {
 
     }
 

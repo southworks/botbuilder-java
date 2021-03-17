@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 
 public class BotTelemetryCientTests {
@@ -73,31 +74,31 @@ public class BotTelemetryCientTests {
                 properties,
                 metrics);
 
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<AvailabilityTelemetry>(t => t.Name == "test")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<AvailabilityTelemetry>(t => t.Message == "message")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<AvailabilityTelemetry>(t => t.Properties["hello"] == "value")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<AvailabilityTelemetry>(t => t.Metrics["metric"] == 0.6)));
+            verify(mockTelemetryChannel.send(isA(AvailabilityTelemetry (t -> t.getName() == "test"))));
+            verify(mockTelemetryChannel.send(isA(AvailabilityTelemetry (t -> t.getMessage()) == "message")));
+            verify(mockTelemetryChannel.send(isA(AvailabilityTelemetry (t -> t.Properties["hello"] == "value"))));
+            verify(mockTelemetryChannel.send(isA(AvailabilityTelemetry (t -> t.Metrics["metric"] == 0.6))));
         }
 
         public void TrackEventTest()
         {
             botTelemetryClient.trackEvent("test", new HashMap<String, String>() {{ put("hello", "value"); }}, new HashMap<String, Double>() {{ put("metric", 0.6); }});
 
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<EventTelemetry>(t => t.Name == "test")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<EventTelemetry>(t => t.Properties["hello"] == "value")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<EventTelemetry>(t => t.Metrics["metric"] == 0.6)));
+            verify(mockTelemetryChannel.send(isA(EventTelemetry(t -> t.getName == "test"))));
+            verify(mockTelemetryChannel.send(isA(EventTelemetry(t -> t.Properties["hello"] == "value"))));
+            verify(mockTelemetryChannel.send(isA(EventTelemetry(t -> t.getMetrics["metric"] == 0.6))));
         }
 
         public void TrackDependencyTest()
         {
             botTelemetryClient.trackDependency("test", "target", "dependencyname", "data", OffsetDateTime.now(), Duration.ofSeconds(1000), "result", false);
 
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<DependencyTelemetry>(t => t.Type == "test")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<DependencyTelemetry>(t => t.Target == "target")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<DependencyTelemetry>(t => t.Name == "dependencyname")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<DependencyTelemetry>(t => t.Data == "data")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<DependencyTelemetry>(t => t.ResultCode == "result")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<DependencyTelemetry>(t => t.Success == false)));
+            verify(mockTelemetryChannel.send(isA(DependencyTelemetry(t -> t.getVer == "test"))));
+            verify(mockTelemetryChannel.send(isA(DependencyTelemetry(t -> t.Target == "target"))));
+            verify(mockTelemetryChannel.send(isA(DependencyTelemetry(t -> t.getName == "dependencyname"))));
+            verify(mockTelemetryChannel.send(isA(DependencyTelemetry(t -> t.getData == "data"))));
+            verify(mockTelemetryChannel.send(isA(DependencyTelemetry(t -> t.ResultCode == "result"))));
+            verify(mockTelemetryChannel.send(isA(DependencyTelemetry(t -> t.isSuccess == false))));
         }
 
         public void TrackExceptionTest()
@@ -105,27 +106,27 @@ public class BotTelemetryCientTests {
             Exception expectedException = new Exception("test-exception");
 
             botTelemetryClient.trackException(expectedException, new HashMap<String, String>() {{ put("foo", "bar"); }}, new HashMap<String, Double>() {{ put("metric", 0.6); }});
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<ExceptionTelemetry>(t => t.Exception == expectedException)));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<ExceptionTelemetry>(t => t.Properties["foo"] == "bar")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<ExceptionTelemetry>(t => t.Metrics["metric"] == 0.6)));
+            verify(mockTelemetryChannel.send(isA(ExceptionTelemetry(t -> t.Exception == expectedException))));
+            verify(mockTelemetryChannel.send(isA(ExceptionTelemetry(t -> t.Properties["foo"] == "bar"))));
+            verify(mockTelemetryChannel.send(isA(ExceptionTelemetry(t -> t.getMetrics["metric"] == 0.6))));
         }
 
         public void TrackTraceTest()
         {
             botTelemetryClient.trackTrace("hello", Severity.CRITICAL, new HashMap<String, String>() {{ put("foo", "bar"); }});
 
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<TraceTelemetry>(t => t.Message == "hello")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<TraceTelemetry>(t => t.SeverityLevel == Severity.CRITICAL)));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<TraceTelemetry>(t => t.Properties["foo"] == "bar")));
+            verify(mockTelemetryChannel.send(isA(TraceTelemetry(t -> t.getMessage == "hello"))));
+            verify(mockTelemetryChannel.send(isA(TraceTelemetry(t -> t.getSeverityLevel == Severity.CRITICAL))));
+            verify(mockTelemetryChannel.send(isA(TraceTelemetry(t -> t.Properties["foo"] == "bar"))));
         }
 
         public void TrackPageViewTest()
         {
             botTelemetryClient.trackDialogView("test", new HashMap<String, String>() {{ put("hello", "value"); }}, new HashMap<String, Double>() {{ put("metric", 0.6); }});
 
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<PageViewTelemetry>(t => t.Name == "test")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<PageViewTelemetry>(t => t.Properties["hello"] == "value")));
-            verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<PageViewTelemetry>(t => t.Metrics["metric"] == 0.6)));
+            verify(mockTelemetryChannel.send(isA(PageViewTelemetry(t -> t.getName == "test"))));
+            verify(mockTelemetryChannel.send(isA(PageViewTelemetry(t -> t.Properties["hello"] == "value"))));
+            verify(mockTelemetryChannel.send(isA(PageViewTelemetry(t -> t.getMetrics["metric"] == 0.6))));
         }
     }
 }

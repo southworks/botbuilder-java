@@ -23,7 +23,7 @@ public class BotTelemetryCientTests {
     public class ConstructorTests {
         public void NullTelemetryClientThrows() {
             try {
-                new BotTelemetryClient(null);
+                new BotTelemetryClientImpl(null);
             } catch (Exception e) {
                 Assert.assertEquals("IllegalArgumentException", e.getCause());
             }
@@ -32,7 +32,7 @@ public class BotTelemetryCientTests {
         public void NonNullTelemetryClientSucceeds() {
             TelemetryClient telemetryClient = new TelemetryClient();
 
-            BotTelemetryClient botTelemetryClient = new BotTelemetryClient(telemetryClient);
+            BotTelemetryClient botTelemetryClient = new BotTelemetryClientImpl(telemetryClient);
         }
 
         public void OverrideTest() {
@@ -54,7 +54,7 @@ public class BotTelemetryCientTests {
             telemetryConfiguration.setChannel(mockTelemetryChannel);
             TelemetryClient telemetryClient = new TelemetryClient(telemetryConfiguration);
 
-            botTelemetryClient = new BotTelemetryClient(telemetryClient);
+            botTelemetryClient = new BotTelemetryClientImpl(telemetryClient);
         }
 
         public void TrackAvailabilityTest()

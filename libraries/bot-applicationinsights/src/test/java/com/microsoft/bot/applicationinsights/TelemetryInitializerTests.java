@@ -28,10 +28,9 @@ public class TelemetryInitializerTests {
     public void telemetryInitializerStoresActivity() {
         TelemetryClient telemetryClient = new TelemetryClient();
 
-        TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware((BotTelemetryClient) telemetryClient, false);
-        TelemetryInitializerMiddleware initializerMiddleware = new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, false);
-
-        /***/
+        /**
+         * TODO: Check Typescript implementation
+         */
     }
 
     @Test
@@ -42,7 +41,7 @@ public class TelemetryInitializerTests {
 
         TestAdapter testAdapter = new TestAdapter()
         		.use(new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, true));
-                
+
         TestFlow testFlow = new TestFlow(testAdapter, (turnContext) -> {
             Activity typingActivity = new Activity() {
             {
@@ -57,14 +56,14 @@ public class TelemetryInitializerTests {
             }
             turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText())).join();
             return CompletableFuture.completedFuture(null);
-        }); 
-        
+        });
+
         testFlow.send("foo")
 		        .assertReply(activity -> {
 		            Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
 		        })
 		        .assertReply("echo:foo");
-                
+
         verify(mockTelemetryClient, times(1));
     }
 
@@ -76,7 +75,7 @@ public class TelemetryInitializerTests {
 
         TestAdapter testAdapter = new TestAdapter()
         		.use(new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, false));
-                
+
         TestFlow testFlow = new TestFlow(testAdapter, (turnContext) -> {
             Activity typingActivity = new Activity() {
             {
@@ -91,14 +90,14 @@ public class TelemetryInitializerTests {
             }
             turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText())).join();
             return CompletableFuture.completedFuture(null);
-        }); 
-        
+        });
+
         testFlow.send("foo")
 		        .assertReply(activity -> {
 		            Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
 		        })
 		        .assertReply("echo:foo");
-                
+
         verify(mockTelemetryClient, times(0));
     }
 }

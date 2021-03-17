@@ -9,6 +9,13 @@ import com.microsoft.applicationinsights.channel.TelemetryChannel;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import org.junit.Assert;
 import org.mockito.Mockito;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.mockito.Mockito.verify;
 
 public class BotTelemetryCientTests {
@@ -49,15 +56,20 @@ public class BotTelemetryCientTests {
 
         public void TrackAvailabilityTest()
         {
+            Map<String, String> properties = new HashMap<>();
+            Map<String, Double> metrics = new HashMap<>();
+            properties.put("hello", "value");
+            metrics.put("metric", 0.6);
+
             botTelemetryClient.trackAvailability(
                 "test",
-                DateTimeOffset.Now,
-                new TimeSpan(1000),
+                OffsetDateTime.now(),
+                Duration.ofSeconds(1000), // TODO: use computer ticks
                 "run location",
                 true,
                 "message",
-                new Dictionary<string, string>() { { "hello", "value" } },
-                new Dictionary<string, double>() { { "metric", 0.6 } });
+                properties,
+                metrics);
 
             verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<AvailabilityTelemetry>(t => t.Name == "test")));
             verify(mockTelemetryChannel => mockTelemetryChannel.send(It.Is<AvailabilityTelemetry>(t => t.Message == "message")));

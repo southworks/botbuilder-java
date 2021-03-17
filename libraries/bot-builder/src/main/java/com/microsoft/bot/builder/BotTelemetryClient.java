@@ -3,6 +3,8 @@
 
 package com.microsoft.bot.builder;
 
+import com.microsoft.applicationinsights.telemetry.SeverityLevel;
+
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -151,7 +153,7 @@ public interface BotTelemetryClient {
      * @param properties    Named string values you can use to search and classify
      *                      events.
      */
-    void trackTrace(String message, Severity severityLevel, Map<String, String> properties);
+    void trackTrace(String message, SeverityLevel severityLevel, Map<String, String> properties);
 
     /**
      * Log a DialogView using the TrackPageView method on the IBotTelemetryClient if

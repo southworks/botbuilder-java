@@ -7,47 +7,60 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 
-public class NanoClockHelper extends Clock
-{
+/**
+ * A customized nanoseconds clock providing access to the current instant, date and time using a time-zone.
+ */
+public class NanoClockHelper extends Clock {
     private final Clock clock;
 
     private final long initialNanos;
 
     private final Instant initialInstant;
 
-    public NanoClockHelper()
-    {
+    /**
+     * Obtains a clock that returns the current instant using the best available
+     * system clock with nanoseconds.
+     */
+    public NanoClockHelper() {
         this(Clock.systemUTC());
     }
 
-    public NanoClockHelper(final Clock clock)
-    {
+    /**
+     * Obtains a clock that returns the current instant using the best available
+     * system clock with nanoseconds.
+     * @param clock A {@link Clock}
+     */
+    public NanoClockHelper(final Clock clock) {
         this.clock = clock;
         initialInstant = clock.instant();
         initialNanos = getSystemNanos();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public ZoneId getZone()
-    {
+    public ZoneId getZone() {
         return clock.getZone();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Instant instant()
-    {
+    public Instant instant() {
         return initialInstant.plusNanos(getSystemNanos() - initialNanos);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Clock withZone(final ZoneId zone)
-    {
+    public Clock withZone(final ZoneId zone) {
         return new NanoClockHelper(clock.withZone(zone));
     }
 
-    private long getSystemNanos()
-    {
+    private long getSystemNanos() {
         return System.nanoTime();
     }
 }
-

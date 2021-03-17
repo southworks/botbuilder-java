@@ -235,14 +235,11 @@ public class TranscriptStoreTests {
         TestAdapter adapter = new TestAdapter(conversation)
             .use(new TranscriptLoggerMiddleware(transcriptStore));
         new TestFlow(adapter, turnContext -> {
+            delay(500);
             Activity typingActivity = new Activity(ActivityTypes.TYPING);
             typingActivity.setRelatesTo(turnContext.getActivity().getRelatesTo());
             turnContext.sendActivity(typingActivity).join();
-            try {
-                TimeUnit.MILLISECONDS.sleep(500);
-            } catch (InterruptedException e) {
-                // Empty error
-            }
+            delay(500);
             turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText())).join();
             return CompletableFuture.completedFuture(null);
         })
@@ -292,6 +289,7 @@ public class TranscriptStoreTests {
             .use(new TranscriptLoggerMiddleware(transcriptStore));
         final Activity[] activityToUpdate = {null};
         new TestFlow(adapter, turnContext -> {
+            delay(500);
             if(turnContext.getActivity().getText().equals("update")) {
                 activityToUpdate[0].setText("new response");
                 turnContext.updateActivity(activityToUpdate[0]).join();
@@ -416,6 +414,7 @@ public class TranscriptStoreTests {
             .use(new TranscriptLoggerMiddleware(transcriptStore));
         final String[] activityId = {null};
         new TestFlow(adapter, turnContext -> {
+            delay(500);
             if (turnContext.getActivity().getText().equals("deleteIt")) {
                 turnContext.deleteActivity(activityId[0]).join();
             } else {
@@ -484,22 +483,15 @@ public class TranscriptStoreTests {
 
         PagedResult<Activity> pagedResult = null;
         for (int timeout = 0; timeout < maxTimeout; timeout += 500) {
-            try {
-                TimeUnit.MILLISECONDS.sleep(500);
-            } catch (InterruptedException e) {
-                // Empty error
-            }
+            delay(500);
             try {
                 pagedResult = transcriptStore
                     .getTranscriptActivities(conversation.getChannelId(), conversation.getConversation().getId()).join();
                 if (pagedResult.getItems().size() >= expectedLength) {
                     break;
                 }
-            } catch (NoSuchElementException ex) {
-
-            } catch (NullPointerException e) {
-
-            }
+            } catch (NoSuchElementException ex) { }
+            catch (NullPointerException e) { }
         }
 
         if(pagedResult == null) {
@@ -523,5 +515,13 @@ public class TranscriptStoreTests {
         // status = -5: the service is already started. Only one instance of the application
         // can be run at the same time.
         return result == 0 || result == -5;
+    }
+
+    private void delay(Integer delay) {
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            // Empty error
+        }
     }
 }

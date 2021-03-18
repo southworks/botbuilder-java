@@ -83,7 +83,7 @@ public class BotTelemetryClientTests {
             Assert.assertEquals("test", availabilityTelemetry.getName());
             Assert.assertEquals("message", availabilityTelemetry.getData().getMessage());
             Assert.assertEquals("value", availabilityTelemetry.getProperties().get("hello"));
-            Assert.assertEquals((Double) 0.6, availabilityTelemetry.getMetrics().get("metric"));
+            Assert.assertEquals(0, Double.compare(0.6, availabilityTelemetry.getMetrics().get("metric")));
 
             return null;
         }).when(mockTelemetryChannel).send(Mockito.any(AvailabilityTelemetry.class));
@@ -103,7 +103,7 @@ public class BotTelemetryClientTests {
 
             Assert.assertEquals("test", eventTelemetry.getName());
             Assert.assertEquals("value", eventTelemetry.getProperties().get("hello"));
-            Assert.assertEquals((Double) 0.6, eventTelemetry.getMetrics().get("metric"));
+            Assert.assertEquals(0, Double.compare(0.6, eventTelemetry.getMetrics().get("metric")));
 
             return null;
         }).when(mockTelemetryChannel).send(Mockito.any(EventTelemetry.class));
@@ -148,7 +148,7 @@ public class BotTelemetryClientTests {
 
             Assert.assertEquals(expectedException, exceptionTelemetry.getException());
             Assert.assertEquals("bar", exceptionTelemetry.getProperties().get("foo"));
-            Assert.assertEquals(0.6, exceptionTelemetry.getProperties().get("metric"));
+            Assert.assertEquals(0, Double.compare(0.6, exceptionTelemetry.getMetrics().get("metric")));
 
             return null;
         }).when(mockTelemetryChannel).send(Mockito.any(ExceptionTelemetry.class));
@@ -186,7 +186,7 @@ public class BotTelemetryClientTests {
 
             Assert.assertEquals("test", pageViewTelemetry.getName());
             Assert.assertEquals("value", pageViewTelemetry.getProperties().get("hello"));
-            Assert.assertEquals(0.6, pageViewTelemetry.getProperties().get("metric"));
+            Assert.assertEquals(0, Double.compare(0.6, pageViewTelemetry.getMetrics().get("metric")));
 
             return null;
         }).when(mockTelemetryChannel).send(Mockito.any(PageViewTelemetry.class));

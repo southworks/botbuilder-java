@@ -25,78 +25,79 @@ import com.microsoft.bot.schema.ActivityTypes;
 public class TelemetryInitializerTests {
 
     @Test
-    public void telemetryInitializerStoresActivity() {
-        TelemetryClient telemetryClient = new TelemetryClient();
+    public void telemetryInitializerMiddlewareLogActivitiesEnabled() {
+    	TelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
 
-        /**
-         * TODO: Check Typescript implementation
-         */
-    }
-
-    @Test
-    public void telemetryInitializerMiddlewareLogActivitiesWhenEnabled() {
-    	TelemetryClient mockTelemetryClient = Mockito.mock(TelemetryClient.class);
-
-        TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware((BotTelemetryClient) mockTelemetryClient, false);
+        TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(mockTelemetryClient, false);
 
         TestAdapter testAdapter = new TestAdapter()
         		.use(new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, true));
 
-        TestFlow testFlow = new TestFlow(testAdapter, (turnContext) -> {
-            Activity typingActivity = new Activity() {
-            {
-            	setType(ActivityTypes.TYPING);
-            	setRelatesTo(turnContext.getActivity().getRelatesTo());
-            }};
+        // Act
+        // Default case logging Send/Receive Activities
+        TestFlow testFlow = new TestFlow(testAdapter, turnContext -> {
+            Activity typingActivity = new Activity(ActivityTypes.TYPING);
+            typingActivity.setRelatesTo(turnContext.getActivity().getRelatesTo());
+
             turnContext.sendActivity(typingActivity).join();
             try {
-                TimeUnit.SECONDS.sleep(5);
+                TimeUnit.MILLISECONDS.sleep(500);
             } catch (InterruptedException e) {
                 // Empty error
             }
             turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText())).join();
             return CompletableFuture.completedFuture(null);
-        });
-
-        testFlow.send("foo")
-		        .assertReply(activity -> {
-		            Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
-		        })
-		        .assertReply("echo:foo");
+        })
+        .send("foo")
+            .assertReply(activity -> {
+                Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
+            })
+            .assertReply("echo:foo")
+        .send("bar")
+            .assertReply(activity -> {
+                Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
+            })
+            .assertReply("echo:bar")
+        .startTest().join();
 
         verify(mockTelemetryClient, times(1));
     }
 
     @Test
-    public void telemetryInitializerMiddlewareNotLogActivitiesWhenDisabled() {
-    	TelemetryClient mockTelemetryClient = Mockito.mock(TelemetryClient.class);
+    public void telemetryInitializerMiddlewareNotLogActivitiesDisabled() {
+    	TelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
 
-        TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware((BotTelemetryClient) mockTelemetryClient, false);
+        TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(mockTelemetryClient, false);
 
         TestAdapter testAdapter = new TestAdapter()
         		.use(new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, false));
 
+        // Act
+        // Default case logging Send/Receive Activities
         TestFlow testFlow = new TestFlow(testAdapter, (turnContext) -> {
-            Activity typingActivity = new Activity() {
-            {
-            	setType(ActivityTypes.TYPING);
-            	setRelatesTo(turnContext.getActivity().getRelatesTo());
-            }};
+            Activity typingActivity = new Activity(ActivityTypes.TYPING);
+            typingActivity.setRelatesTo(turnContext.getActivity().getRelatesTo());
+
             turnContext.sendActivity(typingActivity).join();
             try {
-                TimeUnit.SECONDS.sleep(5);
+                TimeUnit.MILLISECONDS.sleep(500);
             } catch (InterruptedException e) {
                 // Empty error
             }
             turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText())).join();
             return CompletableFuture.completedFuture(null);
-        });
-
-        testFlow.send("foo")
-		        .assertReply(activity -> {
-		            Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
-		        })
-		        .assertReply("echo:foo");
+        })
+        .send("foo")
+            .assertReply(activity -> {
+                Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
+            })
+            .assertReply("echo:foo")
+        .send("bar")
+            .assertReply(activity -> {
+                Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
+            })
+            .assertReply("echo:bar")
+        .startTest().join();
 
         verify(mockTelemetryClient, times(0));
     }

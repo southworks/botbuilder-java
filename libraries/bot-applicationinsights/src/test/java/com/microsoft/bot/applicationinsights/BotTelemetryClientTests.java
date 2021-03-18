@@ -115,7 +115,6 @@ public class BotTelemetryClientTests {
             Assert.assertEquals("test", eventName.getVer());
             Assert.assertEquals("target", eventName.getTarget());
             Assert.assertEquals("dependencyname", eventName.getName());
-            // Assert.assertEquals("data", eventName.getData());
             Assert.assertEquals("result", eventName.getResultCode());
             Assert.assertFalse (eventName.getSuccess());
 

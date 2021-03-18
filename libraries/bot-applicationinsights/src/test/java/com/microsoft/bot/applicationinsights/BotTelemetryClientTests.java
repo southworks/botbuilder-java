@@ -6,6 +6,7 @@ package com.microsoft.bot.applicationinsights;
 import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.TelemetryConfiguration;
 import com.microsoft.applicationinsights.channel.TelemetryChannel;
+import com.microsoft.applicationinsights.telemetry.EventTelemetry;
 import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
 import com.microsoft.applicationinsights.telemetry.PageViewTelemetry;
 import com.microsoft.applicationinsights.telemetry.ExceptionTelemetry;
@@ -97,14 +98,14 @@ public class BotTelemetryClientTests {
         botTelemetryClient.trackEvent("test", properties, metrics);
 
         Mockito.doAnswer(invocation -> {
-            AvailabilityTelemetry availabilityTelemetry = invocation.getArgument(0);
+            EventTelemetry eventTelemetry = invocation.getArgument(0);
 
-            Assert.assertEquals("test", availabilityTelemetry.getName());
-            Assert.assertEquals("value", availabilityTelemetry.getProperties().get("hello"));
-            Assert.assertEquals((Double) 0.6, availabilityTelemetry.getMetrics().get("metric"));
+            Assert.assertEquals("test", eventTelemetry.getName());
+            Assert.assertEquals("value", eventTelemetry.getProperties().get("hello"));
+            Assert.assertEquals((Double) 0.6, eventTelemetry.getMetrics().get("metric"));
 
             return null;
-        }).when(mockTelemetryChannel).send(Mockito.any(AvailabilityTelemetry.class));
+        }).when(mockTelemetryChannel).send(Mockito.any(EventTelemetry.class));
     }
 
     @Test
@@ -128,7 +129,7 @@ public class BotTelemetryClientTests {
             Assert.assertFalse(remoteDependencyTelemetry.getSuccess());
 
             return null;
-        }).when(mockTelemetryChannel).send(Mockito.any(AvailabilityTelemetry.class));
+        }).when(mockTelemetryChannel).send(Mockito.any(RemoteDependencyTelemetry.class));
     }
 
     @Test
@@ -143,7 +144,7 @@ public class BotTelemetryClientTests {
             Assert.assertEquals(0.6, exceptionTelemetry.getProperties().get("metric"));
 
             return null;
-        }).when(mockTelemetryChannel).send(Mockito.any(AvailabilityTelemetry.class));
+        }).when(mockTelemetryChannel).send(Mockito.any(ExceptionTelemetry.class));
     }
 
     @Test
@@ -161,7 +162,7 @@ public class BotTelemetryClientTests {
             Assert.assertEquals("bar", traceTelemetry.getProperties().get("foo"));
 
             return null;
-        }).when(mockTelemetryChannel).send(Mockito.any(AvailabilityTelemetry.class));
+        }).when(mockTelemetryChannel).send(Mockito.any(TraceTelemetry.class));
     }
 
     @Test
@@ -181,6 +182,6 @@ public class BotTelemetryClientTests {
             Assert.assertEquals((Double) 0.6, pageViewTelemetry.getProperties().get("metric"));
 
             return null;
-        }).when(mockTelemetryChannel).send(Mockito.any(AvailabilityTelemetry.class));
+        }).when(mockTelemetryChannel).send(Mockito.any(PageViewTelemetry.class));
     }
 }

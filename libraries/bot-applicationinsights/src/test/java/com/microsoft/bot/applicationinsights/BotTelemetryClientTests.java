@@ -81,6 +81,7 @@ public class BotTelemetryClientTests {
             AvailabilityTelemetry availabilityTelemetry = invocation.getArgument(0);
 
             Assert.assertEquals("test", availabilityTelemetry.getName());
+            Assert.assertEquals("message", availabilityTelemetry.getData().getMessage());
             Assert.assertEquals("value", availabilityTelemetry.getProperties().get("hello"));
             Assert.assertEquals((Double) 0.6, availabilityTelemetry.getMetrics().get("metric"));
 

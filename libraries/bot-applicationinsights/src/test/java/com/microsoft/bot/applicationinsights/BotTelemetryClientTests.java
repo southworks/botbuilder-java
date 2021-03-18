@@ -180,7 +180,7 @@ public class BotTelemetryClientTests {
 
             Assert.assertEquals("test", pageViewTelemetry.getName());
             Assert.assertEquals("value", pageViewTelemetry.getProperties().get("hello"));
-            Assert.assertEquals((Double) 0.6, pageViewTelemetry.getProperties().get("metric"));
+            Assert.assertEquals(0.6, pageViewTelemetry.getProperties().get("metric"));
 
             return null;
         }).when(mockTelemetryChannel).send(Mockito.any(PageViewTelemetry.class));

@@ -26,8 +26,9 @@ public class TelemetryInitializerTests {
 
     @Test
     public void telemetryInitializerMiddlewareLogActivitiesEnabled() {
-    	TelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
 
+        // Arrange
+        TelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
         TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(mockTelemetryClient, false);
 
         TestAdapter testAdapter = new TestAdapter()
@@ -60,13 +61,15 @@ public class TelemetryInitializerTests {
             .assertReply("echo:bar")
         .startTest().join();
 
-        verify(mockTelemetryClient, times(1));
+        // Verify
+        verify(mockTelemetryClient, times(6));
     }
 
     @Test
     public void telemetryInitializerMiddlewareNotLogActivitiesDisabled() {
-    	TelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
 
+        // Arrange
+    	TelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
         TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(mockTelemetryClient, false);
 
         TestAdapter testAdapter = new TestAdapter()
@@ -99,6 +102,7 @@ public class TelemetryInitializerTests {
             .assertReply("echo:bar")
         .startTest().join();
 
+        // Verify
         verify(mockTelemetryClient, times(0));
     }
 }

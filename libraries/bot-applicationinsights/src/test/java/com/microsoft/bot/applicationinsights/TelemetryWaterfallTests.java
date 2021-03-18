@@ -33,15 +33,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class TelemetryWaterfallTests {
 
-    @Captor
-    ArgumentCaptor<String> eventNameCaptor = ArgumentCaptor.forClass(String.class);
-
-    @Captor
-    ArgumentCaptor<Map<String, String>> propertiesCaptor = ArgumentCaptor.forClass(Map.class);
-
-    @Captor
-    ArgumentCaptor<Map<String, Double>> metricsCaptor = ArgumentCaptor.forClass(Map.class);
-
     @Test
     public void waterfall() {
         ConversationState convoState = new ConversationState(new MemoryStorage());

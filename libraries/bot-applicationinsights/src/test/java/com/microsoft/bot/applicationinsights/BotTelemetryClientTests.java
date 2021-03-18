@@ -135,7 +135,13 @@ public class BotTelemetryClientTests {
 
     @Test
     public void trackExceptionTest() {
-        Exception expectedException = new Exception("test-exception");
+        Exception expectedException = new Exception("test-exception");        
+        Map<String, String> properties = new HashMap<>();
+        properties.put("foo", "bar");
+        Map<String, Double> metrics = new HashMap<>();
+        metrics.put("metric", 0.6);
+                
+        botTelemetryClient.trackException(expectedException, properties, metrics);
 
         Mockito.doAnswer(invocation -> {
             ExceptionTelemetry exceptionTelemetry = invocation.getArgument(0);

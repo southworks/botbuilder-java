@@ -45,7 +45,7 @@ public class BlobsStorage implements Storage {
     private ObjectMapper objectMapper;
     private final BlobContainerClient containerClient;
 
-    private final Integer milisecondsTimeout = 2000;
+    private final Integer millisecondsTimeout = 2000;
     private final Integer retryTimes = 8;
 
     /**
@@ -215,8 +215,8 @@ public class BlobsStorage implements Storage {
                 Object obj;
                 // We are doing this try/catch because we are receiving String or HashMap
                 try {
-                    // We need to deserialize to an object class since there are contentString which has a String type
-                    obj = objectMapper.readValue(contentString, String.class);
+                    // We need to deserialize to an Object class since there are contentString which has an Object type
+                    obj = objectMapper.readValue(contentString, Object.class);
                 } catch (MismatchedInputException ex) {
                     // In case of the contentString has the structure of a HashMap,
                     // we need to deserialize it to a HashMap object
@@ -235,7 +235,7 @@ public class BlobsStorage implements Storage {
                     // even though this is a read operation blob storage can return 412 if there is contention
                     if (i++ < retryTimes) {
                         try {
-                            TimeUnit.MILLISECONDS.sleep(milisecondsTimeout);
+                            TimeUnit.MILLISECONDS.sleep(millisecondsTimeout);
                             continue;
                         } catch (InterruptedException ex) {
                             break;

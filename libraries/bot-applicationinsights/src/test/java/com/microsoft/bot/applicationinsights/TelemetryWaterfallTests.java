@@ -149,43 +149,16 @@ public class TelemetryWaterfallTests {
         final Integer[] counter = {0};
 
         // Set up the client to save all logged property names and associated properties (in "saved_properties").
-        BotTelemetryClient telemetryClient = new BotTelemetryClient() {
-            @Override
-            public void trackAvailability(String name, OffsetDateTime timeStamp, Duration duration, String runLocation, boolean success, String message, Map<String, String> properties, Map<String, Double> metrics) {
+        BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
+        Mockito.doAnswer(invocation -> {
+            String eventName = invocation.getArgument(0);
+            Map<String, String> properties = invocation.getArgument(1);
 
-            }
+            StringBuilder sb = new StringBuilder(eventName).append("_").append(counter[0]++);
+            saved_properties.put(sb.toString(), properties);
 
-            @Override
-            public void trackDependency(String dependencyTypeName, String target, String dependencyName, String data, OffsetDateTime startTime, Duration duration, String resultCode, boolean success) {
-
-            }
-
-            @Override
-            public void trackEvent(String eventName, Map<String, String> properties, Map<String, Double> metrics) {
-                StringBuilder sb = new StringBuilder(eventName).append("_").append(counter[0]++);
-                saved_properties.put(sb.toString(), properties);
-            }
-
-            @Override
-            public void trackException(Exception exception, Map<String, String> properties, Map<String, Double> metrics) {
-
-            }
-
-            @Override
-            public void trackTrace(String message, Severity severityLevel, Map<String, String> properties) {
-
-            }
-
-            @Override
-            public void trackDialogView(String dialogName, Map<String, String> properties, Map<String, Double> metrics) {
-
-            }
-
-            @Override
-            public void flush() {
-
-            }
-        };
+            return null;
+        }).when(telemetryClient).trackEvent(Mockito.anyString(), Mockito.anyMap());
 
         MyWaterfallDialog waterfallDialog = new MyWaterfallDialog("test", newWaterfall());
 
@@ -241,43 +214,16 @@ public class TelemetryWaterfallTests {
         final Integer[] counter = {0};
 
         // Set up the client to save all logged property names and associated properties (in "saved_properties").
-        BotTelemetryClient telemetryClient = new BotTelemetryClient() {
-            @Override
-            public void trackAvailability(String name, OffsetDateTime timeStamp, Duration duration, String runLocation, boolean success, String message, Map<String, String> properties, Map<String, Double> metrics) {
+        BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
+        Mockito.doAnswer(invocation -> {
+            String eventName = invocation.getArgument(0);
+            Map<String, String> properties = invocation.getArgument(1);
 
-            }
+            StringBuilder sb = new StringBuilder(eventName).append("_").append(counter[0]++);
+            saved_properties.put(sb.toString(), properties);
 
-            @Override
-            public void trackDependency(String dependencyTypeName, String target, String dependencyName, String data, OffsetDateTime startTime, Duration duration, String resultCode, boolean success) {
-
-            }
-
-            @Override
-            public void trackEvent(String eventName, Map<String, String> properties, Map<String, Double> metrics) {
-                StringBuilder sb = new StringBuilder(eventName).append("_").append(counter[0]++);
-                saved_properties.put(sb.toString(), properties);
-            }
-
-            @Override
-            public void trackException(Exception exception, Map<String, String> properties, Map<String, Double> metrics) {
-
-            }
-
-            @Override
-            public void trackTrace(String message, Severity severityLevel, Map<String, String> properties) {
-
-            }
-
-            @Override
-            public void trackDialogView(String dialogName, Map<String, String> properties, Map<String, Double> metrics) {
-
-            }
-
-            @Override
-            public void flush() {
-
-            }
-        };
+            return null;
+        }).when(telemetryClient).trackEvent(Mockito.anyString(), Mockito.anyMap());
 
         List<WaterfallStep> steps = new ArrayList<>();
         steps.add(step -> {

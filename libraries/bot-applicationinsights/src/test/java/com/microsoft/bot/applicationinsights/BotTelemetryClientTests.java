@@ -78,11 +78,11 @@ public class BotTelemetryClientTests {
             metrics);
 
         Mockito.doAnswer(invocation -> {
-            AvailabilityTelemetry eventName = invocation.getArgument(0);
+            AvailabilityTelemetry availabilityTelemetry = invocation.getArgument(0);
 
-            Assert.assertEquals("test", eventName.getName());
-            Assert.assertEquals("value", eventName.getProperties().get("hello"));
-            Assert.assertEquals("0.6", eventName.getMetrics().get("metric"));
+            Assert.assertEquals("test", availabilityTelemetry.getName());
+            Assert.assertEquals("value", availabilityTelemetry.getProperties().get("hello"));
+            Assert.assertEquals("0.6", availabilityTelemetry.getMetrics().get("metric"));
 
             return null;
         }).when(mockTelemetryChannel).send(Mockito.any(AvailabilityTelemetry.class));
@@ -94,11 +94,11 @@ public class BotTelemetryClientTests {
         botTelemetryClient.trackEvent("test", new HashMap<String, String>() {{ put("hello", "value"); }}, new HashMap<String, Double>() {{ put("metric", 0.6); }});
 
         Mockito.doAnswer(invocation -> {
-            AvailabilityTelemetry eventName = invocation.getArgument(0);
+            AvailabilityTelemetry availabilityTelemetry = invocation.getArgument(0);
 
-            Assert.assertEquals("test", eventName.getName());
-            Assert.assertEquals("value", eventName.getProperties().get("hello"));
-            Assert.assertEquals("0.6", eventName.getMetrics().get("metric"));
+            Assert.assertEquals("test", availabilityTelemetry.getName());
+            Assert.assertEquals("value", availabilityTelemetry.getProperties().get("hello"));
+            Assert.assertEquals("0.6", availabilityTelemetry.getMetrics().get("metric"));
 
             return null;
         }).when(mockTelemetryChannel).send(Mockito.any(AvailabilityTelemetry.class));
@@ -110,13 +110,13 @@ public class BotTelemetryClientTests {
         botTelemetryClient.trackDependency("test", "target", "dependencyname", "data", OffsetDateTime.now(), Duration.ofSeconds(1000), "result", false);
 
         Mockito.doAnswer(invocation -> {
-            RemoteDependencyTelemetry eventName = invocation.getArgument(0);
+            RemoteDependencyTelemetry remoteDependencyTelemetry = invocation.getArgument(0);
 
-            Assert.assertEquals("test", eventName.getVer());
-            Assert.assertEquals("target", eventName.getTarget());
-            Assert.assertEquals("dependencyname", eventName.getName());
-            Assert.assertEquals("result", eventName.getResultCode());
-            Assert.assertFalse (eventName.getSuccess());
+            Assert.assertEquals("test", remoteDependencyTelemetry.getVer());
+            Assert.assertEquals("target", remoteDependencyTelemetry.getTarget());
+            Assert.assertEquals("dependencyname", remoteDependencyTelemetry.getName());
+            Assert.assertEquals("result", remoteDependencyTelemetry.getResultCode());
+            Assert.assertFalse (remoteDependencyTelemetry.getSuccess());
 
             return null;
         }).when(mockTelemetryChannel).send(Mockito.any(AvailabilityTelemetry.class));
@@ -128,11 +128,11 @@ public class BotTelemetryClientTests {
         Exception expectedException = new Exception("test-exception");
 
         Mockito.doAnswer(invocation -> {
-            ExceptionTelemetry eventName = invocation.getArgument(0);
+            ExceptionTelemetry exceptionTelemetry = invocation.getArgument(0);
 
-            Assert.assertEquals(expectedException, eventName.getException());
-            Assert.assertEquals("bar", eventName.getProperties().get("foo"));
-            Assert.assertEquals("0.6", eventName.getProperties().get("metric"));
+            Assert.assertEquals(expectedException, exceptionTelemetry.getException());
+            Assert.assertEquals("bar", exceptionTelemetry.getProperties().get("foo"));
+            Assert.assertEquals("0.6", exceptionTelemetry.getProperties().get("metric"));
 
             return null;
         }).when(mockTelemetryChannel).send(Mockito.any(AvailabilityTelemetry.class));
@@ -144,11 +144,11 @@ public class BotTelemetryClientTests {
         botTelemetryClient.trackTrace("hello", Severity.CRITICAL, new HashMap<String, String>() {{ put("foo", "bar"); }});
 
         Mockito.doAnswer(invocation -> {
-            TraceTelemetry eventName = invocation.getArgument(0);
+            TraceTelemetry traceTelemetry = invocation.getArgument(0);
 
-            Assert.assertEquals("hello", eventName.getMessage());
-            Assert.assertEquals(Severity.CRITICAL, eventName.getSeverityLevel());
-            Assert.assertEquals("bar", eventName.getProperties().get("foo"));
+            Assert.assertEquals("hello", traceTelemetry.getMessage());
+            Assert.assertEquals(Severity.CRITICAL, traceTelemetry.getSeverityLevel());
+            Assert.assertEquals("bar", traceTelemetry.getProperties().get("foo"));
 
             return null;
         }).when(mockTelemetryChannel).send(Mockito.any(AvailabilityTelemetry.class));
@@ -160,11 +160,11 @@ public class BotTelemetryClientTests {
         botTelemetryClient.trackDialogView("test", new HashMap<String, String>() {{ put("hello", "value"); }}, new HashMap<String, Double>() {{ put("metric", 0.6); }});
 
         Mockito.doAnswer(invocation -> {
-            PageViewTelemetry eventName = invocation.getArgument(0);
+            PageViewTelemetry pageViewTelemetry = invocation.getArgument(0);
 
-            Assert.assertEquals("test", eventName.getName());
-            Assert.assertEquals("value", eventName.getProperties().get("hello"));
-            Assert.assertEquals("0.6", eventName.getProperties().get("metric"));
+            Assert.assertEquals("test", pageViewTelemetry.getName());
+            Assert.assertEquals("value", pageViewTelemetry.getProperties().get("hello"));
+            Assert.assertEquals("0.6", pageViewTelemetry.getProperties().get("metric"));
 
             return null;
         }).when(mockTelemetryChannel).send(Mockito.any(AvailabilityTelemetry.class));

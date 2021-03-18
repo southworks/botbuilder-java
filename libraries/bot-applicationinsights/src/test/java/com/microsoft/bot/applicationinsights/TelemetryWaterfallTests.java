@@ -84,6 +84,7 @@ public class TelemetryWaterfallTests {
             Mockito.anyString(),
             Mockito.anyMap()
         );
+        System.out.printf("Complete");
     }
 
     @Test
@@ -133,12 +134,7 @@ public class TelemetryWaterfallTests {
         BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
         WaterfallDialog waterfall = new WaterfallDialog("test", null);
         waterfall.setTelemetryClient(telemetryClient);
-        try {
-            waterfall.addStep(null);
-            Assert.fail();
-        } catch (IllegalArgumentException ex) {
-            ex.printStackTrace();
-        }
+        Assert.assertThrows(IllegalArgumentException.class, () -> waterfall.addStep(null));
     }
 
     @Test

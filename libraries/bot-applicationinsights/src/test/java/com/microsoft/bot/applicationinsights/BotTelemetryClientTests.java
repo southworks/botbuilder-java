@@ -112,13 +112,13 @@ public class BotTelemetryClientTests {
     @Test
     public void trackDependencyTest() {
         botTelemetryClient.trackDependency(
-                "test", 
-                "target", 
-                "dependencyname", 
-                "data", 
-                OffsetDateTime.now(), 
-                Duration.ofSeconds(1000), // TODO: use computer ticks
-                "result", false);
+            "test", 
+            "target", 
+            "dependencyname", 
+            "data", 
+            OffsetDateTime.now(), 
+            Duration.ofSeconds(1000), // TODO: use computer ticks
+            "result", false);
 
         Mockito.doAnswer(invocation -> {
             RemoteDependencyTelemetry remoteDependencyTelemetry = invocation.getArgument(0);

@@ -5,7 +5,6 @@ package com.microsoft.bot.applicationinsights;
 
 import com.microsoft.bot.builder.AutoSaveStateMiddleware;
 import com.microsoft.bot.builder.BotTelemetryClient;
-import com.microsoft.bot.builder.Severity;
 import com.microsoft.bot.builder.StatePropertyAccessor;
 import com.microsoft.bot.builder.TurnContext;
 import com.microsoft.bot.builder.adapters.TestAdapter;
@@ -26,8 +25,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 
-import java.time.Duration;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -146,7 +143,7 @@ public class TelemetryWaterfallTests {
         StatePropertyAccessor<DialogState> dialogState = convoState.createProperty("dialogState");
         DialogSet dialogs = new DialogSet(dialogState);
         HashMap<String, Map<String, String>> saved_properties = new HashMap<>();
-        final Integer[] counter = {0};
+        final int[] counter = {0};
 
         // Set up the client to save all logged property names and associated properties (in "saved_properties").
         BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
@@ -184,7 +181,7 @@ public class TelemetryWaterfallTests {
         .startTest()
         .join();
 
-        Assert.assertEquals((Integer)7, counter[0]);
+        Assert.assertEquals(7, counter[0]);
 
         // Verify:
         // Event name is "WaterfallComplete"
@@ -211,7 +208,7 @@ public class TelemetryWaterfallTests {
         StatePropertyAccessor<DialogState> dialogState = convoState.createProperty("dialogState");
         DialogSet dialogs = new DialogSet(dialogState);
         HashMap<String, Map<String, String>> saved_properties = new HashMap<>();
-        final Integer[] counter = {0};
+        final int[] counter = {0};
 
         // Set up the client to save all logged property names and associated properties (in "saved_properties").
         BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
@@ -261,7 +258,7 @@ public class TelemetryWaterfallTests {
             .startTest()
             .join();
 
-        Assert.assertEquals((Integer)7, counter[0]);
+        Assert.assertEquals(7, counter[0]);
 
         // Verify:
         // Event name is "WaterfallCancel"

@@ -18,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 public class TelemetryInitializerMiddleware implements Middleware {
 
     private HttpContext httpContext;
+    private final String botActivityKey = "BotBuilderActivity";
     private final TelemetryLoggerMiddleware telemetryLoggerMiddleware;
     private final Boolean logActivityTelemetry;
 
@@ -36,13 +37,13 @@ public class TelemetryInitializerMiddleware implements Middleware {
                 this.httpContext = HttpClientContext.create();
             }
 
-            Object item = httpContext.getAttribute("BotBuilderActivity");
+            Object item = httpContext.getAttribute(botActivityKey);
 
             if (item != null) {
-                httpContext.removeAttribute("BotBuilderActivity");
+                httpContext.removeAttribute(botActivityKey);
             }
 
-            httpContext.setAttribute("BotBuilderActivity", activity);
+            httpContext.setAttribute(botActivityKey, activity);
         }
 
         if (logActivityTelemetry) {

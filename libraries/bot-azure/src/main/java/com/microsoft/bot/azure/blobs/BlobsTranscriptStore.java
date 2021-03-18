@@ -352,9 +352,9 @@ public class BlobsTranscriptStore implements TranscriptStore {
                         for (BlobItem blobItem: blobPage.getValue()) {
                             if (blobItem.getMetadata().get("Id").equals(activity.getId())) {
                                 BlobClient blobClient = containerClient.getBlobClient(blobItem.getName());
-                                Activity blobActivity = this.getActivityFromBlobClient(blobClient).join();
-                                return CompletableFuture
-                                    .completedFuture(new Pair<Activity, BlobClient>(blobActivity, blobClient));
+                                return this.getActivityFromBlobClient(blobClient)
+                                    .thenApply(blobActivity ->
+                                        new Pair<Activity, BlobClient>(blobActivity, blobClient));
                             }
                         }
 
@@ -375,9 +375,9 @@ public class BlobsTranscriptStore implements TranscriptStore {
                         }
                     }
                     throw ex;
-                } else {
-                    break;
                 }
+                // This break will finish the while when the catch if condition is false
+                break;
             }
         }
         return CompletableFuture.completedFuture(null);

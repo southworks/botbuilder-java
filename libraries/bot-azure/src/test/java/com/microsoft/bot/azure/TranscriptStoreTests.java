@@ -158,8 +158,6 @@ public class TranscriptStoreTests {
             transcriptStore.getTranscriptActivities(channelId, CONVERSATION_SPECIAL_IDS[i]).thenAccept(result -> {
                 loggedActivities[pos] = result.getItems().get(0);
             });
-            //loggedActivities[i] = transcriptStore.getTranscriptActivities(channelId, CONVERSATION_SPECIAL_IDS[i])
-            //   .join().getItems().get(0);
         }
 
         Assert.assertEquals(activities.size(), loggedActivities.length);
@@ -219,7 +217,7 @@ public class TranscriptStoreTests {
 
     @Test
     public void nullParameterTests() {
-        TranscriptStore store = new BlobsTranscriptStore(blobStorageEmulatorConnectionString, getContainerName());;
+        TranscriptStore store = getTranscriptStore();
 
         Assert.assertThrows(IllegalArgumentException.class, () -> store.logActivity(null));
         Assert.assertThrows(IllegalArgumentException.class,

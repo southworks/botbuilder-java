@@ -38,6 +38,7 @@ import java.util.concurrent.CompletableFuture;
 import static org.mockito.Mockito.*;
 
 public class TelemetryWaterfallTests {
+
     @Captor
     ArgumentCaptor<String> eventNameCaptor = ArgumentCaptor.forClass(String.class);
 

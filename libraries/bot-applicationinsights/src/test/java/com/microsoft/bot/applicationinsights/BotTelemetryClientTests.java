@@ -38,7 +38,7 @@ public class BotTelemetryClientTests {
     }
 
     @Test
-    public void NullTelemetryClientThrows() {
+    public void nullTelemetryClientThrows() {
         try {
             new BotTelemetryClientImpl(null);
         } catch (Exception e) {
@@ -47,20 +47,20 @@ public class BotTelemetryClientTests {
     }
 
     @Test
-    public void NonNullTelemetryClientSucceeds() {
+    public void nonNullTelemetryClientSucceeds() {
         TelemetryClient telemetryClient = new TelemetryClient();
 
         BotTelemetryClient botTelemetryClient = new BotTelemetryClientImpl(telemetryClient);
     }
 
     @Test
-    public void OverrideTest() {
+    public void overrideTest() {
         TelemetryClient telemetryClient = new TelemetryClient();
         MyBotTelemetryClient botTelemetryClient = new MyBotTelemetryClient(telemetryClient);
     }
 
     @Test
-    public void TrackAvailabilityTest()
+    public void trackAvailabilityTest()
     {
         Map<String, String> properties = new HashMap<>();
         Map<String, Double> metrics = new HashMap<>();
@@ -89,7 +89,7 @@ public class BotTelemetryClientTests {
     }
 
     @Test
-    public void TrackEventTest()
+    public void trackEventTest()
     {
         botTelemetryClient.trackEvent("test", new HashMap<String, String>() {{ put("hello", "value"); }}, new HashMap<String, Double>() {{ put("metric", 0.6); }});
 
@@ -105,7 +105,7 @@ public class BotTelemetryClientTests {
     }
 
     @Test
-    public void TrackDependencyTest()
+    public void trackDependencyTest()
     {
         botTelemetryClient.trackDependency("test", "target", "dependencyname", "data", OffsetDateTime.now(), Duration.ofSeconds(1000), "result", false);
 
@@ -123,7 +123,7 @@ public class BotTelemetryClientTests {
     }
 
     @Test
-    public void TrackExceptionTest()
+    public void trackExceptionTest()
     {
         Exception expectedException = new Exception("test-exception");
 
@@ -139,7 +139,7 @@ public class BotTelemetryClientTests {
     }
 
     @Test
-    public void TrackTraceTest()
+    public void trackTraceTest()
     {
         botTelemetryClient.trackTrace("hello", Severity.CRITICAL, new HashMap<String, String>() {{ put("foo", "bar"); }});
 
@@ -155,7 +155,7 @@ public class BotTelemetryClientTests {
     }
 
     @Test
-    public void TrackPageViewTest()
+    public void trackPageViewTest()
     {
         botTelemetryClient.trackDialogView("test", new HashMap<String, String>() {{ put("hello", "value"); }}, new HashMap<String, Double>() {{ put("metric", 0.6); }});
 

@@ -28,7 +28,7 @@ public class TelemetryInitializerTests {
     public void telemetryInitializerMiddlewareLogActivitiesEnabled() {
 
         // Arrange
-        TelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
+        BotTelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
         TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(mockTelemetryClient, false);
 
         TestAdapter testAdapter = new TestAdapter()
@@ -36,7 +36,7 @@ public class TelemetryInitializerTests {
 
         // Act
         // Default case logging Send/Receive Activities
-        TestFlow testFlow = new TestFlow(testAdapter, turnContext -> {
+        new TestFlow(testAdapter, turnContext -> {
             Activity typingActivity = new Activity(ActivityTypes.TYPING);
             typingActivity.setRelatesTo(turnContext.getActivity().getRelatesTo());
 
@@ -69,7 +69,7 @@ public class TelemetryInitializerTests {
     public void telemetryInitializerMiddlewareNotLogActivitiesDisabled() {
 
         // Arrange
-    	TelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
+        BotTelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
         TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(mockTelemetryClient, false);
 
         TestAdapter testAdapter = new TestAdapter()
@@ -77,7 +77,7 @@ public class TelemetryInitializerTests {
 
         // Act
         // Default case logging Send/Receive Activities
-        TestFlow testFlow = new TestFlow(testAdapter, (turnContext) -> {
+        new TestFlow(testAdapter, (turnContext) -> {
             Activity typingActivity = new Activity(ActivityTypes.TYPING);
             typingActivity.setRelatesTo(turnContext.getActivity().getRelatesTo());
 

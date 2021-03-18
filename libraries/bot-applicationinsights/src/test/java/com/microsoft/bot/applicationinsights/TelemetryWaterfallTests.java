@@ -239,7 +239,7 @@ public class TelemetryWaterfallTests {
     @Test
     public void ensureCancelDialogCalled() {
         ConversationState convoState = new ConversationState(new MemoryStorage());
-        TestAdapter adapter = new TestAdapter(TestAdapter.createConversationReference("ensureCancelDialogCalled", "User1", "Bot"))
+        TestAdapter adapter = new TestAdapter(TestAdapter.createConversationReference("EnsureCancelDialogCalled", "User1", "Bot"))
             .use(new AutoSaveStateMiddleware(convoState));
 
         StatePropertyAccessor<DialogState> dialogState = convoState.createProperty("dialogState");

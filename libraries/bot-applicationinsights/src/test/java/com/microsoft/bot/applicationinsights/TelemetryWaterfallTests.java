@@ -281,15 +281,15 @@ public class TelemetryWaterfallTests {
 
         List<WaterfallStep> steps = new ArrayList<>();
         steps.add(step -> {
-            step.getContext().sendActivity("step1");
+            step.getContext().sendActivity("step1").join();
             return CompletableFuture.completedFuture(Dialog.END_OF_TURN);
         });
         steps.add(step -> {
-            step.getContext().sendActivity("step2");
+            step.getContext().sendActivity("step2").join();
             return CompletableFuture.completedFuture(Dialog.END_OF_TURN);
         });
         steps.add(step -> {
-            step.cancelAllDialogs();
+            step.cancelAllDialogs().join();
             return CompletableFuture.completedFuture(Dialog.END_OF_TURN);
         });
 
@@ -340,17 +340,17 @@ public class TelemetryWaterfallTests {
         List<WaterfallStep> waterfall = new ArrayList<>();
 
         waterfall.add(step -> {
-            step.getContext().sendActivity("step1");
+            step.getContext().sendActivity("step1").join();
             return CompletableFuture.completedFuture(Dialog.END_OF_TURN);
         });
 
         waterfall.add(step -> {
-            step.getContext().sendActivity("step2");
+            step.getContext().sendActivity("step2").join();
             return CompletableFuture.completedFuture(Dialog.END_OF_TURN);
         });
 
         waterfall.add(step -> {
-            step.getContext().sendActivity("step3");
+            step.getContext().sendActivity("step3").join();
             return CompletableFuture.completedFuture(Dialog.END_OF_TURN);
         });
 

@@ -14,6 +14,7 @@ import com.microsoft.bot.builder.StoreItem;
 import com.microsoft.bot.builder.TurnContext;
 import com.microsoft.bot.builder.TurnContextImpl;
 import com.microsoft.bot.schema.Activity;
+import com.microsoft.bot.schema.ActivityTypes;
 import com.microsoft.bot.schema.ConversationAccount;
 import com.microsoft.bot.schema.ConversationReference;
 import com.microsoft.bot.schema.ResourceResponse;
@@ -145,10 +146,11 @@ public class BlobsStorageTests extends StorageBaseTests {
         StatePropertyAccessor<Prop> propAccessor = conversationState.createProperty("prop");
 
         TestStorageAdapter adapter = new TestStorageAdapter();
-        Activity activity = new Activity() {{
-            setChannelId("123");
-            setConversation(new ConversationAccount() {{ setId("abc"); }});
-        }};
+        Activity activity = new Activity(ActivityTypes.MESSAGE);
+        activity.setChannelId("123");
+        ConversationAccount conversationAccount = new ConversationAccount();
+        conversationAccount.setId("abc");
+        activity.setConversation(conversationAccount);
 
         // Act
         TurnContext turnContext1 = new TurnContextImpl(adapter, activity);
@@ -185,12 +187,11 @@ public class BlobsStorageTests extends StorageBaseTests {
         ConversationState conversationState = new ConversationState(blobs);
         StatePropertyAccessor<Prop> propAccessor = conversationState.createProperty("prop");
         TestStorageAdapter adapter = new TestStorageAdapter();
-        Activity activity = new Activity() {
-            {
-                setChannelId("123");
-                setConversation(new ConversationAccount() {{ setId("abc"); }});
-            }
-        };
+        Activity activity = new Activity(ActivityTypes.MESSAGE);
+        activity.setChannelId("123");
+        ConversationAccount conversationAccount = new ConversationAccount();
+        conversationAccount.setId("abc");
+        activity.setConversation(conversationAccount);
 
         // Act
         TurnContext turnContext1 = new TurnContextImpl(adapter, activity);
@@ -241,7 +242,7 @@ public class BlobsStorageTests extends StorageBaseTests {
         }
     }
 
-    private class Prop {
+    private static class Prop {
         private String X;
         private String Y;
         StoreItem storeItem;

@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for
-// license information.
+// Licensed under the MIT License.
 
 package com.microsoft.bot.applicationinsights;
 
@@ -34,8 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
-import static org.mockito.Mockito.*;
 
 public class TelemetryWaterfallTests {
 
@@ -83,9 +80,9 @@ public class TelemetryWaterfallTests {
         // On the other hand, Java's BotTelemetryClient overloads the trackEvent method,
         // so instead of calling the same method, it calls a method with less parameters.
         // In this particular test, WaterfallDialog's beginDialog calls the method with only two parameters
-        verify(telemetryClient, times(4)).trackEvent(
-            anyString(),
-            anyMap()
+        Mockito.verify(telemetryClient, Mockito.times(4)).trackEvent(
+            Mockito.anyString(),
+            Mockito.anyMap()
         );
     }
 
@@ -125,9 +122,9 @@ public class TelemetryWaterfallTests {
         // On the other hand, Java's BotTelemetryClient overloads the trackEvent method,
         // so instead of calling the same method, it calls a method with less parameters.
         // In this particular test, WaterfallDialog's beginDialog calls the method with only two parameters
-        verify(telemetryClient, times(4)).trackEvent(
-            anyString(),
-            anyMap()
+        Mockito.verify(telemetryClient, Mockito.times(4)).trackEvent(
+            Mockito.anyString(),
+            Mockito.anyMap()
         );
     }
 

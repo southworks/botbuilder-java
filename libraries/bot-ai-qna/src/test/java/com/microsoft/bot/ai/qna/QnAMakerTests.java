@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -153,12 +154,16 @@ public class QnAMakerTests {
                     .assertReply("echo:bar")
                 .startTest().join();
 
+            ObjectMapper objectMapper = new ObjectMapper()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .findAndRegisterModules();
+
             // Validate Trace Activity created
             PagedResult<Activity> pagedResult = transcriptStore.getTranscriptActivities("test", conversationId[0]).join();
             Assert.assertEquals(7, pagedResult.getItems().size());
             Assert.assertEquals("how do I clean the stove?", pagedResult.getItems().get(0).getText());
             Assert.assertTrue(pagedResult.getItems().get(1).isType(ActivityTypes.TRACE));
-            QnAMakerTraceInfo traceInfo = (QnAMakerTraceInfo) pagedResult.getItems().get(1).getValue();
+            QnAMakerTraceInfo traceInfo = objectMapper.readValue(objectMapper.writeValueAsString(pagedResult.getItems().get(1).getValue()), QnAMakerTraceInfo.class);
             Assert.assertNotNull(traceInfo);
             Assert.assertEquals("echo:how do I clean the stove?", pagedResult.getItems().get(3).getText());
             Assert.assertEquals("bar", pagedResult.getItems().get(4).getText());

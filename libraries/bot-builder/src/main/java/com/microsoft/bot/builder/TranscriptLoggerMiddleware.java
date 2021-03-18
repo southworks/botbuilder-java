@@ -3,14 +3,19 @@
 
 package com.microsoft.bot.builder;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityTypes;
 import com.microsoft.bot.schema.ChannelAccount;
 import com.microsoft.bot.schema.RoleTypes;
+import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -57,7 +62,7 @@ public class TranscriptLoggerMiddleware implements Middleware {
     public CompletableFuture<Void> onTurn(TurnContext context, NextDelegate next) {
         // log incoming activity at beginning of turn
         if (context.getActivity() != null) {
-            logActivity(Activity.clone(context.getActivity()), true);
+            logActivity(cloneActivity(context.getActivity()), true);
         }
 
         // hook up onSend pipeline
@@ -66,7 +71,7 @@ public class TranscriptLoggerMiddleware implements Middleware {
                 // run full pipeline
                 return nextSend.get().thenApply(responses -> {
                     for (Activity activity : activities) {
-                        logActivity(Activity.clone(activity), false);
+                        logActivity(cloneActivity(activity), false);
                     }
 
                     return responses;
@@ -80,7 +85,7 @@ public class TranscriptLoggerMiddleware implements Middleware {
                 // run full pipeline
                 return nextUpdate.get().thenApply(resourceResponse -> {
                     // add Message Update activity
-                    Activity updateActivity = Activity.clone(activity);
+                    Activity updateActivity = cloneActivity(activity);
                     updateActivity.setType(ActivityTypes.MESSAGE_UPDATE);
                     logActivity(updateActivity, false);
 
@@ -121,6 +126,37 @@ public class TranscriptLoggerMiddleware implements Middleware {
                     }
                 }
             );
+    }
+
+    private static Activity cloneActivity(Activity activity) {
+        ObjectMapper objectMapper = new ObjectMapper()
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .findAndRegisterModules();
+
+        try {
+            activity = objectMapper.readValue(objectMapper.writeValueAsString(activity), Activity.class);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        Activity activityWithId = ensureActivityHasId(activity);
+
+        return activityWithId;
+    }
+
+    private static Activity ensureActivityHasId(Activity activity) {
+        Activity activityWithId = activity;
+
+        if (activity == null) {
+            throw new IllegalArgumentException("Cannot check or add Id on a null Activity.");
+        }
+
+        if (StringUtils.isBlank(activity.getId())) {
+            String generatedId = String.format("g_%s", UUID.randomUUID().toString());
+            activity.setId(generatedId);
+        }
+
+        return activityWithId;
     }
 
     private void logActivity(Activity activity, boolean incoming) {

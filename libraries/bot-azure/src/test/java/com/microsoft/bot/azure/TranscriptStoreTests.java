@@ -328,6 +328,49 @@ public class TranscriptStoreTests {
     }
 
     @Test
+    public void logMissingUpdateActivity() {
+        TranscriptStore transcriptStore = getTranscriptStore();
+        ConversationReference conversation = TestAdapter
+            .createConversationReference(UUID.randomUUID().toString(), "User1", "Bot");
+        TestAdapter adapter = new TestAdapter(conversation)
+            .use(new TranscriptLoggerMiddleware(transcriptStore));
+        final String[] fooId = {new String()};
+        new TestFlow(adapter, turnContext -> {
+            fooId[0] = turnContext.getActivity().getId();
+            ObjectMapper objectMapper = new ObjectMapper()
+                .findAndRegisterModules();
+            Activity updateActivity = null;
+            try {
+                // clone the activity, so we can use it to do an update
+                updateActivity = objectMapper.readValue(objectMapper.writeValueAsString(turnContext.getActivity()), Activity.class);
+            } catch (JsonProcessingException ex) {
+                ex.printStackTrace();
+            }
+            updateActivity.setText("updated response");
+            ResourceResponse response = turnContext.updateActivity(updateActivity).join();
+            return CompletableFuture.completedFuture(null);
+        }).send("foo")
+          .startTest().join();
+
+        delay(3000);
+
+        PagedResult<Activity> pagedResult = null;
+        try {
+            pagedResult = this.getPagedResult(conversation, 2, null).join();
+        } catch (TimeoutException ex) {
+            Assert.fail();
+        }
+        
+        Assert.assertEquals(2, pagedResult.getItems().size());
+        Assert.assertTrue(pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE));
+        Assert.assertEquals(fooId[0], pagedResult.getItems().get(0).getId());
+        Assert.assertEquals("foo", pagedResult.getItems().get(0).getText());
+        Assert.assertTrue(pagedResult.getItems().get(1).isType(ActivityTypes.MESSAGE));
+        Assert.assertTrue(pagedResult.getItems().get(1).getId().startsWith("g_"));
+        Assert.assertEquals("updated response", pagedResult.getItems().get(1).getText());
+    }
+
+    @Test
     public void testDateLogUpdateActivities() {
         TranscriptStore transcriptStore = getTranscriptStore();
         OffsetDateTime dateTimeStartOffset1 = OffsetDateTime.now();

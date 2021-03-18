@@ -41,11 +41,9 @@ public class BotTelemetryClientTests {
 
     @Test
     public void nullTelemetryClientThrows() {
-        try {
-            new BotTelemetryClientImpl(null);
-        } catch (Exception e) {
-            Assert.assertEquals("IllegalArgumentException", e.getCause());
-        }
+        Assert.assertThrows(IllegalArgumentException.class, () -> { 
+            new BotTelemetryClientImpl(null); 
+        });
     }
 
     @Test

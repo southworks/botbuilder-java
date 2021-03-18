@@ -304,14 +304,11 @@ public class TelemetryWaterfallTests {
     }
 
     private class MyWaterfallDialog extends WaterfallDialog {
-        private Boolean endDialogCalled;
-        private Boolean cancelDialogCalled;
+        private Boolean endDialogCalled = false;
+        private Boolean cancelDialogCalled = false;
 
         public MyWaterfallDialog(String id, List<WaterfallStep> actions) {
             super(id, actions);
-
-            endDialogCalled = false;
-            cancelDialogCalled = false;
         }
 
         @Override

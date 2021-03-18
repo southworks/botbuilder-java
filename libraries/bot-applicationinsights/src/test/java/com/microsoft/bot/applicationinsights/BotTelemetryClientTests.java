@@ -13,6 +13,7 @@ import com.microsoft.applicationinsights.telemetry.TraceTelemetry;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.Severity;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -22,10 +23,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BotTelemetryClientTests {
-    final private BotTelemetryClient botTelemetryClient;
-    final private TelemetryChannel mockTelemetryChannel;
+    
+    private BotTelemetryClient botTelemetryClient;
+    private TelemetryChannel mockTelemetryChannel;
 
-    public BotTelemetryClientTests()
+    @Before
+    public void initialize()
     {
         mockTelemetryChannel = Mockito.mock(TelemetryChannel.class);
 

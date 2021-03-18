@@ -24,85 +24,85 @@ import com.microsoft.bot.schema.ActivityTypes;
 
 public class TelemetryInitializerTests {
 
-    @Test
-    public void telemetryInitializerMiddlewareLogActivitiesEnabled() {
+	@Test
+	public void telemetryInitializerMiddlewareLogActivitiesEnabled() {
 
-        // Arrange
-        BotTelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
-        TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(mockTelemetryClient, false);
+		// Arrange
+		BotTelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
+		TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(mockTelemetryClient, false);
 
-        TestAdapter testAdapter = new TestAdapter()
-        		.use(new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, true));
+		TestAdapter testAdapter = new TestAdapter()
+				.use(new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, true));
 
-        // Act
-        // Default case logging Send/Receive Activities
-        new TestFlow(testAdapter, turnContext -> {
-            Activity typingActivity = new Activity(ActivityTypes.TYPING);
-            typingActivity.setRelatesTo(turnContext.getActivity().getRelatesTo());
+		// Act
+		// Default case logging Send/Receive Activities
+		new TestFlow(testAdapter, turnContext -> {
+			Activity typingActivity = new Activity(ActivityTypes.TYPING);
+			typingActivity.setRelatesTo(turnContext.getActivity().getRelatesTo());
 
-            turnContext.sendActivity(typingActivity).join();
-            try {
-                TimeUnit.MILLISECONDS.sleep(500);
-            } catch (InterruptedException e) {
-                // Empty error
-            }
-            turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText())).join();
-            return CompletableFuture.completedFuture(null);
-        })
-        .send("foo")
-            .assertReply(activity -> {
-                Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
-            })
-            .assertReply("echo:foo")
-        .send("bar")
-            .assertReply(activity -> {
-                Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
-            })
-            .assertReply("echo:bar")
-        .startTest().join();
+			turnContext.sendActivity(typingActivity).join();
+			try {
+				TimeUnit.MILLISECONDS.sleep(500);
+			} catch (InterruptedException e) {
+				// Empty error
+			}
+			turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText())).join();
+			return CompletableFuture.completedFuture(null);
+		})
+		.send("foo")
+			.assertReply(activity -> {
+				Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
+			})
+			.assertReply("echo:foo")
+		.send("bar")
+			.assertReply(activity -> {
+				Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
+			})
+			.assertReply("echo:bar")
+		.startTest().join();
 
-        // Verify
-        verify(mockTelemetryClient, times(6));
-    }
+		// Verify
+		verify(mockTelemetryClient, times(6));
+	}
 
-    @Test
-    public void telemetryInitializerMiddlewareNotLogActivitiesDisabled() {
+	@Test
+	public void telemetryInitializerMiddlewareNotLogActivitiesDisabled() {
 
-        // Arrange
-        BotTelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
-        TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(mockTelemetryClient, false);
+		// Arrange
+		BotTelemetryClient mockTelemetryClient = Mockito.mock(BotTelemetryClient.class);
+		TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(mockTelemetryClient, false);
 
-        TestAdapter testAdapter = new TestAdapter()
-        		.use(new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, false));
+		TestAdapter testAdapter = new TestAdapter()
+				.use(new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, false));
 
-        // Act
-        // Default case logging Send/Receive Activities
-        new TestFlow(testAdapter, (turnContext) -> {
-            Activity typingActivity = new Activity(ActivityTypes.TYPING);
-            typingActivity.setRelatesTo(turnContext.getActivity().getRelatesTo());
+		// Act
+		// Default case logging Send/Receive Activities
+		new TestFlow(testAdapter, (turnContext) -> {
+			Activity typingActivity = new Activity(ActivityTypes.TYPING);
+			typingActivity.setRelatesTo(turnContext.getActivity().getRelatesTo());
 
-            turnContext.sendActivity(typingActivity).join();
-            try {
-                TimeUnit.MILLISECONDS.sleep(500);
-            } catch (InterruptedException e) {
-                // Empty error
-            }
-            turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText())).join();
-            return CompletableFuture.completedFuture(null);
-        })
-        .send("foo")
-            .assertReply(activity -> {
-                Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
-            })
-            .assertReply("echo:foo")
-        .send("bar")
-            .assertReply(activity -> {
-                Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
-            })
-            .assertReply("echo:bar")
-        .startTest().join();
+			turnContext.sendActivity(typingActivity).join();
+			try {
+				TimeUnit.MILLISECONDS.sleep(500);
+			} catch (InterruptedException e) {
+				// Empty error
+			}
+			turnContext.sendActivity(String.format("echo:%s", turnContext.getActivity().getText())).join();
+			return CompletableFuture.completedFuture(null);
+		})
+		.send("foo")
+			.assertReply(activity -> {
+				Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
+			})
+			.assertReply("echo:foo")
+		.send("bar")
+			.assertReply(activity -> {
+				Assert.assertTrue(activity.isType(ActivityTypes.TYPING));
+			})
+			.assertReply("echo:bar")
+		.startTest().join();
 
-        // Verify
-        verify(mockTelemetryClient, times(0));
-    }
+		// Verify
+		verify(mockTelemetryClient, times(0));
+	}
 }

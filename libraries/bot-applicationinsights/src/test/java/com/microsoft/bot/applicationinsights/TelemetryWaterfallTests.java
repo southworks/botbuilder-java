@@ -92,7 +92,7 @@ public class TelemetryWaterfallTests {
     @Test
     public void waterfallWithCallback() {
         ConversationState convoState = new ConversationState(new MemoryStorage());
-        TestAdapter adapter = new TestAdapter(TestAdapter.createConversationReference("waterfallWithCallback", "User1", "Bot"))
+        TestAdapter adapter = new TestAdapter(TestAdapter.createConversationReference("WaterfallWithCallback", "User1", "Bot"))
             .use(new AutoSaveStateMiddleware(convoState));
 
         BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);

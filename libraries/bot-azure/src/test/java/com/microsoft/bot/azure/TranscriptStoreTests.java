@@ -335,10 +335,10 @@ public class TranscriptStoreTests {
         TestAdapter adapter = new TestAdapter(conversation)
             .use(new TranscriptLoggerMiddleware(transcriptStore));
         final String[] fooId = {new String()};
+        ObjectMapper objectMapper = new ObjectMapper()
+            .findAndRegisterModules();
         new TestFlow(adapter, turnContext -> {
             fooId[0] = turnContext.getActivity().getId();
-            ObjectMapper objectMapper = new ObjectMapper()
-                .findAndRegisterModules();
             Activity updateActivity = null;
             try {
                 // clone the activity, so we can use it to do an update
@@ -360,7 +360,7 @@ public class TranscriptStoreTests {
         } catch (TimeoutException ex) {
             Assert.fail();
         }
-        
+
         Assert.assertEquals(2, pagedResult.getItems().size());
         Assert.assertTrue(pagedResult.getItems().get(0).isType(ActivityTypes.MESSAGE));
         Assert.assertEquals(fooId[0], pagedResult.getItems().get(0).getId());

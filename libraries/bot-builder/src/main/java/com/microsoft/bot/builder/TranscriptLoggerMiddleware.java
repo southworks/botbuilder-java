@@ -151,7 +151,7 @@ public class TranscriptLoggerMiddleware implements Middleware {
             throw new IllegalArgumentException("Cannot check or add Id on a null Activity.");
         }
 
-        if (StringUtils.isBlank(activity.getId())) {
+        if (activity.getId() == null) {
             String generatedId = String.format("g_%s", UUID.randomUUID().toString());
             activity.setId(generatedId);
         }

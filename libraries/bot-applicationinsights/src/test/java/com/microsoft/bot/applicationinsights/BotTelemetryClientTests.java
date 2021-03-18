@@ -121,7 +121,7 @@ public class BotTelemetryClientTests {
         Mockito.doAnswer(invocation -> {
             RemoteDependencyTelemetry remoteDependencyTelemetry = invocation.getArgument(0);
 
-            Assert.assertEquals("test", remoteDependencyTelemetry.getVer());
+            Assert.assertEquals("test", remoteDependencyTelemetry.getType());
             Assert.assertEquals("target", remoteDependencyTelemetry.getTarget());
             Assert.assertEquals("dependencyname", remoteDependencyTelemetry.getName());
             Assert.assertEquals("result", remoteDependencyTelemetry.getResultCode());

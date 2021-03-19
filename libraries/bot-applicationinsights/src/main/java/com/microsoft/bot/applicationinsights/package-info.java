@@ -5,4 +5,4 @@
 /**
  * This package contains the classes for Bot-Builder.
  */
-package com.microsoft.bot.applicationinsights.core;
+package com.microsoft.bot.applicationinsights;

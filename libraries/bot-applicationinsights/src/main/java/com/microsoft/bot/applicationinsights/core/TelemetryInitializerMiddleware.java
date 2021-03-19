@@ -16,8 +16,9 @@ import com.microsoft.bot.schema.Activity;
 import java.util.concurrent.CompletableFuture;
 
 public class TelemetryInitializerMiddleware implements Middleware {
-    
+
     private HttpContext httpContext;
+    private final String botActivityKey = "BotBuilderActivity";
     private final TelemetryLoggerMiddleware telemetryLoggerMiddleware;
     private final Boolean logActivityTelemetry;
 
@@ -36,13 +37,13 @@ public class TelemetryInitializerMiddleware implements Middleware {
                 this.httpContext = HttpClientContext.create();
             }
 
-            Object item = httpContext.getAttribute(TelemetryBotIdInitializer.BotActivityKey);
+            Object item = httpContext.getAttribute(botActivityKey);
 
             if (item != null) {
-                httpContext.removeAttribute(TelemetryBotIdInitializer.BotActivityKey);
+                httpContext.removeAttribute(botActivityKey);
             }
 
-            httpContext.setAttribute(TelemetryBotIdInitializer.BotActivityKey, activity);
+            httpContext.setAttribute(botActivityKey, activity);
         }
 
         if (logActivityTelemetry) {
@@ -50,8 +51,6 @@ public class TelemetryInitializerMiddleware implements Middleware {
         } else {
             return next.next();
         }
-
-        return CompletableFuture.completedFuture(null);
     }
 }
 

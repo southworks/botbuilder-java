@@ -28,13 +28,12 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
     private final TelemetryClient telemetryClient;
 
     /**
-     * Initializes a new instance of the {@link BotTelemetryClient}
+     * Initializes a new instance of the {@link BotTelemetryClient}.
      *
-     * @param withTelemetryClient The telemetry client to forward bot events to.</param>
+     * @param withTelemetryClient The telemetry client to forward bot events to.
      */
-    public BotTelemetryClientImpl(TelemetryClient withTelemetryClient)
-    {
-        if(withTelemetryClient == null){
+    public BotTelemetryClientImpl(TelemetryClient withTelemetryClient) {
+        if (withTelemetryClient == null) {
             throw new IllegalArgumentException("withTelemetry should be provided");
         }
         this.telemetryClient = withTelemetryClient;
@@ -52,9 +51,16 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
      * @param properties Named string values you can use to classify and search for this availability telemetry.
      * @param metrics Additional values associated with this availability telemetry.
      */
+    @SuppressWarnings("checkstyle:ParameterNumber")
     @Override
-    public void trackAvailability(String name, OffsetDateTime timeStamp, Duration duration, String runLocation, boolean success, String message, Map<String, String> properties, Map<String, Double> metrics)
-    {
+    public void trackAvailability(String name,
+                                  OffsetDateTime timeStamp,
+                                  Duration duration,
+                                  String runLocation,
+                                  boolean success,
+                                  String message,
+                                  Map<String, String> properties,
+                                  Map<String, Double> metrics) {
         com.microsoft.applicationinsights.telemetry.Duration durationTelemetry =
             new com.microsoft.applicationinsights.telemetry.Duration(duration.toNanos());
         ConcurrentMap<String, String> concurrentProperties = new ConcurrentHashMap<>(properties);
@@ -67,24 +73,20 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
             success,
             concurrentMetrics,
             concurrentProperties);
-        if (properties != null)
-        {
-            for(Map.Entry<String, String> pair: properties.entrySet())
-            {
+        if (properties != null) {
+            for (Map.Entry<String, String> pair: properties.entrySet()) {
                 telemetry.getProperties().put(pair.getKey(), pair.getValue());
             }
         }
 
-        if (metrics != null)
-        {
-            for(Map.Entry<String, Double> pair: metrics.entrySet())
-            {
+        if (metrics != null) {
+            for (Map.Entry<String, Double> pair: metrics.entrySet()) {
                 telemetry.getMetrics().put(pair.getKey(), pair.getValue());
             }
         }
 
         /**
-         * TODO: this should be telemetryClient.trackAvailability(telemetry).
+         * TODO : this should be telemetryClient.trackAvailability(telemetry).
          * However, this is not present in TelemetryClient class
          */
         telemetryClient.track(telemetry);
@@ -106,15 +108,22 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
      * @param resultCode Result code of dependency call execution.
      * @param success True if the dependency call was handled successfully.
      */
+    @SuppressWarnings("checkstyle:ParameterNumber")
     @Override
-    public void trackDependency(String dependencyTypeName, String target, String dependencyName, String data, OffsetDateTime startTime, Duration duration, String resultCode, boolean success)
-    {
+    public void trackDependency(String dependencyTypeName,
+                                String target,
+                                String dependencyName,
+                                String data,
+                                OffsetDateTime startTime,
+                                Duration duration,
+                                String resultCode,
+                                boolean success) {
         RemoteDependencyTelemetry telemetry = new RemoteDependencyTelemetry();
 
         telemetry.setType(dependencyTypeName);
         telemetry.setTarget(target);
         telemetry.setName(dependencyName);
-        // TODO: RemoteDependencyTelemetry has the getData as protected, so we can't access
+        // TODO : RemoteDependencyTelemetry has the getData as protected, so we can't access
         telemetry.setTimestamp(new Date(startTime.toInstant().toEpochMilli()));
         com.microsoft.applicationinsights.telemetry.Duration durationTelemetry =
             new com.microsoft.applicationinsights.telemetry.Duration(duration.toNanos());
@@ -133,21 +142,16 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
      * @param metrics Measurements associated with this event.
      */
     @Override
-    public void trackEvent(String eventName, Map<String, String> properties, Map<String, Double> metrics)
-    {
+    public void trackEvent(String eventName, Map<String, String> properties, Map<String, Double> metrics) {
         EventTelemetry telemetry = new EventTelemetry(eventName);
-        if (properties != null)
-        {
-            for(Map.Entry<String, String> pair: properties.entrySet())
-            {
+        if (properties != null) {
+            for (Map.Entry<String, String> pair: properties.entrySet()) {
                 telemetry.getProperties().put(pair.getKey(), pair.getValue());
             }
         }
 
-        if (metrics != null)
-        {
-            for(Map.Entry<String, Double> pair: metrics.entrySet())
-            {
+        if (metrics != null) {
+            for (Map.Entry<String, Double> pair: metrics.entrySet()) {
                 telemetry.getMetrics().put(pair.getKey(), pair.getValue());
             }
         }
@@ -163,21 +167,16 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
      * @param metrics Additional values associated with this exception
      */
     @Override
-    public void trackException(Exception exception, Map<String, String> properties, Map<String, Double> metrics)
-    {
+    public void trackException(Exception exception, Map<String, String> properties, Map<String, Double> metrics) {
         ExceptionTelemetry telemetry = new ExceptionTelemetry(exception);
-        if (properties != null)
-        {
-            for(Map.Entry<String, String> pair: properties.entrySet())
-            {
+        if (properties != null) {
+            for (Map.Entry<String, String> pair: properties.entrySet()) {
                 telemetry.getProperties().put(pair.getKey(), pair.getValue());
             }
         }
 
-        if (metrics != null)
-        {
-            for(Map.Entry<String, Double> pair: metrics.entrySet())
-            {
+        if (metrics != null) {
+            for (Map.Entry<String, Double> pair: metrics.entrySet()) {
                 telemetry.getMetrics().put(pair.getKey(), pair.getValue());
             }
         }
@@ -193,15 +192,12 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
      * @param properties Named string values you can use to search and classify events.
      */
     @Override
-    public void trackTrace(String message, Severity severityLevel, Map<String, String> properties)
-    {
+    public void trackTrace(String message, Severity severityLevel, Map<String, String> properties) {
         TraceTelemetry telemetry = new TraceTelemetry(message);
         telemetry.setSeverityLevel(SeverityLevel.values()[severityLevel.ordinal()]);
 
-        if (properties != null)
-        {
-            for(Map.Entry<String, String> pair: properties.entrySet())
-            {
+        if (properties != null) {
+            for (Map.Entry<String, String> pair: properties.entrySet()) {
                 telemetry.getProperties().put(pair.getKey(), pair.getValue());
             }
         }
@@ -228,22 +224,17 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
      * @param properties Named string values you can use to search and classify events.
      * @param metrics Measurements associated with this event.
      */
-    public void trackPageView(String dialogName, Map<String, String> properties, Map<String, Double> metrics)
-    {
+    public void trackPageView(String dialogName, Map<String, String> properties, Map<String, Double> metrics) {
         PageViewTelemetry telemetry = new PageViewTelemetry(dialogName);
 
-        if (properties != null)
-        {
-            for(Map.Entry<String, String> pair: properties.entrySet())
-            {
+        if (properties != null) {
+            for (Map.Entry<String, String> pair: properties.entrySet()) {
                 telemetry.getProperties().put(pair.getKey(), pair.getValue());
             }
         }
 
-        if (metrics != null)
-        {
-            for(Map.Entry<String, Double> pair: metrics.entrySet())
-            {
+        if (metrics != null) {
+            for (Map.Entry<String, Double> pair: metrics.entrySet()) {
                 telemetry.getMetrics().put(pair.getKey(), pair.getValue());
             }
         }

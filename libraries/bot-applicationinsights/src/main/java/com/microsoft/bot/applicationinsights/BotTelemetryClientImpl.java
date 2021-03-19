@@ -98,7 +98,6 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
      * @param dependencyTypeName Name of the command initiated with this dependency call. Low cardinality value.
      * Examples are SQL, Azure table, and HTTP.
      * @param target External dependency target.
-     * @param duration The time taken for the availability test to run.
      * @param dependencyName Name of the command initiated with this dependency call. Low cardinality value.
      * Examples are stored procedure name and URL path template.
      * @param data Command initiated by this dependency call. Examples are SQL statement and HTTP

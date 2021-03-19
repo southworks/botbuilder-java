@@ -41,6 +41,7 @@ public final class AvailabilityTelemetry extends BaseSampleSourceTelemetry<Avail
 
         this.data.setProperties(properties);
         this.data.setMeasurements(measurements);
+        this.data.setMessage(message);
 
         initialize(this.data.getProperties());
 

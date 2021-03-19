@@ -15,6 +15,9 @@ import com.microsoft.bot.schema.Activity;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ *
+ */
 public class TelemetryInitializerMiddleware implements Middleware {
 
     private HttpContext httpContext;
@@ -22,11 +25,23 @@ public class TelemetryInitializerMiddleware implements Middleware {
     private final TelemetryLoggerMiddleware telemetryLoggerMiddleware;
     private final Boolean logActivityTelemetry;
 
-    public TelemetryInitializerMiddleware(TelemetryLoggerMiddleware withTelemetryLoggerMiddleware, Boolean withLogActivityTelemetry) {
+    /**
+     *
+     * @param withTelemetryLoggerMiddleware The TelemetryLoggerMiddleware to use
+     * @param withLogActivityTelemetry Boolean determining if you want to log telemetry activity
+     */
+    public TelemetryInitializerMiddleware(TelemetryLoggerMiddleware withTelemetryLoggerMiddleware,
+                                          Boolean withLogActivityTelemetry) {
         telemetryLoggerMiddleware = withTelemetryLoggerMiddleware;
-        logActivityTelemetry = withLogActivityTelemetry != null ? withLogActivityTelemetry : true;
+        logActivityTelemetry = withLogActivityTelemetry != null && withLogActivityTelemetry;
     }
 
+    /**
+     *
+     * @param context The incoming TurnContext
+     * @param next Delegate to run next on
+     * @return Returns a CompletableFuture with Void value
+     */
     public CompletableFuture<Void> onTurn(TurnContext context, NextDelegate next) {
         BotAssert.contextNotNull(context);
 

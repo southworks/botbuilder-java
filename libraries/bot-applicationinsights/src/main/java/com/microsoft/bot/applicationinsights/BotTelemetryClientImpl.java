@@ -12,7 +12,6 @@ import com.microsoft.applicationinsights.telemetry.SeverityLevel;
 import com.microsoft.applicationinsights.telemetry.TraceTelemetry;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.Severity;
-import org.apache.commons.lang3.NotImplementedException;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;

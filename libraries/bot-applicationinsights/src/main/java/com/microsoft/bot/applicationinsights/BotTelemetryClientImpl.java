@@ -215,7 +215,11 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
      */
     @Override
     public void trackDialogView(String dialogName, Map<String, String> properties, Map<String, Double> metrics) {
-        throw new NotImplementedException("trackDialogView is not implemented");
+        if (telemetryClient instanceof BotTelemetryClient) {
+            trackPageView(dialogName, properties, metrics);
+        } else {
+            telemetryClient.trackTrace("Dialog View: " + dialogName, SeverityLevel.Information, properties);
+        }
     }
 
     /**

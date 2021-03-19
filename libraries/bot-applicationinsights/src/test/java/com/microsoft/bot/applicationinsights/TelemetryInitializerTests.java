@@ -18,7 +18,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 
-import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.bot.applicationinsights.core.TelemetryInitializerMiddleware;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.TelemetryLoggerMiddleware;

@@ -21,8 +21,6 @@ import com.microsoft.bot.dialogs.WaterfallDialog;
 import com.microsoft.bot.dialogs.WaterfallStep;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;

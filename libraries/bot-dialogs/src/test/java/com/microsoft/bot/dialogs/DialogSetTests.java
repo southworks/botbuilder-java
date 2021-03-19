@@ -12,10 +12,10 @@ import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.ConversationState;
 import com.microsoft.bot.builder.MemoryStorage;
 import com.microsoft.bot.builder.NullBotTelemetryClient;
+import com.microsoft.bot.builder.Severity;
 import com.microsoft.bot.builder.StatePropertyAccessor;
 import com.microsoft.bot.builder.TestUtilities;
 import com.microsoft.bot.builder.TurnContext;
-
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Assert;
 import org.junit.Test;

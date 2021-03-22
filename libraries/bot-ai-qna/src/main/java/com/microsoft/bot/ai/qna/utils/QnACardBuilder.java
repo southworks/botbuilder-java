@@ -49,29 +49,23 @@ public final class QnACardBuilder {
 
         // Add all suggestions
         for (String suggestion : suggestionsList) {
-            buttonList.add(new CardAction() {
-                {
-                    setValue(suggestion);
-                    setType(ActionTypes.IM_BACK);
-                    setTitle(suggestion);
-                }
-            });
+            CardAction cardAction = new CardAction();
+            cardAction.setValue(suggestion);
+            cardAction.setType(ActionTypes.IM_BACK);
+            cardAction.setTitle(suggestion);
+
+            buttonList.add(cardAction);
         }
 
         // Add No match text
-        buttonList.add(new CardAction() {
-            {
-                setValue(cardNoMatchText);
-                setType(ActionTypes.IM_BACK);
-                setTitle(cardNoMatchText);
-            }
-        });
+        CardAction cardAction = new CardAction();
+        cardAction.setValue(cardNoMatchText);
+        cardAction.setType(ActionTypes.IM_BACK);
+        cardAction.setTitle(cardNoMatchText);
+        buttonList.add(cardAction);
 
-        HeroCard plCard = new HeroCard() {
-            {
-                setButtons(buttonList);
-            }
-        };
+        HeroCard plCard = new HeroCard();
+        plCard.setButtons(buttonList);
 
         // Create the attachment.
         Attachment attachment = plCard.toAttachment();

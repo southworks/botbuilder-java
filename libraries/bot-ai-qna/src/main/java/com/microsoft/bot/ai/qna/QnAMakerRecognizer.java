@@ -380,17 +380,15 @@ public class QnAMakerRecognizer extends Recognizer {
             filters.addAll(Arrays.asList(externalMetadata));
         }
 
-        QnAMakerOptions options = new QnAMakerOptions() {
-            {
-                setContext(context);
-                setThreshold(threshold);
-                setStrictFilters(filters.toArray(new Metadata[filters.size()]));
-                setTop(top);
-                setQnAId(qnAId);
-                setIsTest(isTest);
-                setStrictFiltersJoinOperator(strictFiltersJoinOperator);
-            }
-        };
+        QnAMakerOptions options = new QnAMakerOptions();
+        options.setContext(context);
+        options.setScoreThreshold(threshold);
+        options.setStrictFilters(filters.toArray(new Metadata[filters.size()]));
+        options.setTop(top);
+        options.setQnAId(qnAId);
+        options.setIsTest(isTest);
+        options.setStrictFiltersJoinOperator(strictFiltersJoinOperator);
+
         // Calling QnAMaker to get response.
         return this.getQnAMakerClient(dialogContext).thenCompose(qnaClient -> {
             return qnaClient.getAnswers(dialogContext.getContext(), options, null, null).thenApply(answers -> {
@@ -434,11 +432,9 @@ public class QnAMakerRecognizer extends Recognizer {
                     recognizerResult.setEntities(entitiesNode);
                     recognizerResult.getProperties().put("answers", mapper.valueToTree(answers));
                 } else {
-                    recognizerResult.getIntents().put("None", new IntentScore() {
-                        {
-                            setScore(1.0f);
-                        }
-                    });
+                    IntentScore intentScore = new IntentScore();
+                    intentScore.setScore(1.0f);
+                    recognizerResult.getIntents().put("None", intentScore);
                 }
 
                 this.trackRecognizerResult(
@@ -469,13 +465,10 @@ public class QnAMakerRecognizer extends Recognizer {
         String hn = this.hostName;
         String kbId = this.knowledgeBaseId;
         Boolean logPersonalInfo = this.logPersonalInformation;
-        QnAMakerEndpoint endpoint = new QnAMakerEndpoint() {
-            {
-                setEndpointKey(epKey);
-                setHost(hn);
-                setKnowledgeBaseId(kbId);
-            }
-        };
+        QnAMakerEndpoint endpoint = new QnAMakerEndpoint();
+        endpoint.setEndpointKey(epKey);
+        endpoint.setHost(hn);
+        endpoint.setKnowledgeBaseId(kbId);
 
         return CompletableFuture
             .completedFuture(new QnAMaker(endpoint, new QnAMakerOptions(), this.getTelemetryClient(), logPersonalInfo));

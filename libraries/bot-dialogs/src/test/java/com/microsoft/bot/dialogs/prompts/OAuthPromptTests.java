@@ -83,12 +83,10 @@ public class OAuthPromptTests {
             dialogs.add(prompt);
             ConversationAccount conversation = new ConversationAccount();
             conversation.setId("123");
-            TurnContextImpl tc = new TurnContextImpl(adapter, new Activity(ActivityTypes.MESSAGE) {
-                {
-                    setConversation(conversation);
-                    setChannelId("test");
-                }
-            });
+            Activity activity = new Activity(ActivityTypes.MESSAGE);
+            activity.setConversation(conversation);
+            activity.setChannelId("test");
+            TurnContextImpl tc = new TurnContextImpl(adapter, activity);
 
             DialogContext dc = dialogs.createContext(tc).join();
 

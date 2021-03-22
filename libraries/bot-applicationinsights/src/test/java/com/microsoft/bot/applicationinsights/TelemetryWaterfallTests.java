@@ -117,10 +117,12 @@ public class TelemetryWaterfallTests {
 
     @Test
     public void waterfallWithActionsNull() {
-        BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
-        WaterfallDialog waterfall = new WaterfallDialog("test", null);
-        waterfall.setTelemetryClient(telemetryClient);
-        Assert.assertThrows(IllegalArgumentException.class, () -> waterfall.addStep(null));
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
+            WaterfallDialog waterfall = new WaterfallDialog("test", null);
+            waterfall.setTelemetryClient(telemetryClient);
+            waterfall.addStep(null);
+        });
     }
 
     @Test
@@ -170,7 +172,10 @@ public class TelemetryWaterfallTests {
         .startTest()
         .join();
 
-        Assert.assertEquals(7, counter[0]);
+        Mockito.verify(telemetryClient, Mockito.times(7)).trackEvent(
+            Mockito.anyString(),
+            Mockito.anyMap()
+        );
 
         // Verify:
         // Event name is "WaterfallComplete"
@@ -185,6 +190,7 @@ public class TelemetryWaterfallTests {
         // Verify naming on lambda's is "StepXofY"
         Assert.assertTrue(saved_properties.get("WaterfallStep_1").containsKey("StepName"));
         Assert.assertEquals("Step1of3", saved_properties.get("WaterfallStep_1").get("StepName"));
+        Assert.assertTrue(saved_properties.get("WaterfallStep_1").containsKey("InstanceId"));
         Assert.assertTrue(waterfallDialog.getEndDialogCalled());
     }
 
@@ -247,7 +253,10 @@ public class TelemetryWaterfallTests {
             .startTest()
             .join();
 
-        Assert.assertEquals(7, counter[0]);
+        Mockito.verify(telemetryClient, Mockito.times(7)).trackEvent(
+            Mockito.anyString(),
+            Mockito.anyMap()
+        );
 
         // Verify:
         // Event name is "WaterfallCancel"

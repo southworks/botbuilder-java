@@ -3,6 +3,6 @@
 // license information.
 
 /**
- * This package contains the classes for Bot-Builder.
+ * This package contains the classes for bot-applicationinsights.
  */
 package com.microsoft.bot.applicationinsights.core;

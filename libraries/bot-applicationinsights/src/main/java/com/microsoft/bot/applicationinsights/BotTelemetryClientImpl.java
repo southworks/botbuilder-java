@@ -117,18 +117,16 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
                                 Duration duration,
                                 String resultCode,
                                 boolean success) {
-        RemoteDependencyTelemetry telemetry = new RemoteDependencyTelemetry();
+        com.microsoft.applicationinsights.telemetry.Duration durationTelemetry =
+            new com.microsoft.applicationinsights.telemetry.Duration(duration.toNanos());
+
+        RemoteDependencyTelemetry telemetry =
+            new RemoteDependencyTelemetry(dependencyName, data, durationTelemetry, success);
 
         telemetry.setType(dependencyTypeName);
         telemetry.setTarget(target);
-        telemetry.setName(dependencyName);
-        // TODO : RemoteDependencyTelemetry has the getData as protected, so we can't access
         telemetry.setTimestamp(new Date(startTime.toInstant().toEpochMilli()));
-        com.microsoft.applicationinsights.telemetry.Duration durationTelemetry =
-            new com.microsoft.applicationinsights.telemetry.Duration(duration.toNanos());
-        telemetry.setDuration(durationTelemetry);
         telemetry.setResultCode(resultCode);
-        telemetry.setSuccess(success);
 
         telemetryClient.trackDependency(telemetry);
     }
@@ -209,11 +207,7 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
      */
     @Override
     public void trackDialogView(String dialogName, Map<String, String> properties, Map<String, Double> metrics) {
-        if (telemetryClient instanceof BotTelemetryClient) {
-            trackPageView(dialogName, properties, metrics);
-        } else {
-            telemetryClient.trackTrace("Dialog View: " + dialogName, SeverityLevel.Information, properties);
-        }
+        trackPageView(dialogName, properties, metrics);
     }
 
     /**

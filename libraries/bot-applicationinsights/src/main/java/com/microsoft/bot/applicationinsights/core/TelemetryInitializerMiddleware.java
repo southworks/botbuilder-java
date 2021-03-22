@@ -16,7 +16,7 @@ import com.microsoft.bot.schema.Activity;
 import java.util.concurrent.CompletableFuture;
 
 /**
- *
+ * Middleware for storing incoming activity on the HttpContext.
  */
 public class TelemetryInitializerMiddleware implements Middleware {
 
@@ -26,8 +26,8 @@ public class TelemetryInitializerMiddleware implements Middleware {
     private final Boolean logActivityTelemetry;
 
     /**
-     *
-     * @param withTelemetryLoggerMiddleware The TelemetryLoggerMiddleware to use
+     * Initializes a new instance of the {@link TelemetryInitializerMiddleware}.
+     * @param withTelemetryLoggerMiddleware The TelemetryLoggerMiddleware to use.
      * @param withLogActivityTelemetry Boolean determining if you want to log telemetry activity
      */
     public TelemetryInitializerMiddleware(TelemetryLoggerMiddleware withTelemetryLoggerMiddleware,
@@ -37,7 +37,7 @@ public class TelemetryInitializerMiddleware implements Middleware {
     }
 
     /**
-     *
+     * Stores the incoming activity as JSON in the items collection on the HttpContext.
      * @param context The incoming TurnContext
      * @param next Delegate to run next on
      * @return Returns a CompletableFuture with Void value

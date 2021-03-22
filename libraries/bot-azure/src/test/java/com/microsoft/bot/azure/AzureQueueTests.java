@@ -41,7 +41,7 @@ import com.microsoft.bot.restclient.serializer.JacksonAdapter;
 
 public class AzureQueueTests {
     private static final Integer DEFAULT_DELAY = 2000;
-    private static Boolean emulatorIsRunning = false;
+    private static boolean emulatorIsRunning = false;
     private final String connectionString = "UseDevelopmentStorage=true";
     private static final String NO_EMULATOR_MESSAGE = "This test requires Azure STORAGE Emulator! Go to https://docs.microsoft.com/azure/storage/common/storage-use-emulator to download and install.";
 

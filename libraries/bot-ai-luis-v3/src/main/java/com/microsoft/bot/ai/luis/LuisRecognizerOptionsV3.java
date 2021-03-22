@@ -125,7 +125,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Gets External entity recognizer to recognize external entities to pass to
      * LUIS.
-     * 
+     *
      * @return externalEntityRecognizer
      */
     public Recognizer getExternalEntityRecognizer() {
@@ -135,7 +135,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Sets External entity recognizer to recognize external entities to pass to
      * LUIS.
-     * 
+     *
      * @param externalEntityRecognizer External Recognizer instance.
      */
     public void setExternalEntityRecognizer(Recognizer externalEntityRecognizer) {
@@ -145,7 +145,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Gets indicating whether all intents come back or only the top one. True for
      * returning all intents.
-     * 
+     *
      * @return True for returning all intents.
      */
     public boolean isIncludeAllIntents() {
@@ -154,7 +154,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Sets indicating whether all intents come back or only the top one.
-     * 
+     *
      * @param includeAllIntents True for returning all intents.
      */
     public void setIncludeAllIntents(boolean includeAllIntents) {
@@ -164,7 +164,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Gets value indicating whether or not instance data should be included in
      * response.
-     * 
+     *
      * @return True if instance data should be included in response.
      */
     public boolean isIncludeInstanceData() {
@@ -174,7 +174,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Sets value indicating whether or not instance data should be included in
      * response.
-     * 
+     *
      * @param includeInstanceData True if instance data should be included in
      *                            response.
      */
@@ -186,7 +186,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
      * Value indicating whether queries should be logged in LUIS. If queries should
      * be logged in LUIS in order to help build better models through active
      * learning
-     * 
+     *
      * @return True if queries should be logged in LUIS.
      */
     public boolean isLog() {
@@ -197,7 +197,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
      * Value indicating whether queries should be logged in LUIS. If queries should
      * be logged in LUIS in order to help build better models through active
      * learning.
-     * 
+     *
      * @param log True if queries should be logged in LUIS.
      */
     public void setLog(boolean log) {
@@ -206,7 +206,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Returns Dynamic lists used to recognize entities for a particular query.
-     * 
+     *
      * @return Dynamic lists used to recognize entities for a particular query
      */
     public List<DynamicList> getDynamicLists() {
@@ -215,7 +215,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Sets Dynamic lists used to recognize entities for a particular query.
-     * 
+     *
      * @param dynamicLists to recognize entities for a particular query.
      */
     public void setDynamicLists(List<DynamicList> dynamicLists) {
@@ -224,7 +224,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Gets External entities to be recognized in query.
-     * 
+     *
      * @return External entities to be recognized in query.
      */
     public List<ExternalEntity> getExternalEntities() {
@@ -233,7 +233,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Sets External entities to be recognized in query.
-     * 
+     *
      * @param externalEntities External entities to be recognized in query.
      */
     public void setExternalEntities(List<ExternalEntity> externalEntities) {
@@ -243,7 +243,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Gets value indicating whether external entities should override other means
      * of recognizing entities.
-     * 
+     *
      * @return True if external entities should be preferred to the results from
      *         LUIS models.
      */
@@ -254,7 +254,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Sets value indicating whether external entities should override other means
      * of recognizing entities.
-     * 
+     *
      * @param preferExternalEntities True if external entities should be preferred
      *                               to the results from LUIS models.
      */
@@ -264,7 +264,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Gets datetimeV2 offset. The format for the datetimeReference is ISO 8601.
-     * 
+     *
      * @return The format for the datetimeReference in ISO 8601.
      */
     public String getDateTimeReference() {
@@ -273,7 +273,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Sets datetimeV2 offset.
-     * 
+     *
      * @param dateTimeReference The format for the datetimeReference is ISO 8601.
      */
     public void setDateTimeReference(String dateTimeReference) {
@@ -285,7 +285,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
      * production slot. You can find other standard slots in LuisSlot. If you
      * specify a Version, then a private version of the application is used instead
      * of a slot.
-     * 
+     *
      * @return LuisSlot constant.
      */
     public String getSlot() {
@@ -297,7 +297,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
      * production slot. You can find other standard slots in LuisSlot. If you
      * specify a Version, then a private version of the application is used instead
      * of a slot.
-     * 
+     *
      * @param slot LuisSlot value to use.
      */
     public void setSlot(String slot) {
@@ -308,7 +308,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
      * Gets the specific version of the application to access. LUIS supports
      * versions and this is the version to use instead of a slot. If this is
      * specified, then the Slot is ignored.
-     * 
+     *
      * @return Luis application version to Query.
      */
     public String getVersion() {
@@ -318,7 +318,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Sets the specific version of the application to access. LUIS supports
      * versions and this is the version to use instead of a slot.
-     * 
+     *
      * @param version Luis Application version. If this is specified, then the Slot
      *                is ignored.
      */
@@ -328,7 +328,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Gets whether the http client.
-     * 
+     *
      * @return OkHttpClient used to query the Luis Service.
      */
     public OkHttpClient getHttpClient() {
@@ -337,7 +337,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Sets the http client.
-     * 
+     *
      * @param httpClient to use for Luis Service http calls.
      */
     public void setHttpClient(OkHttpClient httpClient) {
@@ -346,7 +346,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Initializes a new instance of the LuisRecognizerOptionsV3.
-     * 
+     *
      * @param application Luis Application instance to query.
      */
     public LuisRecognizerOptionsV3(LuisApplication application) {
@@ -356,7 +356,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Internal implementation of the http request to the LUIS service and parsing
      * of the response to a Recognizer Result instance.
-     * 
+     *
      * @param dialogContext Context Object.
      * @param activity      Activity object to extract the utterance.
      */
@@ -420,7 +420,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Internal implementation of the http request to the LUIS service and parsing
      * of the response to a Recognizer Result instance.
-     * 
+     *
      * @param turnContext Context Object.
      */
     @Override
@@ -485,11 +485,8 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
         ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
 
         if (utterance == null || utterance.isEmpty()) {
-            recognizerResult = new RecognizerResult() {
-                {
-                    setText(utterance);
-                }
-            };
+            recognizerResult = new RecognizerResult();
+            recognizerResult.setText(utterance);
         } else {
             try {
                 Request request = buildRequest(buildRequestBody(utterance));
@@ -541,11 +538,9 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
             Map.Entry<String, JsonNode> intent = it.next();
             double score = intent.getValue().get("score").asDouble();
             String intentName = intent.getKey().replace(".", "_").replace(" ", "_");
-            intents.put(intentName, new IntentScore() {
-                {
-                    setScore(score);
-                }
-            });
+            IntentScore intentScore = new IntentScore();
+            intentScore.setScore(score);
+            intents.put(intentName, intentScore);
         }
 
         return intents;

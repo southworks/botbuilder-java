@@ -58,7 +58,7 @@ public class BlobsStorageTests extends StorageBaseTests {
     }
 
     @After
-    public void afterTest() {
+    public void testCleanup() {
         BlobContainerClient containerClient = new BlobContainerClientBuilder()
             .connectionString(connectionString)
             .containerName(getContainerName())

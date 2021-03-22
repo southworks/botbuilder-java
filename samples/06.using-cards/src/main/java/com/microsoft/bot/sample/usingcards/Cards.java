@@ -73,29 +73,24 @@ public class Cards {
     public static ReceiptCard getReceiptCard() {
         ReceiptCard receiptCard = new ReceiptCard();
         receiptCard.setTitle("John Doe");
-        receiptCard.setFacts(
-            new Fact("Order Number", "1234"), new Fact("Payment Method", "VISA 5555-****"));
-        receiptCard.setItems(
-            new ReceiptItem(){{
-                setTitle("Data Transfer");
-                setPrice("$ 38.45");
-                setQuantity("368");
-                setImage(new CardImage("https://github.com/amido/azure-vector-icons/raw/master/renders/traffic-manager.png"));
-            }},
-            new ReceiptItem() {{
-                setTitle("App Service");
-                setPrice("$ 45.00");
-                setQuantity("720");
-                setImage(new CardImage("https://github.com/amido/azure-vector-icons/raw/master/renders/cloud-service.png"));
-            }}
-            );
+        ReceiptItem receiptItem1 = new ReceiptItem();
+        receiptItem1.setTitle("Data Transfer");
+        receiptItem1.setPrice("$ 38.45");
+        receiptItem1.setQuantity("368");
+        receiptItem1.setImage(new CardImage("https://github.com/amido/azure-vector-icons/raw/master/renders/traffic-manager.png"));
+        ReceiptItem receiptItem2 = new ReceiptItem();
+        receiptItem2.setTitle("App Service");
+        receiptItem2.setPrice("$ 45.00");
+        receiptItem2.setQuantity("720");
+        receiptItem2.setImage(new CardImage("https://github.com/amido/azure-vector-icons/raw/master/renders/cloud-service.png"));
+        receiptCard.setFacts(new Fact("Order Number", "1234"), new Fact("Payment Method", "VISA 5555-****"));
+        receiptCard.setItems(receiptItem1, receiptItem2);
         receiptCard.setTax("$ 7.50");
         receiptCard.setTotal("$ 90.95");
-        receiptCard.setButtons(new CardAction(ActionTypes.OPEN_URL, "More information") {{
-                setImage(
-                    "https://account.windowsazure.com/content/6.10.1.38-.8225.160809-1618/aux-pre/images/offer-icon-freetrial.png");
-                setValue("https://azure.microsoft.com/en-us/pricing/");
-        }});
+        CardAction cardAction = new CardAction(ActionTypes.OPEN_URL, "More information");
+        cardAction.setImage("https://account.windowsazure.com/content/6.10.1.38-.8225.160809-1618/aux-pre/images/offer-icon-freetrial.png");
+        cardAction.setValue("https://azure.microsoft.com/en-us/pricing/");
+        receiptCard.setButtons(cardAction);
 
         return receiptCard;
     }

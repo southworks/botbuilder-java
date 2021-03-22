@@ -203,6 +203,8 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
     }
 
     /**
+     * We implemented this method calling the tracePageView method from {@link BotTelemetryClientImpl} as the
+     * IBotPageViewTelemetryClient has not been implemented.
      * {@inheritDoc}
      */
     @Override

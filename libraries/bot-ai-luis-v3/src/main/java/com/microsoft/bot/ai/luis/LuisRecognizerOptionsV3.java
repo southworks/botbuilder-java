@@ -224,7 +224,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Gets External entities to be recognized in query.
-     *
+     * 
      * @return External entities to be recognized in query.
      */
     public List<ExternalEntity> getExternalEntities() {

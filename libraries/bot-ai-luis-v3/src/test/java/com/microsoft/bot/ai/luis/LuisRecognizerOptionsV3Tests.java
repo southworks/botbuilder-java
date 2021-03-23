@@ -240,7 +240,6 @@ public class LuisRecognizerOptionsV3Tests {
 
         Activity activity = new Activity(ActivityTypes.MESSAGE);
         activity.setText(message);
-        activity.setType(ActivityTypes.MESSAGE);
         activity.setChannelId("EmptyContext");
 
         return new TurnContextImpl(new NotImplementedAdapter(), activity);

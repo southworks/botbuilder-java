@@ -264,7 +264,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Gets datetimeV2 offset. The format for the datetimeReference is ISO 8601.
-     *
+     * 
      * @return The format for the datetimeReference in ISO 8601.
      */
     public String getDateTimeReference() {

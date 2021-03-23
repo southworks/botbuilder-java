@@ -20,8 +20,8 @@ public final class EmulatorValidation {
     }
 
     /**
-     * TO BOT FROM EMULATOR: Token validation parameters when connecting to a
-     * channel.
+     * TO BOT FROM EMULATOR.
+     * @return Token validation parameters when connecting to a channel.
      */
     public static TokenValidationParameters getTokenValidationParameters() {
         TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();

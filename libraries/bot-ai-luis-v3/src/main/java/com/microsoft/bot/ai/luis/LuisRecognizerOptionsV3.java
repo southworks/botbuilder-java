@@ -328,7 +328,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Gets whether the http client.
-     *
+     * 
      * @return OkHttpClient used to query the Luis Service.
      */
     public OkHttpClient getHttpClient() {

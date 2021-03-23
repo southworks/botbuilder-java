@@ -113,7 +113,7 @@ public class OAuthCard {
      */
     public Attachment toAttachment() {
         Attachment attachment = new Attachment();
-        attachment.setContent(OAuthCard.this);
+        attachment.setContent(this);
         attachment.setContentType(CONTENTTYPE);
 
         return attachment;

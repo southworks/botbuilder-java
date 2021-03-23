@@ -311,7 +311,7 @@ public class VideoCard {
      */
     public Attachment toAttachment() {
         Attachment attachment = new Attachment();
-        attachment.setContent(VideoCard.this);
+        attachment.setContent(this);
         attachment.setContentType(CONTENTTYPE);
         return attachment;
     }

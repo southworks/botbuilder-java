@@ -83,7 +83,7 @@ public class SigninCard {
      */
     public Attachment toAttachment() {
         Attachment attachment = new Attachment();
-        attachment.setContent(SigninCard.this);
+        attachment.setContent(this);
         attachment.setContentType(CONTENTTYPE);
         return attachment;
     }

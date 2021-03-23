@@ -346,7 +346,7 @@ public class AudioCard {
      */
     public Attachment toAttachment() {
         Attachment attachment = new Attachment();
-        attachment.setContent(AudioCard.this);
+        attachment.setContent(this);
         attachment.setContentType(CONTENTTYPE);
         return attachment;
     }

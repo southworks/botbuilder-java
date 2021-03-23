@@ -166,12 +166,12 @@ public class JwtTokenExtractorTests {
         KeyStore p12 = KeyStore.getInstance("pkcs12");
         p12.load(fis, "botframework".toCharArray());
 
-        return new CertInfo() {{
-            cert = (X509Certificate) p12.getCertificate("bot-connector-pkcs12");
-            keypair = new KeyPair(cert.getPublicKey(),
-                (PrivateKey) p12.getKey("bot-connector-pkcs12", "botframework".toCharArray())
-            );
-        }};
+        CertInfo certInfo = new CertInfo();
+        certInfo.cert = (X509Certificate) p12.getCertificate("bot-connector-pkcs12");
+        certInfo.keypair = new KeyPair(certInfo.cert.getPublicKey(),
+            (PrivateKey) p12.getKey("bot-connector-pkcs12", "botframework".toCharArray())
+        );
+        return certInfo;
     }
 
     private static String encodeCertificate(Certificate certificate) {

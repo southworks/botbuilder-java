@@ -5,6 +5,7 @@ package com.microsoft.bot.connector;
 
 import com.microsoft.bot.connector.authentication.*;
 import com.microsoft.bot.schema.Activity;
+import com.microsoft.bot.schema.ActivityTypes;
 import com.microsoft.bot.schema.ChannelAccount;
 import com.microsoft.bot.schema.ConversationReference;
 import com.microsoft.bot.schema.RoleTypes;
@@ -161,10 +162,10 @@ public class JwtTokenValidationTests {
     public void ChannelMsaHeaderValidServiceUrlShouldBeTrusted() throws IOException, ExecutionException, InterruptedException {
         String header = getHeaderToken();
         CredentialProvider credentials = new SimpleCredentialProvider(APPID, "");
+        Activity activity = new Activity(ActivityTypes.MESSAGE);
+        activity.setServiceUrl("https://smba.trafficmanager.net/amer-client-ss.msg/");
         JwtTokenValidation.authenticateRequest(
-            new Activity() {{
-                setServiceUrl("https://smba.trafficmanager.net/amer-client-ss.msg/");
-            }},
+            activity,
             header,
             credentials,
             new SimpleChannelProvider()).join();

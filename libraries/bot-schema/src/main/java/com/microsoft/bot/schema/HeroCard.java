@@ -192,7 +192,7 @@ public class HeroCard {
      */
     public Attachment toAttachment() {
         Attachment attachment = new Attachment();
-        attachment.setContent(HeroCard.this);
+        attachment.setContent(this);
         attachment.setContentType(CONTENTTYPE);
         return attachment;
     }

@@ -1516,13 +1516,13 @@ public class Activity {
     @JsonIgnore
     public ConversationReference getConversationReference() {
         ConversationReference conversationReference = new ConversationReference();
-        conversationReference.setActivityId(Activity.this.getId());
-        conversationReference.setUser(Activity.this.getFrom());
-        conversationReference.setBot(Activity.this.getRecipient());
-        conversationReference.setConversation(Activity.this.getConversation());
-        conversationReference.setChannelId(Activity.this.getChannelId());
-        conversationReference.setLocale(Activity.this.getLocale());
-        conversationReference.setServiceUrl(Activity.this.getServiceUrl());
+        conversationReference.setActivityId(getId());
+        conversationReference.setUser(getFrom());
+        conversationReference.setBot(getRecipient());
+        conversationReference.setConversation(getConversation());
+        conversationReference.setChannelId(getChannelId());
+        conversationReference.setLocale(getLocale());
+        conversationReference.setServiceUrl(getServiceUrl());
         return conversationReference;
     }
 

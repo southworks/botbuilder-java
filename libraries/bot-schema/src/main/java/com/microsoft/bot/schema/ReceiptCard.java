@@ -251,7 +251,7 @@ public class ReceiptCard {
      */
     public Attachment toAttachment() {
         Attachment attachment = new Attachment();
-        attachment.setContent(ReceiptCard.this);
+        attachment.setContent(this);
         attachment.setContentType(CONTENTTYPE);
         return attachment;
     }

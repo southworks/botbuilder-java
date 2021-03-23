@@ -50,7 +50,7 @@ public final class GovernmentChannelValidation {
 
     /**
      * Sets the OpenID metadata URL.
-     *
+     * 
      * @param withOpenIdMetaDataUrl The metadata url.
      */
     public static void setOpenIdMetaDataUrl(String withOpenIdMetaDataUrl) {

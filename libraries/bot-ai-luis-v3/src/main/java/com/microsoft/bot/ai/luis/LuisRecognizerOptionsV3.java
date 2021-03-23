@@ -186,7 +186,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
      * Value indicating whether queries should be logged in LUIS. If queries should
      * be logged in LUIS in order to help build better models through active
      * learning
-     *
+     * 
      * @return True if queries should be logged in LUIS.
      */
     public boolean isLog() {

@@ -356,7 +356,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Internal implementation of the http request to the LUIS service and parsing
      * of the response to a Recognizer Result instance.
-     *
+     * 
      * @param dialogContext Context Object.
      * @param activity      Activity object to extract the utterance.
      */

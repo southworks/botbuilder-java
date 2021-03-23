@@ -80,7 +80,7 @@ public class BotFrameworkAdapterTests {
                 AppCredentials usingAppCredentials
             ) {
                 Conversations conv = mock(Conversations.class);
-                ConversationResourceResponse response =new ConversationResourceResponse();
+                ConversationResourceResponse response = new ConversationResourceResponse();
                 response.setActivityId(ActivityIdValue);
                 response.setId(ConversationIdValue);
                 when(conv.createConversation(any())).thenReturn(

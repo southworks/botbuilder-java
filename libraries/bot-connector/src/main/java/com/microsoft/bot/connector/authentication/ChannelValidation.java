@@ -21,7 +21,8 @@ public final class ChannelValidation {
     }
 
     /**
-     * TO BOT FROM CHANNEL: Token validation parameters when connecting to a bot.
+     * TO BOT FROM CHANNEL.
+     * @return Token validation parameters when connecting to a bot.
      */
     public static TokenValidationParameters getTokenValidationParameters() {
         TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();

@@ -17,8 +17,8 @@ public final class GovernmentChannelValidation {
         GovernmentAuthenticationConstants.TO_BOT_FROM_CHANNEL_OPENID_METADATA_URL;
 
     /**
-     * TO BOT FROM GOVERNMENT CHANNEL: Token validation parameters when connecting
-     * to a bot.
+     * TO BOT FROM GOVERNMENT CHANNEL.
+     * @return Token validation parameters when connecting to a bot.
      */
     public static TokenValidationParameters getTokenValidationParameters() {
         TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();

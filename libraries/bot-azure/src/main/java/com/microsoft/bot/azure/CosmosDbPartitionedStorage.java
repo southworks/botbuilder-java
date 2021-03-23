@@ -189,7 +189,9 @@ public class CosmosDbPartitionedStorage implements Storage {
                     node.remove("eTag");
 
                     DocumentStoreItem documentChange = new DocumentStoreItem();
-                    documentChange.setId(CosmosDbKeyEscape.escapeKey(change.getKey(), cosmosDbStorageOptions.getKeySuffix(),
+                    documentChange.setId(
+                        CosmosDbKeyEscape.escapeKey(change.getKey(),
+                        cosmosDbStorageOptions.getKeySuffix(),
                                     cosmosDbStorageOptions.getCompatibilityMode()));
                     documentChange.setReadId(change.getKey());
                     documentChange.setDocument(node.toString());

@@ -19,7 +19,7 @@ public class RetryParams {
 
     /**
      * Helper to create a RetryParams with a shouldRetry of false.
-     *
+     * 
      * @return A RetryParams that returns false for {@link #getShouldRetry()}.
      */
     public static RetryParams stopRetrying() {

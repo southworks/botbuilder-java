@@ -318,7 +318,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Sets the specific version of the application to access. LUIS supports
      * versions and this is the version to use instead of a slot.
-     *
+     * 
      * @param version Luis Application version. If this is specified, then the Slot
      *                is ignored.
      */

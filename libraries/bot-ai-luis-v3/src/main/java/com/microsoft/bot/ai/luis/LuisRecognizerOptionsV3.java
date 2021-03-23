@@ -308,7 +308,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
      * Gets the specific version of the application to access. LUIS supports
      * versions and this is the version to use instead of a slot. If this is
      * specified, then the Slot is ignored.
-     *
+     * 
      * @return Luis application version to Query.
      */
     public String getVersion() {

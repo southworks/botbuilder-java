@@ -58,7 +58,7 @@ public class RetryParams {
 
     /**
      * Indicates whether a retry should happen.
-     *
+     * 
      * @return True if a retry should occur.
      */
     public boolean getShouldRetry() {

@@ -337,7 +337,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Sets the http client.
-     *
+     * 
      * @param httpClient to use for Luis Service http calls.
      */
     public void setHttpClient(OkHttpClient httpClient) {

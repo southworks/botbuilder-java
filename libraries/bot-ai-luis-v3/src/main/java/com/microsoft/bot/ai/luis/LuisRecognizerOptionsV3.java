@@ -297,7 +297,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
      * production slot. You can find other standard slots in LuisSlot. If you
      * specify a Version, then a private version of the application is used instead
      * of a slot.
-     *
+     * 
      * @param slot LuisSlot value to use.
      */
     public void setSlot(String slot) {

@@ -215,7 +215,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Sets Dynamic lists used to recognize entities for a particular query.
-     *
+     * 
      * @param dynamicLists to recognize entities for a particular query.
      */
     public void setDynamicLists(List<DynamicList> dynamicLists) {

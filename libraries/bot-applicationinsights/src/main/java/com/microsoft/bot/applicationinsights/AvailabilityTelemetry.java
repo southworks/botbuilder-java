@@ -25,7 +25,7 @@ public final class AvailabilityTelemetry extends BaseSampleSourceTelemetry<Avail
 
 
     /**
-     * Initializes a new instance of the HttpAvailabilityTelemetry class.
+     * Initializes a new instance of the AvailabilityTelemetry class.
      */
     public AvailabilityTelemetry() {
         this.data = new AvailabilityData();
@@ -38,7 +38,7 @@ public final class AvailabilityTelemetry extends BaseSampleSourceTelemetry<Avail
     }
 
     /**
-     * Initializes a new instance of the HttpAvailabilityTelemetry class with the given name,
+     * Initializes a new instance of the AvailabilityTelemetry class with the given name,
      * time stamp, duration, HTTP response code and success property values.
      * @param name A user-friendly name for the request.
      * @param duration The time of the request.

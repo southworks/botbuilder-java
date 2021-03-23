@@ -11,6 +11,7 @@ import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
 import com.microsoft.applicationinsights.telemetry.PageViewTelemetry;
 import com.microsoft.applicationinsights.telemetry.ExceptionTelemetry;
 import com.microsoft.applicationinsights.telemetry.TraceTelemetry;
+import com.microsoft.applicationinsights.telemetry.SeverityLevel;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.Severity;
 import org.junit.Assert;
@@ -157,7 +158,7 @@ public class BotTelemetryClientTests {
             TraceTelemetry traceTelemetry = invocations.getAllInvocations().get(0).getArgument(0);
 
             Assert.assertEquals("hello", traceTelemetry.getMessage());
-            Assert.assertEquals(Severity.CRITICAL.name(), traceTelemetry.getSeverityLevel().name().toUpperCase());
+            Assert.assertEquals(SeverityLevel.Critical, traceTelemetry.getSeverityLevel());
             Assert.assertEquals("bar", traceTelemetry.getProperties().get("foo"));
         }).send(Mockito.any(TraceTelemetry.class));
     }

@@ -62,10 +62,6 @@
 
     <dependency>
       <groupId>com.microsoft.bot</groupId>
-      <artifactId>bot-builder</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.bot</groupId>
       <artifactId>bot-dialogs</artifactId>
     </dependency>
     <dependency>

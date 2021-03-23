@@ -33,7 +33,10 @@ public class TelemetryInitializerMiddleware implements Middleware {
     public TelemetryInitializerMiddleware(TelemetryLoggerMiddleware withTelemetryLoggerMiddleware,
                                           Boolean withLogActivityTelemetry) {
         telemetryLoggerMiddleware = withTelemetryLoggerMiddleware;
-        logActivityTelemetry = withLogActivityTelemetry != null && withLogActivityTelemetry;
+        if (withLogActivityTelemetry == null) {
+            withLogActivityTelemetry = true;
+        }
+        logActivityTelemetry = withLogActivityTelemetry;
     }
 
     /**

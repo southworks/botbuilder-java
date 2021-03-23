@@ -49,7 +49,7 @@ public class RetryParams {
 
     /**
      * RetryParams with the specified delay.
-     *
+     * 
      * @param withRetryAfter Delay in milliseconds.
      */
     public RetryParams(long withRetryAfter) {

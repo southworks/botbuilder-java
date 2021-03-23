@@ -54,12 +54,9 @@ public class TelemetryMiddlewareTests {
         String[] conversationId = new String[] { null };
         new TestFlow(adapter, (turnContext -> {
             conversationId[0] = turnContext.getActivity().getConversation().getId();
-            turnContext.sendActivity(new Activity() {
-                {
-                    setType(ActivityTypes.TYPING);
-                    setRelatesTo(turnContext.getActivity().getRelatesTo());
-                }
-            }).join();
+            Activity activity = new Activity(ActivityTypes.TYPING);
+            activity.setRelatesTo(turnContext.getActivity().getRelatesTo());
+            turnContext.sendActivity(activity).join();
             turnContext.sendActivity("echo:" + turnContext.getActivity().getText()).join();
             return CompletableFuture.completedFuture(null);
         })).send("foo").assertReply(activity -> {
@@ -127,12 +124,9 @@ public class TelemetryMiddlewareTests {
         String[] conversationId = new String[] { null };
         new TestFlow(adapter, (turnContext -> {
             conversationId[0] = turnContext.getActivity().getConversation().getId();
-            turnContext.sendActivity(new Activity() {
-                {
-                    setType(ActivityTypes.TYPING);
-                    setRelatesTo(turnContext.getActivity().getRelatesTo());
-                }
-            }).join();
+            Activity activity = new Activity(ActivityTypes.TYPING);
+            activity.setRelatesTo(turnContext.getActivity().getRelatesTo());
+            turnContext.sendActivity(activity).join();
             turnContext.sendActivity("echo:" + turnContext.getActivity().getText()).join();
             return CompletableFuture.completedFuture(null);
         })).send("foo").assertReply(activity -> {
@@ -278,12 +272,9 @@ public class TelemetryMiddlewareTests {
         String[] conversationId = new String[] { null };
         new TestFlow(adapter, (turnContext -> {
             conversationId[0] = turnContext.getActivity().getConversation().getId();
-            turnContext.sendActivity(new Activity() {
-                {
-                    setType(ActivityTypes.TYPING);
-                    setRelatesTo(turnContext.getActivity().getRelatesTo());
-                }
-            }).join();
+            Activity activity = new Activity(ActivityTypes.TYPING);
+            activity.setRelatesTo(turnContext.getActivity().getRelatesTo());
+            turnContext.sendActivity(activity).join();
             turnContext.sendActivity("echo:" + turnContext.getActivity().getText()).join();
             return CompletableFuture.completedFuture(null);
         })).send("foo").assertReply(activity -> {
@@ -349,12 +340,9 @@ public class TelemetryMiddlewareTests {
         String[] conversationId = new String[] { null };
         new TestFlow(adapter, (turnContext -> {
             conversationId[0] = turnContext.getActivity().getConversation().getId();
-            turnContext.sendActivity(new Activity() {
-                {
-                    setType(ActivityTypes.TYPING);
-                    setRelatesTo(turnContext.getActivity().getRelatesTo());
-                }
-            }).join();
+            Activity activity = new Activity(ActivityTypes.TYPING);
+            activity.setRelatesTo(turnContext.getActivity().getRelatesTo());
+            turnContext.sendActivity(activity).join();
             turnContext.sendActivity("echo:" + turnContext.getActivity().getText()).join();
             return CompletableFuture.completedFuture(null);
         })).send("foo").assertReply(activity -> {
@@ -552,20 +540,19 @@ public class TelemetryMiddlewareTests {
             setName("teamName");
         }};
 
-        TeamsChannelData channelData = new TeamsChannelData() {{
-           setTeam(teamInfo);
-           setTenant(new TenantInfo() {{
-               setId("tenantId");
-           }});
-        }};
+        TeamsChannelData channelData = new TeamsChannelData();
+        channelData.setTeam(teamInfo);
+        TenantInfo tenant = new TenantInfo();
+        tenant.setId("tenantId");
+        channelData.setTenant(tenant);
 
         Activity activity = MessageFactory.text("test");
         activity.setChannelData(channelData);
-        activity.setFrom(new ChannelAccount() {{
-            setId("userId");
-            setName("userName");
-            setAadObjectId("aadId");
-        }});
+        ChannelAccount from = new ChannelAccount();
+        from.setId("userId");
+        from.setName("userName");
+        from.setAadObjectId("aadId");
+        activity.setFrom(from);
 
         new TestFlow(adapter).send(activity).startTest().join();
 
@@ -593,12 +580,9 @@ public class TelemetryMiddlewareTests {
 
         @Override
         protected CompletableFuture<Void> onReceiveActivity(Activity activity) {
-            Map<String, String> customProperties = new HashMap<String, String>() {
-                {
-                    put("foo", "bar");
-                    put("ImportantProperty", "ImportantValue");
-                }
-            };
+            Map<String, String> customProperties = new HashMap<String, String>();
+            customProperties.put("foo", "bar");
+            customProperties.put("ImportantProperty", "ImportantValue");
 
             getTelemetryClient().trackEvent(
                 TelemetryLoggerConstants.BOTMSGRECEIVEEVENT,
@@ -622,12 +606,9 @@ public class TelemetryMiddlewareTests {
 
         @Override
         protected CompletableFuture<Void> onSendActivity(Activity activity) {
-            Map<String, String> customProperties = new HashMap<String, String>() {
-                {
-                    put("foo", "bar");
-                    put("ImportantProperty", "ImportantValue");
-                }
-            };
+            Map<String, String> customProperties = new HashMap<String, String>();
+            customProperties.put("foo", "bar");
+            customProperties.put("ImportantProperty", "ImportantValue");
 
             getTelemetryClient().trackEvent(
                 TelemetryLoggerConstants.BOTMSGSENDEVENT,
@@ -651,12 +632,9 @@ public class TelemetryMiddlewareTests {
 
         @Override
         protected CompletableFuture<Void> onUpdateActivity(Activity activity) {
-            Map<String, String> properties = new HashMap<String, String>() {
-                {
-                    put("foo", "bar");
-                    put("ImportantProperty", "ImportantValue");
-                }
-            };
+            Map<String, String> properties = new HashMap<String, String>();
+            properties.put("foo", "bar");
+            properties.put("ImportantProperty", "ImportantValue");
 
             getTelemetryClient().trackEvent(TelemetryLoggerConstants.BOTMSGUPDATEEVENT, properties);
             return CompletableFuture.completedFuture(null);
@@ -664,12 +642,9 @@ public class TelemetryMiddlewareTests {
 
         @Override
         protected CompletableFuture<Void> onDeleteActivity(Activity activity) {
-            Map<String, String> properties = new HashMap<String, String>() {
-                {
-                    put("foo", "bar");
-                    put("ImportantProperty", "ImportantValue");
-                }
-            };
+            Map<String, String> properties = new HashMap<String, String>();
+            properties.put("foo", "bar");
+            properties.put("ImportantProperty", "ImportantValue");
 
             getTelemetryClient().trackEvent(TelemetryLoggerConstants.BOTMSGDELETEEVENT, properties);
             return CompletableFuture.completedFuture(null);
@@ -686,12 +661,9 @@ public class TelemetryMiddlewareTests {
 
         @Override
         protected CompletableFuture<Void> onReceiveActivity(Activity activity) {
-            Map<String, String> customProperties = new HashMap<String, String>() {
-                {
-                    put("foo", "bar");
-                    put("ImportantProperty", "ImportantValue");
-                }
-            };
+            Map<String, String> customProperties = new HashMap<String, String>();
+            customProperties.put("foo", "bar");
+            customProperties.put("ImportantProperty", "ImportantValue");
 
             return fillReceiveEventProperties(activity, customProperties).thenApply(
                 allProperties -> {
@@ -706,12 +678,9 @@ public class TelemetryMiddlewareTests {
 
         @Override
         protected CompletableFuture<Void> onSendActivity(Activity activity) {
-            Map<String, String> customProperties = new HashMap<String, String>() {
-                {
-                    put("foo", "bar");
-                    put("ImportantProperty", "ImportantValue");
-                }
-            };
+            Map<String, String> customProperties = new HashMap<String, String>();
+            customProperties.put("foo", "bar");
+            customProperties.put("ImportantProperty", "ImportantValue");
 
             return fillSendEventProperties(activity, customProperties).thenApply(allProperties -> {
                 getTelemetryClient().trackEvent(
@@ -724,12 +693,9 @@ public class TelemetryMiddlewareTests {
 
         @Override
         protected CompletableFuture<Void> onUpdateActivity(Activity activity) {
-            Map<String, String> customProperties = new HashMap<String, String>() {
-                {
-                    put("foo", "bar");
-                    put("ImportantProperty", "ImportantValue");
-                }
-            };
+            Map<String, String> customProperties = new HashMap<String, String>();
+            customProperties.put("foo", "bar");
+            customProperties.put("ImportantProperty", "ImportantValue");
 
             return fillUpdateEventProperties(activity, customProperties).thenApply(
                 allProperties -> {
@@ -744,12 +710,9 @@ public class TelemetryMiddlewareTests {
 
         @Override
         protected CompletableFuture<Void> onDeleteActivity(Activity activity) {
-            Map<String, String> customProperties = new HashMap<String, String>() {
-                {
-                    put("foo", "bar");
-                    put("ImportantProperty", "ImportantValue");
-                }
-            };
+            Map<String, String> customProperties = new HashMap<String, String>();
+            customProperties.put("foo", "bar");
+            customProperties.put("ImportantProperty", "ImportantValue");
 
             return fillDeleteEventProperties(activity, customProperties).thenApply(
                 allProperties -> {

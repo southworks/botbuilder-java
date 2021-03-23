@@ -250,19 +250,18 @@ public class GenerateAnswerUtils {
         JacksonAdapter jacksonAdapter = new JacksonAdapter();
         String jsonRequest = null;
 
-        jsonRequest = jacksonAdapter.serialize(new JSONObject() {
-            {
-                put("question", messageActivity.getText());
-                put("top", withOptions.getTop());
-                put("strictFilters", withOptions.getStrictFilters());
-                put("scoreThreshold", withOptions.getScoreThreshold());
-                put("context", withOptions.getContext());
-                put("qnaId", withOptions.getQnAId());
-                put("isTest", withOptions.getIsTest());
-                put("rankerType", withOptions.getRankerType());
-                put("StrictFiltersCompoundOperationType", withOptions.getStrictFiltersJoinOperator());
-            }
-        });
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("question", messageActivity.getText());
+        jsonObject.put("top", withOptions.getTop());
+        jsonObject.put("strictFilters", withOptions.getStrictFilters());
+        jsonObject.put("scoreThreshold", withOptions.getScoreThreshold());
+        jsonObject.put("context", withOptions.getContext());
+        jsonObject.put("qnaId", withOptions.getQnAId());
+        jsonObject.put("isTest", withOptions.getIsTest());
+        jsonObject.put("rankerType", withOptions.getRankerType());
+        jsonObject.put("StrictFiltersCompoundOperationType", withOptions.getStrictFiltersJoinOperator());
+
+        jsonRequest = jacksonAdapter.serialize(jsonObject);
 
         HttpRequestUtils httpRequestHelper = new HttpRequestUtils();
         return httpRequestHelper.executeHttpRequest(requestUrl, jsonRequest, this.endpoint).thenCompose(response -> {
@@ -282,20 +281,18 @@ public class GenerateAnswerUtils {
         QnAMakerOptions withOptions
     ) {
         String knowledgeBaseId = this.endpoint.getKnowledgeBaseId();
-        QnAMakerTraceInfo traceInfo = new QnAMakerTraceInfo() {
-            {
-                setMessage(messageActivity);
-                setQueryResults(result);
-                setKnowledgeBaseId(knowledgeBaseId);
-                setScoreThreshold(withOptions.getScoreThreshold());
-                setTop(withOptions.getTop());
-                setStrictFilters(withOptions.getStrictFilters());
-                setContext(withOptions.getContext());
-                setQnAId(withOptions.getQnAId());
-                setIsTest(withOptions.getIsTest());
-                setRankerType(withOptions.getRankerType());
-            }
-        };
+        QnAMakerTraceInfo traceInfo = new QnAMakerTraceInfo();
+        traceInfo.setMessage(messageActivity);
+        traceInfo.setQueryResults(result);
+        traceInfo.setKnowledgeBaseId(knowledgeBaseId);
+        traceInfo.setScoreThreshold(withOptions.getScoreThreshold());
+        traceInfo.setTop(withOptions.getTop());
+        traceInfo.setStrictFilters(withOptions.getStrictFilters());
+        traceInfo.setContext(withOptions.getContext());
+        traceInfo.setQnAId(withOptions.getQnAId());
+        traceInfo.setIsTest(withOptions.getIsTest());
+        traceInfo.setRankerType(withOptions.getRankerType());
+
         Activity traceActivity = Activity.createTraceActivity(
             QnAMaker.QNA_MAKER_NAME,
             QnAMaker.QNA_MAKER_TRACE_TYPE,

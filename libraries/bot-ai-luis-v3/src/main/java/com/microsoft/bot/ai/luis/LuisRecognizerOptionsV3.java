@@ -174,7 +174,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Sets value indicating whether or not instance data should be included in
      * response.
-     *
+     * 
      * @param includeInstanceData True if instance data should be included in
      *                            response.
      */

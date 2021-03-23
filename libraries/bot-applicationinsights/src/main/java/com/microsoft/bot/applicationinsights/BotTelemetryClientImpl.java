@@ -86,8 +86,8 @@ public class BotTelemetryClientImpl implements BotTelemetryClient {
         }
 
         /**
-         * TODO : this should be telemetryClient.trackAvailability(telemetry).
-         * However, this is not present in TelemetryClient class
+         * This should be telemetryClient.trackAvailability(telemetry).
+         * However, it is not present in TelemetryClient class
          */
         telemetryClient.track(telemetry);
     }

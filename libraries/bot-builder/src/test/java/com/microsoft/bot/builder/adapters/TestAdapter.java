@@ -97,25 +97,19 @@ public class TestAdapter extends BotAdapter implements UserTokenProvider {
         ConversationReference conversationReference = new ConversationReference();
         conversationReference.setChannelId(channelId);
         conversationReference.setServiceUrl("https://test.com");
-        conversationReference.setUser(new ChannelAccount() {
-            {
-                setId("user1");
-                setName("User1");
-            }
-        });
-        conversationReference.setBot(new ChannelAccount() {
-            {
-                setId("bot");
-                setName("Bot");
-            }
-        });
-        conversationReference.setConversation(new ConversationAccount() {
-            {
-                setIsGroup(false);
-                setConversationType("convo1");
-                setId("Conversation1");
-            }
-        });
+        ChannelAccount userAccount = new ChannelAccount();
+        userAccount.setId("user1");
+        userAccount.setName("User1");
+        conversationReference.setUser(userAccount);
+        ChannelAccount botAccount = new ChannelAccount();
+        botAccount.setId("bot");
+        botAccount.setName("Bot");
+        conversationReference.setBot(botAccount);
+        ConversationAccount conversation = new ConversationAccount();
+        conversation.setIsGroup(false);
+        conversation.setConversationType("convo1");
+        conversation.setId("Conversation1");
+        conversationReference.setConversation(conversation);
         conversationReference.setLocale(this.getLocale());
 
         setConversationReference(conversationReference);
@@ -128,25 +122,19 @@ public class TestAdapter extends BotAdapter implements UserTokenProvider {
             ConversationReference conversationReference = new ConversationReference();
             conversationReference.setChannelId(Channels.TEST);
             conversationReference.setServiceUrl("https://test.com");
-            conversationReference.setUser(new ChannelAccount() {
-                {
-                    setId("user1");
-                    setName("User1");
-                }
-            });
-            conversationReference.setBot(new ChannelAccount() {
-                {
-                    setId("bot");
-                    setName("Bot");
-                }
-            });
-            conversationReference.setConversation(new ConversationAccount() {
-                {
-                    setIsGroup(false);
-                    setConversationType("convo1");
-                    setId("Conversation1");
-                }
-            });
+            ChannelAccount userAccount = new ChannelAccount();
+            userAccount.setId("user1");
+            userAccount.setName("User1");
+            conversationReference.setUser(userAccount);
+            ChannelAccount botAccount = new ChannelAccount();
+            botAccount.setId("bot");
+            botAccount.setName("Bot");
+            conversationReference.setBot(botAccount);
+            ConversationAccount conversation = new ConversationAccount();
+            conversation.setIsGroup(false);
+            conversation.setConversationType("convo1");
+            conversation.setId("Conversation1");
+            conversationReference.setConversation(conversation);
             conversationReference.setLocale(this.getLocale());
             setConversationReference(conversationReference);
         }
@@ -347,16 +335,13 @@ public class TestAdapter extends BotAdapter implements UserTokenProvider {
 
     public Activity makeActivity(String withText) {
         Integer next = nextId++;
-        Activity activity = new Activity(ActivityTypes.MESSAGE) {
-            {
-                setFrom(conversationReference().getUser());
-                setRecipient(conversationReference().getBot());
-                setConversation(conversationReference().getConversation());
-                setServiceUrl(conversationReference().getServiceUrl());
-                setId(next.toString());
-                setText(withText);
-            }
-        };
+        Activity activity = new Activity(ActivityTypes.MESSAGE);
+        activity.setFrom(conversationReference().getUser());
+        activity.setRecipient(conversationReference().getBot());
+        activity.setConversation(conversationReference().getConversation());
+        activity.setServiceUrl(conversationReference().getServiceUrl());
+        activity.setId(next.toString());
+        activity.setText(withText);
         activity.setLocale(getLocale() != null ? getLocale() : "en-us");
 
         return activity;
@@ -382,13 +367,11 @@ public class TestAdapter extends BotAdapter implements UserTokenProvider {
         if (withMagicCode == null) {
             userTokens.put(userKey, token);
         } else {
-            magicCodes.add(new TokenMagicCode() {
-                {
-                    key = userKey;
-                    magicCode = withMagicCode;
-                    userToken = token;
-                }
-            });
+            TokenMagicCode tokenMagicCode = new TokenMagicCode();
+            tokenMagicCode.key = userKey;
+            tokenMagicCode.magicCode = withMagicCode;
+            tokenMagicCode.userToken = token;
+            magicCodes.add(tokenMagicCode);
         }
     }
 
@@ -482,12 +465,10 @@ public class TestAdapter extends BotAdapter implements UserTokenProvider {
                 }
 
                 if (userTokens.containsKey(key)) {
-                    return CompletableFuture.completedFuture(new TokenResponse() {
-                        {
-                            setConnectionName(connectionName);
-                            setToken(userTokens.get(key));
-                        }
-                    });
+                    TokenResponse tokenResponse = new TokenResponse();
+                    tokenResponse.setConnectionName(connectionName);
+                    tokenResponse.setToken(userTokens.get(key));
+                    return CompletableFuture.completedFuture(tokenResponse);
                 }
 
                 return CompletableFuture.completedFuture(null);
@@ -562,12 +543,12 @@ public class TestAdapter extends BotAdapter implements UserTokenProvider {
                 .filter(x -> StringUtils.equals(x.channelId, turnContext.getActivity().getChannelId())
                         && StringUtils.equals(x.userId, turnContext.getActivity().getFrom().getId())
                         && (includeFilter == null || Arrays.binarySearch(filter, x.connectionName) != -1))
-                .map(r -> new TokenStatus() {
-                    {
-                        setConnectionName(r.connectionName);
-                        setHasToken(true);
-                        setServiceProviderDisplayName(r.connectionName);
-                    }
+                .map(r -> {
+                    TokenStatus tokenStatus = new TokenStatus();
+                    tokenStatus.setConnectionName(r.connectionName);
+                    tokenStatus.setHasToken(true);
+                    tokenStatus.setServiceProviderDisplayName(r.connectionName);
+                    return tokenStatus;
                 }).collect(Collectors.toList());
 
         if (records.size() > 0) {
@@ -657,13 +638,11 @@ public class TestAdapter extends BotAdapter implements UserTokenProvider {
                         new RuntimeException("Exception occurred during exchanging tokens")
                     );
                 }
-                return CompletableFuture.completedFuture(new TokenResponse() {
-                    {
-                        setChannelId(key.getChannelId());
-                        setConnectionName(key.getConnectionName());
-                        setToken(token);
-                    }
-                });
+                TokenResponse tokenResponse = new TokenResponse();
+                tokenResponse.setChannelId(key.getChannelId());
+                tokenResponse.setConnectionName(key.getConnectionName());
+                tokenResponse.setToken(token);
+                return CompletableFuture.completedFuture(tokenResponse);
             } else {
                 return CompletableFuture.completedFuture(null);
             }

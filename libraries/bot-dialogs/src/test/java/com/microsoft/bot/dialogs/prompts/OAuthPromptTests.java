@@ -287,6 +287,13 @@ public class OAuthPromptTests {
             return CompletableFuture.completedFuture(null);
         };
 
+        TokenExchangeInvokeRequest value = new TokenExchangeInvokeRequest();
+        value.setConnectionName(connectionName);
+        value.setToken(exchangeToken);
+        Activity activityToSend = new Activity(ActivityTypes.INVOKE);
+        activityToSend.setName(SignInConstants.TOKEN_EXCHANGE_OPERATION_NAME);
+        activityToSend.setValue(value);
+
         new TestFlow(adapter, botCallbackHandler)
         .send("hello")
         .assertReply(activity -> {
@@ -298,16 +305,7 @@ public class OAuthPromptTests {
             adapter.addExchangeableToken(connectionName, activity.getChannelId(),
                                          activity.getRecipient().getId(), exchangeToken, token);
         })
-        .send(new Activity(ActivityTypes.INVOKE) {
-            {
-                setName(SignInConstants.TOKEN_EXCHANGE_OPERATION_NAME);
-                setValue(new TokenExchangeInvokeRequest() {
-                {
-                    setConnectionName(connectionName);
-                    setToken(exchangeToken);
-                }
-            });
-        }})
+        .send(activityToSend)
         .assertReply(a -> {
             Assert.assertEquals("invokeResponse", a.getType());
             InvokeResponse response = (InvokeResponse) ((Activity)a).getValue();
@@ -359,6 +357,13 @@ public class OAuthPromptTests {
             return CompletableFuture.completedFuture(null);
         };
 
+        TokenExchangeInvokeRequest value = new TokenExchangeInvokeRequest();
+        value.setConnectionName(connectionName);
+        value.setToken(exchangeToken);
+        Activity activityToSend = new Activity(ActivityTypes.INVOKE);
+        activityToSend.setName(SignInConstants.TOKEN_EXCHANGE_OPERATION_NAME);
+        activityToSend.setValue(value);
+
         new TestFlow(adapter, botCallbackHandler)
         .send("hello")
         .assertReply(activity -> {
@@ -367,16 +372,7 @@ public class OAuthPromptTests {
             Assert.assertEquals(InputHints.ACCEPTING_INPUT, ((Activity) activity).getInputHint());
             // No exchangable token is added to the adapter
         })
-        .send(new Activity(ActivityTypes.INVOKE) {
-            {
-                setName(SignInConstants.TOKEN_EXCHANGE_OPERATION_NAME);
-                setValue(new TokenExchangeInvokeRequest() {
-                {
-                    setConnectionName(connectionName);
-                    setToken(exchangeToken);
-                }
-            });
-        }})
+        .send(activityToSend)
         .assertReply(a -> {
             Assert.assertEquals("invokeResponse", a.getType());
             InvokeResponse response = (InvokeResponse) ((Activity) a).getValue();
@@ -426,6 +422,8 @@ public class OAuthPromptTests {
             return CompletableFuture.completedFuture(null);
         };
 
+        Activity activityToSend = new Activity(ActivityTypes.INVOKE);
+        activityToSend.setName(SignInConstants.TOKEN_EXCHANGE_OPERATION_NAME);
         new TestFlow(adapter, botCallbackHandler)
         .send("hello")
         .assertReply(activity -> {
@@ -434,11 +432,7 @@ public class OAuthPromptTests {
             Assert.assertEquals(InputHints.ACCEPTING_INPUT, ((Activity) activity).getInputHint());
             // No exchangable token is added to the adapter
         })
-        .send(new Activity(ActivityTypes.INVOKE) {
-            {
-                setName(SignInConstants.TOKEN_EXCHANGE_OPERATION_NAME);
-            }
-        })
+        .send(activityToSend)
         .assertReply(a -> {
             Assert.assertEquals("invokeResponse", a.getType());
             InvokeResponse response = (InvokeResponse) ((Activity) a).getValue();
@@ -489,6 +483,12 @@ public class OAuthPromptTests {
             return CompletableFuture.completedFuture(null);
         };
 
+        TokenExchangeInvokeRequest value = new TokenExchangeInvokeRequest();
+        value.setConnectionName("beepboop");
+        value.setToken(exchangeToken);
+        Activity activityToSend = new Activity(ActivityTypes.INVOKE);
+        activityToSend.setName(SignInConstants.TOKEN_EXCHANGE_OPERATION_NAME);
+        activityToSend.setValue(value);
         new TestFlow(adapter, botCallbackHandler)
         .send("hello")
         .assertReply(activity -> {
@@ -497,16 +497,7 @@ public class OAuthPromptTests {
             Assert.assertEquals(InputHints.ACCEPTING_INPUT, ((Activity) activity).getInputHint());
             // No exchangable token is added to the adapter
         })
-        .send(new Activity(ActivityTypes.INVOKE) {
-            {
-                setName(SignInConstants.TOKEN_EXCHANGE_OPERATION_NAME);
-                setValue(new TokenExchangeInvokeRequest() {
-                {
-                    setConnectionName("beepboop");
-                    setToken(exchangeToken);
-                }
-            });
-        }})
+        .send(activityToSend)
         .assertReply(a -> {
             Assert.assertEquals("invokeResponse", a.getType());
             InvokeResponse response = (InvokeResponse) ((Activity) a).getValue();
@@ -540,27 +531,31 @@ public class OAuthPromptTests {
                                         token);
 
             // Positive case: Token
-            TokenResponse result = adapter.exchangeToken(turnContext, connectionName, userId,
-                                            new TokenExchangeRequest() {{ setToken(exchangeToken); }}).join();
+            TokenExchangeRequest requestPositiveToken = new TokenExchangeRequest();
+            requestPositiveToken.setToken(exchangeToken);
+            TokenResponse result = adapter.exchangeToken(turnContext, connectionName, userId, requestPositiveToken).join();
             Assert.assertNotNull(result);
             Assert.assertEquals(token, result.getToken());
             Assert.assertEquals(connectionName, result.getConnectionName());
 
             // Positive case: URI
-            result = adapter.exchangeToken(turnContext, connectionName, userId,
-                                            new TokenExchangeRequest() { { setUri(exchangeToken); }}).join();
+            TokenExchangeRequest requestPositiveURI = new TokenExchangeRequest();
+            requestPositiveURI.setUri(exchangeToken);
+            result = adapter.exchangeToken(turnContext, connectionName, userId, requestPositiveURI).join();
             Assert.assertNotNull(result);
             Assert.assertEquals(token, result.getToken());
             Assert.assertEquals(connectionName, result.getConnectionName());
 
             // Negative case: Token
-            result = adapter.exchangeToken(turnContext, connectionName, userId,
-                                            new TokenExchangeRequest() {{ setToken("beeboop"); }}).join();
+            TokenExchangeRequest requestNegativeToken = new TokenExchangeRequest();
+            requestNegativeToken.setToken("beeboop");
+            result = adapter.exchangeToken(turnContext, connectionName, userId, requestNegativeToken).join();
             Assert.assertNull(result);
 
             // Negative case: URI
-            result = adapter.exchangeToken(turnContext, connectionName, userId,
-                                            new TokenExchangeRequest() {{ setUri("beeboop"); }}).join();
+            TokenExchangeRequest requestNegativeURI = new TokenExchangeRequest();
+            requestNegativeURI.setToken("beeboop");
+            result = adapter.exchangeToken(turnContext, connectionName, userId, requestNegativeURI).join();
             Assert.assertNull(result);
 
             return CompletableFuture.completedFuture(null);

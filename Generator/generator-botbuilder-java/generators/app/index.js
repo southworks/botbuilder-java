@@ -191,14 +191,11 @@ module.exports = class extends Generator {
                         {
                             name: BOT_TEMPLATE_NAME_EMPTY,
                             value: BOT_TEMPLATE_NOPROMPT_EMPTY
-                        }
-
-                        /*,
+                        },
                         {
                             name: BOT_TEMPLATE_NAME_CORE,
                             value: BOT_TEMPLATE_NOPROMPT_CORE
                         }
-                       */
                     ],
                     default: (this.options.template ? _.toLower(this.options.template) : BOT_TEMPLATE_NOPROMPT_SIMPLE)
                     }).then(answer => {

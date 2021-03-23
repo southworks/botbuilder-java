@@ -59,7 +59,7 @@ module.exports = class extends Generator {
             const botName = this.templateConfig.botName;
             const packageName = this.templateConfig.packageName.toLowerCase();
             const packageTree = packageName.replace(/\./g, '/');
-            const artifact = camelCase(this.templateConfig.botName);
+            const artifact = this.templateConfig.botName.toLowerCase();
             const directoryName = camelCase(this.templateConfig.botName);
             const template = this.templateConfig.template.toLowerCase();
 

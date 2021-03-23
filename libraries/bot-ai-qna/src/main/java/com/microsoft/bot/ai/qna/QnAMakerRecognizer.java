@@ -401,19 +401,17 @@ public class QnAMakerRecognizer extends Recognizer {
                     }
                     Float internalTopAnswer = topAnswer.getScore();
                     if (topAnswer.getAnswer().trim().toUpperCase().startsWith(intentPrefix.toUpperCase())) {
+                        IntentScore intentScore = new IntentScore();
+                        intentScore.setScore(internalTopAnswer);
                         recognizerResult.getIntents()
                             .put(topAnswer.getAnswer().trim().substring(
                                 intentPrefix.length()).trim(),
-                                new IntentScore() {{
-                                    setScore(internalTopAnswer);
-                                }}
+                                intentScore
                             );
                     } else {
-                        recognizerResult.getIntents().put(this.qnAMatchIntent, new IntentScore() {
-                            {
-                                setScore(internalTopAnswer);
-                            }
-                        });
+                        IntentScore intentScore = new IntentScore();
+                        intentScore.setScore(internalTopAnswer);
+                        recognizerResult.getIntents().put(this.qnAMatchIntent, intentScore);
                     }
                     ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
                     ObjectNode entitiesNode = mapper.createObjectNode();
@@ -498,44 +496,40 @@ public class QnAMakerRecognizer extends Recognizer {
             );
         }
 
-        Map<String, String> properties = new HashMap<String, String>() {
-            {
-                put(
-                    "TopIntent",
-                    !recognizerResult.getIntents().isEmpty()
-                        ? (String) recognizerResult.getIntents().keySet().toArray()[0]
-                        : null
-                );
-                put(
-                    "TopIntentScore",
-                    !recognizerResult.getIntents()
-                        .isEmpty()
-                            ? Double.toString(
-                                ((IntentScore) recognizerResult.getIntents().values().toArray()[0]).getScore()
-                            )
-                            : null
-                );
-                put(
-                    "Intents",
-                    !recognizerResult.getIntents().isEmpty()
-                        ? Serialization.toStringSilent(recognizerResult.getIntents())
-                        : null
-                );
-                put(
-                    "Entities",
-                    recognizerResult.getEntities() != null
-                        ? Serialization.toStringSilent(recognizerResult.getEntities())
-                        : null
-                );
-                put(
-                    "AdditionalProperties",
-                    !recognizerResult.getProperties().isEmpty()
-                        ? Serialization.toStringSilent(recognizerResult.getProperties())
-                        : null
-                );
-            }
-        };
-
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put(
+            "TopIntent",
+            !recognizerResult.getIntents().isEmpty()
+                ? (String) recognizerResult.getIntents().keySet().toArray()[0]
+                : null
+        );
+        properties.put(
+            "TopIntentScore",
+            !recognizerResult.getIntents()
+                .isEmpty()
+                    ? Double.toString(
+                        ((IntentScore) recognizerResult.getIntents().values().toArray()[0]).getScore()
+                    )
+                    : null
+        );
+        properties.put(
+            "Intents",
+            !recognizerResult.getIntents().isEmpty()
+                ? Serialization.toStringSilent(recognizerResult.getIntents())
+                : null
+        );
+        properties.put(
+            "Entities",
+            recognizerResult.getEntities() != null
+                ? Serialization.toStringSilent(recognizerResult.getEntities())
+                : null
+        );
+        properties.put(
+            "AdditionalProperties",
+            !recognizerResult.getProperties().isEmpty()
+                ? Serialization.toStringSilent(recognizerResult.getProperties())
+                : null
+        );
         if (logPersonalInformation && !Strings.isNullOrEmpty(recognizerResult.getText())) {
             properties.put("Text", recognizerResult.getText());
             properties.put("AlteredText", recognizerResult.getAlteredText());

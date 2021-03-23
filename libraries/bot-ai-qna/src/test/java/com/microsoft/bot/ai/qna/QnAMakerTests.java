@@ -368,11 +368,8 @@ public class QnAMakerTests {
             qnaMakerEndpoint.setEndpointKey(endpointKey);
             qnaMakerEndpoint.setHost(finalEndpoint);
 
-            QnAMakerOptions qnaMakerOptions = new QnAMakerOptions() {
-                {
-                    setTop(5);
-                }
-            };
+            QnAMakerOptions qnaMakerOptions = new QnAMakerOptions();
+            qnaMakerOptions.setTop(5);
             QnAMaker qna = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions);
             QueryResult[] results = qna.getAnswers(getContext("Q11"), null).join();
             Assert.assertNotNull(results);
@@ -489,17 +486,13 @@ public class QnAMakerTests {
             qnaMakerEndpoint.setEndpointKey(endpointKey);
             qnaMakerEndpoint.setHost(finalEndpoint);
 
-            QnAMakerOptions qnaMakerOptions = new QnAMakerOptions() {
-                {
-                    setStrictFilters(new Metadata[] { new Metadata() {
-                        {
-                            setName("topic");
-                            setValue("value");
-                        }
-                    } });
-                    setTop(1);
-                }
-            };
+            QnAMakerOptions qnaMakerOptions = new QnAMakerOptions();
+            Metadata metadata = new Metadata();
+            metadata.setName("topic");
+            metadata.setValue("value");
+            Metadata[] filters = new Metadata[] { metadata };
+            qnaMakerOptions.setStrictFilters(filters);
+            qnaMakerOptions.setTop(1);
             QnAMaker qna = new QnAMaker(qnaMakerEndpoint, qnaMakerOptions);
             ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
@@ -1507,9 +1500,8 @@ public class QnAMakerTests {
             BotTelemetryClient telemetryClient = Mockito.mock(BotTelemetryClient.class);
 
             // Act - Override the QnaMaker object to log custom stuff and honor parms passed in.
-            Map<String, String> telemetryProperties = new HashMap<String, String>() {{
-                put("Id", "MyID");
-            }};
+            Map<String, String> telemetryProperties = new HashMap<String, String>();
+            telemetryProperties.put("Id", "MyID");
 
             QnAMaker qna = new OverrideTelemetry(qnAMakerEndpoint, options, telemetryClient, false);
             QueryResult[] results = qna.getAnswers(getContext("how do I clean the stove?"), null, telemetryProperties, null).join();

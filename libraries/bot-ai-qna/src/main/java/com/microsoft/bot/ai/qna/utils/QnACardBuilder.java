@@ -97,20 +97,15 @@ public final class QnACardBuilder {
 
         // Add all prompt
         for (QnAMakerPrompt prompt : result.getContext().getPrompts()) {
-            buttonList.add(new CardAction() {
-                {
-                    setValue(prompt.getDisplayText());
-                    setType(ActionTypes.IM_BACK);
-                    setTitle(prompt.getDisplayText());
-                }
-            });
+            CardAction card = new CardAction();
+            card.setValue(prompt.getDisplayText());
+            card.setType(ActionTypes.IM_BACK);
+            card.setTitle(prompt.getDisplayText());
+            buttonList.add(card);
         }
 
-        HeroCard plCard = new HeroCard() {
-            {
-                setButtons(buttonList);
-            }
-        };
+        HeroCard plCard = new HeroCard();
+        plCard.setButtons(buttonList);
 
         // Create the attachment.
         Attachment attachment = plCard.toAttachment();

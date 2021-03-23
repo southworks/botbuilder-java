@@ -145,7 +145,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Gets indicating whether all intents come back or only the top one. True for
      * returning all intents.
-     *
+     * 
      * @return True for returning all intents.
      */
     public boolean isIncludeAllIntents() {

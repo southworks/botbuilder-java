@@ -346,7 +346,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Initializes a new instance of the LuisRecognizerOptionsV3.
-     *
+     * 
      * @param application Luis Application instance to query.
      */
     public LuisRecognizerOptionsV3(LuisApplication application) {

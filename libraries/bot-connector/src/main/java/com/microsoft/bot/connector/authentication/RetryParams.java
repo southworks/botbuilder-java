@@ -30,7 +30,7 @@ public class RetryParams {
 
     /**
      * Helper to create a RetryParams with the default backoff time.
-     *
+     * 
      * @param retryCount The number of times retry has happened.
      * @return A RetryParams object with the proper backoff time.
      */

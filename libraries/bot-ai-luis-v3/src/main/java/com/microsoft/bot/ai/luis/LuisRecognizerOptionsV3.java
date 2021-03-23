@@ -233,7 +233,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
 
     /**
      * Sets External entities to be recognized in query.
-     *
+     * 
      * @param externalEntities External entities to be recognized in query.
      */
     public void setExternalEntities(List<ExternalEntity> externalEntities) {

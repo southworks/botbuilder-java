@@ -135,7 +135,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Sets External entity recognizer to recognize external entities to pass to
      * LUIS.
-     *
+     * 
      * @param externalEntityRecognizer External Recognizer instance.
      */
     public void setExternalEntityRecognizer(Recognizer externalEntityRecognizer) {

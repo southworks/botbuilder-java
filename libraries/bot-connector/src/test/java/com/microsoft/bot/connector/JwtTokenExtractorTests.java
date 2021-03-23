@@ -54,9 +54,9 @@ public class JwtTokenExtractorTests {
 
     @Before
     public void setup() throws GeneralSecurityException, IOException {
-        ChannelValidation.TOKENVALIDATIONPARAMETERS.validateLifetime = false;
-        EmulatorValidation.TOKENVALIDATIONPARAMETERS.validateLifetime = false;
-        GovernmentChannelValidation.TOKENVALIDATIONPARAMETERS.validateLifetime = false;
+        ChannelValidation.getTokenValidationParameters().validateLifetime = false;
+        EmulatorValidation.getTokenValidationParameters().validateLifetime = false;
+        GovernmentChannelValidation.getTokenValidationParameters().validateLifetime = false;
 
         valid = loadCert("bot-connector.pkcs12");
         expired = loadCert("bot-connector-expired.pkcs12");

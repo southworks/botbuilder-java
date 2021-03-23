@@ -19,18 +19,18 @@ public class RetryParams {
 
     /**
      * Helper to create a RetryParams with a shouldRetry of false.
-     * 
+     *
      * @return A RetryParams that returns false for {@link #getShouldRetry()}.
      */
     public static RetryParams stopRetrying() {
-        return new RetryParams() {{
-            setShouldRetry(false);
-        }};
+        RetryParams retryParams = new RetryParams();
+        retryParams.setShouldRetry(false);
+        return retryParams;
     }
 
     /**
      * Helper to create a RetryParams with the default backoff time.
-     * 
+     *
      * @param retryCount The number of times retry has happened.
      * @return A RetryParams object with the proper backoff time.
      */
@@ -49,7 +49,7 @@ public class RetryParams {
 
     /**
      * RetryParams with the specified delay.
-     * 
+     *
      * @param withRetryAfter Delay in milliseconds.
      */
     public RetryParams(long withRetryAfter) {
@@ -58,7 +58,7 @@ public class RetryParams {
 
     /**
      * Indicates whether a retry should happen.
-     * 
+     *
      * @return True if a retry should occur.
      */
     public boolean getShouldRetry() {
@@ -67,7 +67,7 @@ public class RetryParams {
 
     /**
      * Sets whether a retry should happen.
-     * 
+     *
      * @param withShouldRetry True for a retry.
      */
     public void setShouldRetry(boolean withShouldRetry) {
@@ -76,7 +76,7 @@ public class RetryParams {
 
     /**
      * Retry delay.
-     * 
+     *
      * @return Delay in milliseconds.
      */
     public long getRetryAfter() {
@@ -85,7 +85,7 @@ public class RetryParams {
 
     /**
      * Sets the retry delay.
-     * 
+     *
      * @param withRetryAfter Delay in milliseconds.
      */
     public void setRetryAfter(long withRetryAfter) {

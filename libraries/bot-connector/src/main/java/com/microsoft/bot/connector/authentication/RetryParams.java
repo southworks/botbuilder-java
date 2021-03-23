@@ -76,7 +76,7 @@ public class RetryParams {
 
     /**
      * Retry delay.
-     *
+     * 
      * @return Delay in milliseconds.
      */
     public long getRetryAfter() {

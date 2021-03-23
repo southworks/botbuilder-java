@@ -132,26 +132,26 @@ public class JwtTokenExtractorTests {
 
     private static TokenValidationParameters createTokenValidationParameters(X509Certificate cert)
     {
-        return new TokenValidationParameters() {{
-            validateIssuer = false;
-            validIssuers = Collections.singletonList(AuthenticationConstants.TO_BOT_FROM_CHANNEL_TOKEN_ISSUER);
+        TokenValidationParameters parameters = new TokenValidationParameters();
+        parameters.validateIssuer = false;
+        parameters.validIssuers = Collections.singletonList(AuthenticationConstants.TO_BOT_FROM_CHANNEL_TOKEN_ISSUER);
 
-            // Audience validation takes place in JwtTokenExtractor
-            validateAudience = false;
-            validateLifetime = true;
-            clockSkew = Duration.ofMinutes(5);
-            requireSignedTokens = true;
+        // Audience validation takes place in JwtTokenExtractor
+        parameters.validateAudience = false;
+        parameters.validateLifetime = true;
+        parameters.clockSkew = Duration.ofMinutes(5);
+        parameters.requireSignedTokens = true;
 
-            // provide a custom resolver so that calls to openid won't happen (which wouldn't
-            // work for these tests).
-            issuerSigningKeyResolver = key -> (OpenIdMetadata) keyId -> {
-                // return our certificate data
-                OpenIdMetadataKey key1 = new OpenIdMetadataKey();
-                key1.key = (RSAPublicKey) cert.getPublicKey();
-                key1.certificateChain = Collections.singletonList(encodeCertificate(cert));
-                return key1;
-            };
-        }};
+        // provide a custom resolver so that calls to openid won't happen (which wouldn't
+        // work for these tests).
+        parameters.issuerSigningKeyResolver = key -> (OpenIdMetadata) keyId -> {
+            // return our certificate data
+            OpenIdMetadataKey key1 = new OpenIdMetadataKey();
+            key1.key = (RSAPublicKey) cert.getPublicKey();
+            key1.certificateChain = Collections.singletonList(encodeCertificate(cert));
+            return key1;
+        };
+        return parameters;
     }
 
     private static class CertInfo {

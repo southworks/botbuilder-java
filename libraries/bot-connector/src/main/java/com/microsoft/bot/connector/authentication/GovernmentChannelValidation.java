@@ -41,7 +41,7 @@ public final class GovernmentChannelValidation {
 
     /**
      * Gets the OpenID metadata URL.
-     *
+     * 
      * @return The url.
      */
     public static String getOpenIdMetaDataUrl() {

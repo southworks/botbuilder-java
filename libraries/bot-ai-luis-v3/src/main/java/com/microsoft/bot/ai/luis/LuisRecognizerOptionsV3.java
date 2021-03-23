@@ -243,7 +243,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Gets value indicating whether external entities should override other means
      * of recognizing entities.
-     *
+     * 
      * @return True if external entities should be preferred to the results from
      *         LUIS models.
      */

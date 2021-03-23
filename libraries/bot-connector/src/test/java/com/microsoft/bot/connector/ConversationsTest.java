@@ -26,11 +26,10 @@ public class ConversationsTest extends BotConnectorTestBase {
         activity.setFrom(bot);
         activity.setText("TEST Create Conversation");
 
-        ConversationParameters params = new ConversationParameters() {{
-            setMembers(Collections.singletonList(user));
-            setBot(bot);
-            setActivity(activity);
-        }};
+        ConversationParameters params = new ConversationParameters();
+        params.setMembers(Collections.singletonList(user));
+        params.setBot(bot);
+        params.setActivity(activity);
 
         ConversationResourceResponse result = connector.getConversations().createConversation(params).join();
 
@@ -124,10 +123,9 @@ public class ConversationsTest extends BotConnectorTestBase {
     @Test
     public void GetConversationMembers() {
 
-        ConversationParameters createMessage = new ConversationParameters() {{
-            setMembers(Collections.singletonList(user));
-            setBot(bot);
-        }};
+        ConversationParameters createMessage = new ConversationParameters();
+        createMessage.setMembers(Collections.singletonList(user));
+        createMessage.setBot(bot);
 
         ConversationResourceResponse conversation = connector.getConversations().createConversation(createMessage).join();
 
@@ -336,15 +334,26 @@ public class ConversationsTest extends BotConnectorTestBase {
         activity.setFrom(bot);
         activity.setName("activity");
         activity.setText("TEST Send Card to Conversation");
+        CardImage imageJPEG = new CardImage();
+        imageJPEG.setUrl("https://docs.microsoft.com/en-us/bot-framework/media/designing-bots/core/dialogs-screens.png");
+        HeroCard heroCardJPEG = new HeroCard();
+        heroCardJPEG.setTitle("A static image");
+        heroCardJPEG.setSubtitle("JPEG image");
+        heroCardJPEG.setImages(Collections.singletonList(imageJPEG));
+        Attachment attachmentJPEG = new Attachment();
+        attachmentJPEG.setContentType("application/vnd.microsoft.card.hero");
+        attachmentJPEG.setContent(heroCardJPEG);
 
-        activity.setAttachments(Arrays.asList(createAttachment("A static image",
-                                                              "JPEG image",
-            "https://docs.microsoft.com/en-us/bot-framework/media/designing-bots/core/dialogs-screens.png"),
-                                              createAttachment("An animation",
-                                                             "GIF image",
-                                                                      "http://i.giphy.com/Ki55RUbOV5njy.gif")
-        ));
-
+        CardImage imageGIF = new CardImage();
+        imageGIF.setUrl("http://i.giphy.com/Ki55RUbOV5njy.gif");
+        HeroCard heroCardGIF = new HeroCard();
+        heroCardGIF.setTitle("An animation");
+        heroCardGIF.setSubtitle("GIF image");
+        heroCardGIF.setImages(Collections.singletonList(imageGIF));
+        Attachment attachmentGIF = new Attachment();
+        attachmentGIF.setContentType("application/vnd.microsoft.card.hero");
+        attachmentGIF.setContent(heroCardGIF);
+        activity.setAttachments(Arrays.asList(attachmentJPEG, attachmentGIF));
         ConversationParameters createMessage = new ConversationParameters();
         createMessage.setMembers(Collections.singletonList(user));
         createMessage.setBot(bot);

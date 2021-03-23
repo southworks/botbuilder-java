@@ -164,7 +164,7 @@ public class LuisRecognizerOptionsV3 extends LuisRecognizerOptions {
     /**
      * Gets value indicating whether or not instance data should be included in
      * response.
-     *
+     * 
      * @return True if instance data should be included in response.
      */
     public boolean isIncludeInstanceData() {

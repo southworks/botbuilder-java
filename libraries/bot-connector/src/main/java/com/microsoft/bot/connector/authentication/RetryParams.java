@@ -85,7 +85,7 @@ public class RetryParams {
 
     /**
      * Sets the retry delay.
-     *
+     * 
      * @param withRetryAfter Delay in milliseconds.
      */
     public void setRetryAfter(long withRetryAfter) {

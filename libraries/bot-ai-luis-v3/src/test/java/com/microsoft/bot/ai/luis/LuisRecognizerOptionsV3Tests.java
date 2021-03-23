@@ -314,18 +314,18 @@ public class LuisRecognizerOptionsV3Tests {
         ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
         ObjectReader readerDynamicList = mapper.readerFor(new TypeReference<List<DynamicList>>() {});
         ObjectReader readerExternalentities = mapper.readerFor(new TypeReference<List<ExternalEntity>>() {});
-        return new LuisRecognizerOptionsV3(
+        LuisRecognizerOptionsV3 recognizer = new LuisRecognizerOptionsV3(
             new LuisApplication(
                 this.applicationId,
                 this.subscriptionKey,
-                endpoint)) {{
-            setIncludeInstanceData(testSettings.get("IncludeInstanceData").asBoolean());
-            setIncludeAllIntents(testSettings.get("IncludeAllIntents").asBoolean());
-            setVersion(testSettings.get("Version") == null ? null : testSettings.get("Version").asText());
-            setDynamicLists(testSettings.get("DynamicLists") == null ? null : readerDynamicList.readValue(testSettings.get("DynamicLists")));
-            setExternalEntities(testSettings.get("ExternalEntities") == null ? null : readerExternalentities.readValue(testSettings.get("ExternalEntities")));
-            setDateTimeReference(testSettings.get("DateTimeReference") == null ? null : testSettings.get("DateTimeReference").asText());
-        }};
+                endpoint));
+        recognizer.setIncludeInstanceData(testSettings.get("IncludeInstanceData").asBoolean());
+        recognizer.setIncludeAllIntents(testSettings.get("IncludeAllIntents").asBoolean());
+        recognizer.setVersion(testSettings.get("Version") == null ? null : testSettings.get("Version").asText());
+        recognizer.setDynamicLists(testSettings.get("DynamicLists") == null ? null : readerDynamicList.readValue(testSettings.get("DynamicLists")));
+        recognizer.setExternalEntities(testSettings.get("ExternalEntities") == null ? null : readerExternalentities.readValue(testSettings.get("ExternalEntities")));
+        recognizer.setDateTimeReference(testSettings.get("DateTimeReference") == null ? null : testSettings.get("DateTimeReference").asText());
+        return recognizer;
     }
 
 }

@@ -67,7 +67,7 @@ public class RetryParams {
 
     /**
      * Sets whether a retry should happen.
-     *
+     * 
      * @param withShouldRetry True for a retry.
      */
     public void setShouldRetry(boolean withShouldRetry) {

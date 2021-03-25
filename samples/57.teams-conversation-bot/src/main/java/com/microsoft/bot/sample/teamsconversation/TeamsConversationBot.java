@@ -22,7 +22,6 @@ import com.microsoft.bot.schema.teams.TeamInfo;
 import com.microsoft.bot.schema.teams.TeamsChannelAccount;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.smartcardio.Card;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -177,28 +176,28 @@ public class TeamsConversationBot extends TeamsActivityHandler {
     }
 
     private List<CardAction> getHeroCardButtons(Object value) {
-        CardAction cardAction1 = new CardAction();
-        cardAction1.setType(ActionTypes.MESSAGE_BACK);
-        cardAction1.setTitle("Update Card");
-        cardAction1.setText("UpdateCardAction");
-        cardAction1.setValue(value);
+        CardAction updateAction = new CardAction();
+        updateAction.setType(ActionTypes.MESSAGE_BACK);
+        updateAction.setTitle("Update Card");
+        updateAction.setText("UpdateCardAction");
+        updateAction.setValue(value);
 
-        CardAction cardAction2 = new CardAction();
-        cardAction2.setType(ActionTypes.MESSAGE_BACK);
-        cardAction2.setTitle("Message All Members");
-        cardAction2.setText("MessageAllMembers");
+        CardAction allMembersAction = new CardAction();
+        allMembersAction.setType(ActionTypes.MESSAGE_BACK);
+        allMembersAction.setTitle("Message All Members");
+        allMembersAction.setText("MessageAllMembers");
 
-        CardAction cardAction3 = new CardAction();
-        cardAction3.setType(ActionTypes.MESSAGE_BACK);
-        cardAction3.setTitle("Delete card");
-        cardAction3.setText("Delete");
+        CardAction deleteAction = new CardAction();
+        deleteAction.setType(ActionTypes.MESSAGE_BACK);
+        deleteAction.setTitle("Delete card");
+        deleteAction.setText("Delete");
 
-        CardAction cardAction4 = new CardAction();
-        cardAction4.setType(ActionTypes.MESSAGE_BACK);
-        cardAction4.setTitle("Who am I?");
-        cardAction4.setText("MentionMe");
+        CardAction mentionAction = new CardAction();
+        mentionAction.setType(ActionTypes.MESSAGE_BACK);
+        mentionAction.setTitle("Who am I?");
+        mentionAction.setText("MentionMe");
 
-        return Arrays.asList(cardAction1, cardAction2, cardAction3, cardAction4);
+        return Arrays.asList(updateAction, allMembersAction, deleteAction, mentionAction);
     }
 
     private CompletableFuture<Void> mentionActivity(TurnContext turnContext) {

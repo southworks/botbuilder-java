@@ -33,7 +33,7 @@ Once you created the LUIS model, update `application.properties` with your `Luis
 
 - From the root of this project folder:
   - Build the sample using `mvn package`
-  - Run it by using `java -jar .\target\<%= botName %>-sample.jar`
+  - Run it by using `java -jar .\target\<%= artifact %>-1.0.0.jar`
 
 ## Testing the bot using Bot Framework Emulator
 

@@ -56,28 +56,27 @@ public class TeamsMessagingExtensionsSearchBot extends TeamsActivityHandler {
                     previewCard.setTap(cardAction);
 
                     if (!StringUtils.isEmpty(item[4])) {
-                        previewCard.setImages(Collections.singletonList(new CardImage() {{
-                            setUrl(item[4]);
-                            setAlt("Icon");
-                        }}));
+                        CardImage cardImage = new CardImage();
+                        cardImage.setUrl(item[4]);
+                        cardImage.setAlt("Icon");
+                        previewCard.setImages(Collections.singletonList(cardImage));
                     }
 
-                    MessagingExtensionAttachment attachment = new MessagingExtensionAttachment() {{
-                        setContentType(HeroCard.CONTENTTYPE);
-                        setContent(new HeroCard() {{
-                            setTitle(item[0]);
-                        }});
-                        setPreview(previewCard.toAttachment());
-                    }};
+                    HeroCard heroCard = new HeroCard();
+                    heroCard.setTitle(item[0]);
+
+                    MessagingExtensionAttachment attachment = new MessagingExtensionAttachment();
+                    attachment.setContentType(HeroCard.CONTENTTYPE);
+                    attachment.setContent(heroCard);
+                    attachment.setPreview(previewCard.toAttachment());
 
                     attachments.add(attachment);
                 }
 
-                MessagingExtensionResult composeExtension = new MessagingExtensionResult() {{
-                    setType("result");
-                    setAttachmentLayout("list");
-                    setAttachments(attachments);
-                }};
+                MessagingExtensionResult composeExtension = new MessagingExtensionResult();
+                composeExtension.setType("result");
+                composeExtension.setAttachmentLayout("list");
+                composeExtension.setAttachments(attachments);
 
                 return new MessagingExtensionResponse(composeExtension);
             });

@@ -1,5 +1,5 @@
 {
-    "name": "generator-java",
+    "name": "generator-botbuilder-java",
     "version": "4.9.1",
     "description": "A yeoman generator for creating Java bots built with Bot Framework v4",
     "homepage": "https://github.com/Microsoft/BotBuilder-Samples/tree/master/generators/generator-botbuilder",

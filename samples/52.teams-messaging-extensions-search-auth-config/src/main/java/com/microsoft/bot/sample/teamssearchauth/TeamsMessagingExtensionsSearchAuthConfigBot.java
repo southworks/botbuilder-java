@@ -23,7 +23,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
-import javax.smartcardio.Card;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -146,11 +145,11 @@ public class TeamsMessagingExtensionsSearchAuthConfigBot extends TeamsActivityHa
                 previewCard.setTitle(item[0]);
                 previewCard.setTap(cardAction);
 
-                CardImage cardImage = new CardImage();
-                cardImage.setUrl(item[4]);
-                cardAction.setImageAltText("Icon");
 
                 if (!StringUtils.isEmpty(item[4])) {
+                    CardImage cardImage = new CardImage();
+                    cardImage.setUrl(item[4]);
+                    cardAction.setImageAltText("Icon");
                     previewCard.setImage(cardImage);
                 }
 
@@ -190,24 +189,28 @@ public class TeamsMessagingExtensionsSearchAuthConfigBot extends TeamsActivityHa
                 if (response == null || StringUtils.isEmpty(response.getToken())) {
                     // There is no token, so the user has not signed in yet.
 
-                    MessagingExtensionResponse extensionResponse = new MessagingExtensionResponse();
-                    CardAction cardAction = new CardAction();
-                    cardAction.setType(ActionTypes.OPEN_URL);
-                    cardAction.setValue(extensionResponse);
-                    cardAction.setTitle("Bot Service OAuth");
 
-                    MessagingExtensionSuggestedAction suggestedAction = new MessagingExtensionSuggestedAction();
-                    suggestedAction.setAction(cardAction);
-
-                    MessagingExtensionResult result = new MessagingExtensionResult();
-                    result.setType("auth");
-                    result.setSuggestedActions(suggestedAction);
-
-
-                    extensionResponse.setComposeExtension(result);
 
                     return tokenProvider.getOAuthSignInLink(turnContext, connectionName)
-                        .thenApply(link -> extensionResponse);
+                        .thenApply(link -> {
+                            MessagingExtensionResponse extensionResponse = new MessagingExtensionResponse();
+                            CardAction cardAction = new CardAction();
+                            cardAction.setType(ActionTypes.OPEN_URL);
+                            cardAction.setValue(extensionResponse);
+                            cardAction.setTitle("Bot Service OAuth");
+
+                            MessagingExtensionSuggestedAction suggestedAction = new MessagingExtensionSuggestedAction();
+                            suggestedAction.setAction(cardAction);
+
+                            MessagingExtensionResult result = new MessagingExtensionResult();
+                            result.setType("auth");
+                            result.setSuggestedActions(suggestedAction);
+
+
+                            extensionResponse.setComposeExtension(result);
+
+                            return extensionResponse;
+                        });
                 }
 
                 String search = "";
@@ -270,22 +273,25 @@ public class TeamsMessagingExtensionsSearchAuthConfigBot extends TeamsActivityHa
         if (action.getCommandId().toUpperCase().equals("SIGNOUTCOMMAND")) {
             UserTokenProvider tokenProvider = (UserTokenProvider) turnContext.getAdapter();
 
-            TaskModuleTaskInfo taskInfo = new TaskModuleTaskInfo();
-            taskInfo.setCard(createAdaptiveCardAttachment());
-            taskInfo.setHeight(200);
-            taskInfo.setWidth(400);
-            taskInfo.setTitle("Adaptive Card: Inputs");
 
-            TaskModuleContinueResponse continueResponse = new TaskModuleContinueResponse();
-            continueResponse.setValue(taskInfo);
-
-            MessagingExtensionActionResponse actionResponse = new MessagingExtensionActionResponse();
-            actionResponse.setTask(continueResponse);
             return tokenProvider.signOutUser(
                 turnContext,
                 connectionName,
                 turnContext.getActivity().getFrom().getId()
-            ).thenApply(response -> actionResponse);
+            ).thenApply(response -> {
+                TaskModuleTaskInfo taskInfo = new TaskModuleTaskInfo();
+                taskInfo.setCard(createAdaptiveCardAttachment());
+                taskInfo.setHeight(200);
+                taskInfo.setWidth(400);
+                taskInfo.setTitle("Adaptive Card: Inputs");
+
+                TaskModuleContinueResponse continueResponse = new TaskModuleContinueResponse();
+                continueResponse.setValue(taskInfo);
+
+                MessagingExtensionActionResponse actionResponse = new MessagingExtensionActionResponse();
+                actionResponse.setTask(continueResponse);
+                return actionResponse;
+            });
         }
 
         return notImplemented();
@@ -341,6 +347,7 @@ public class TeamsMessagingExtensionsSearchAuthConfigBot extends TeamsActivityHa
         MessagingExtensionResult result = new MessagingExtensionResult();
         result.setType("result");
         result.setAttachmentLayout("list");
+        result.setAttachments(attachments);
 
         return result;
     }

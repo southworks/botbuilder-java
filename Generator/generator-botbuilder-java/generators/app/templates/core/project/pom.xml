@@ -41,7 +41,7 @@
         <java.version>1.8</java.version>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
-        <start-class>com.microsoft.bot.sample.core.Application</start-class>
+        <start-class><%= packageName %>.Application</start-class>
     </properties>
 
     <dependencies>
@@ -130,7 +130,7 @@
                             <goal>repackage</goal>
                         </goals>
                         <configuration>
-                            <mainClass>com.microsoft.bot.sample.core.Application</mainClass>
+                            <mainClass><%= packageName %>.Application</mainClass>
                         </configuration>
                     </execution>
                 </executions>

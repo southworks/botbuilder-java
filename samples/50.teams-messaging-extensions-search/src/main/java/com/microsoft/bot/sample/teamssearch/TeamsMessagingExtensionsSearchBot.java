@@ -100,10 +100,10 @@ public class TeamsMessagingExtensionsSearchBot extends TeamsActivityHandler {
         card.setSubtitle(data.get(2));
         card.setButtons(Arrays.asList(cardAction));
 
-        CardImage cardImage = new CardImage();
-        cardImage.setUrl(data.get(4));
-        cardImage.setAlt("Icon");
         if (!StringUtils.isEmpty(data.get(4))) {
+            CardImage cardImage = new CardImage();
+            cardImage.setUrl(data.get(4));
+            cardImage.setAlt("Icon");
             card.setImages(Collections.singletonList(cardImage));
         }
 

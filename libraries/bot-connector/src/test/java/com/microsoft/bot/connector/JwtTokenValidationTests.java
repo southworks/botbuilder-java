@@ -226,7 +226,9 @@ public class JwtTokenValidationTests {
         activity.setServiceUrl("https://webchat.botframework.com/");
         activity.setChannelId(Channels.EMULATOR);
         activity.setRelatesTo(new ConversationReference());
-        activity.setRecipient(new ChannelAccount() { { setRole(RoleTypes.SKILL); } });
+        ChannelAccount skillAccount = new ChannelAccount();
+        skillAccount.setRole(RoleTypes.SKILL);
+        activity.setRecipient(skillAccount);
         ClaimsIdentity identity = JwtTokenValidation.authenticateRequest(
             activity,
             header,

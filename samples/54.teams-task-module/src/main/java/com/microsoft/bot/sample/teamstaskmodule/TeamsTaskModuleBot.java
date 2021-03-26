@@ -146,7 +146,7 @@ public class TeamsTaskModuleBot extends TeamsActivityHandler {
         List<CardAction> buttons = actions.stream().map(cardType -> {
             CardTaskFetchValue fetchValue = new CardTaskFetchValue<String>();
             fetchValue.setData(cardType.getId());
-            TaskModuleAction moduleAction = new TaskModuleAction(cardType.getButtonTitle(),fetchValue);
+            TaskModuleAction moduleAction = new TaskModuleAction(cardType.getButtonTitle(), fetchValue);
             return moduleAction;
             }).collect(Collectors.toCollection(ArrayList::new));
 

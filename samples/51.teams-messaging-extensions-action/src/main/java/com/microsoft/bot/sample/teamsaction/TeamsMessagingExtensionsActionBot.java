@@ -77,9 +77,6 @@ public class TeamsMessagingExtensionsActionBot extends TeamsActivityHandler {
                 .getFrom().getUser().getDisplayName() : "");
         card.setText(action.getMessagePayload().getBody().getContent());
 
-        CardImage cardImage = new CardImage();
-        cardImage.setUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtB3AwMUeNoq4gUBGe6Ocj8kyh3bXa9ZbV7u1fVKQoyKFHdkqU");
-
         if (action.getMessagePayload().getAttachments() != null && !action.getMessagePayload()
             .getAttachments().isEmpty()) {
             card.setSubtitle("Attachments not included)");
@@ -89,6 +86,8 @@ public class TeamsMessagingExtensionsActionBot extends TeamsActivityHandler {
             Boolean.valueOf(actionData.get("includeImage"))
         ) : false;
         if (includeImage) {
+            CardImage cardImage = new CardImage();
+            cardImage.setUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtB3AwMUeNoq4gUBGe6Ocj8kyh3bXa9ZbV7u1fVKQoyKFHdkqU");
             card.setImages(Arrays.asList(cardImage));
         }
 

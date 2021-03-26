@@ -145,11 +145,10 @@ public class TeamsMessagingExtensionsSearchAuthConfigBot extends TeamsActivityHa
                 previewCard.setTitle(item[0]);
                 previewCard.setTap(cardAction);
 
-
                 if (!StringUtils.isEmpty(item[4])) {
                     CardImage cardImage = new CardImage();
                     cardImage.setUrl(item[4]);
-                    cardAction.setImageAltText("Icon");
+                    cardImage.setAlt("Icon");
                     previewCard.setImage(cardImage);
                 }
 
@@ -188,8 +187,6 @@ public class TeamsMessagingExtensionsSearchAuthConfigBot extends TeamsActivityHa
             .thenCompose(response -> {
                 if (response == null || StringUtils.isEmpty(response.getToken())) {
                     // There is no token, so the user has not signed in yet.
-
-
 
                     return tokenProvider.getOAuthSignInLink(turnContext, connectionName)
                         .thenApply(link -> {
@@ -236,11 +233,11 @@ public class TeamsMessagingExtensionsSearchAuthConfigBot extends TeamsActivityHa
         card.setTitle(data.get(0));
         card.setSubtitle(data.get(2));
         card.setButtons(Arrays.asList(cardAction));
-
-        CardImage cardImage = new CardImage();
-        cardImage.setUrl(data.get(4));
-        cardImage.setAlt("Icon");
+        
         if (!StringUtils.isEmpty(data.get(4))) {
+            CardImage cardImage = new CardImage();
+            cardImage.setUrl(data.get(4));
+            cardImage.setAlt("Icon");
             card.setImage(cardImage);
         }
 
@@ -271,7 +268,6 @@ public class TeamsMessagingExtensionsSearchAuthConfigBot extends TeamsActivityHa
     ) {
         if (action.getCommandId().toUpperCase().equals("SIGNOUTCOMMAND")) {
             UserTokenProvider tokenProvider = (UserTokenProvider) turnContext.getAdapter();
-
 
             return tokenProvider.signOutUser(
                 turnContext,

@@ -206,7 +206,6 @@ public class TeamsMessagingExtensionsSearchAuthConfigBot extends TeamsActivityHa
                             result.setType("auth");
                             result.setSuggestedActions(suggestedAction);
 
-
                             extensionResponse.setComposeExtension(result);
 
                             return extensionResponse;

@@ -1060,13 +1060,10 @@ public class BotFrameworkAdapter extends BotAdapter
                     // run pipeline
                     CompletableFuture<Void> result = new CompletableFuture<>();
                     try (TurnContextImpl context = new TurnContextImpl(this, eventActivity)) {
-                        HashMap<String, String> claims = new HashMap<String, String>() {
-                            {
-                                put(AuthenticationConstants.AUDIENCE_CLAIM, credentials.getAppId());
-                                put(AuthenticationConstants.APPID_CLAIM, credentials.getAppId());
-                                put(AuthenticationConstants.SERVICE_URL_CLAIM, serviceUrl);
-                            }
-                        };
+                        HashMap<String, String> claims = new HashMap<String, String>();
+                        claims.put(AuthenticationConstants.AUDIENCE_CLAIM, credentials.getAppId());
+                        claims.put(AuthenticationConstants.APPID_CLAIM, credentials.getAppId());
+                        claims.put(AuthenticationConstants.SERVICE_URL_CLAIM, serviceUrl);
                         ClaimsIdentity claimsIdentity = new ClaimsIdentity("anonymous", claims);
 
                         context.getTurnState().add(BOT_IDENTITY_KEY, claimsIdentity);

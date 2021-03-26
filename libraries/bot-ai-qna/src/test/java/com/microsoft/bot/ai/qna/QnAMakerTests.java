@@ -322,11 +322,9 @@ public class QnAMakerTests {
         MockWebServer mockWebServer = new MockWebServer();
         try {
             QnAMaker qna = this.qnaReturnsAnswer(mockWebServer);
-            QnAMakerOptions options = new QnAMakerOptions() {
-                {
-                    setTop(1);
-                }
-            };
+            QnAMakerOptions options = new QnAMakerOptions();
+            options.setTop(1);
+
             QueryResults results = qna.getAnswersRaw(getContext("how do I clean the stove?"), options, null, null).join();
             Assert.assertNotNull(results.getAnswers());
             Assert.assertTrue(results.getActiveLearningEnabled());

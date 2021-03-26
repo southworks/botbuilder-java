@@ -6,7 +6,6 @@ package com.microsoft.bot.builder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.microsoft.bot.builder.adapters.TestAdapter;
 import com.microsoft.bot.builder.adapters.TestFlow;
-import com.microsoft.bot.builder.teams.TeamsInfo;
 import com.microsoft.bot.connector.Channels;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityTypes;

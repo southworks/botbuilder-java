@@ -63,7 +63,6 @@ public class MainDialog extends ComponentDialog {
         setInitialDialogId("WaterfallDialog");
     }
 
-
     /**
      * First step in the waterfall dialog. Prompts the user for a command. Currently, this expects a
      * booking request, like "book me a flight from Paris to Berlin on march 22" Note that the
@@ -76,7 +75,7 @@ public class MainDialog extends ComponentDialog {
         if (!luisRecognizer.isConfigured()) {
             Activity text = MessageFactory.text("NOTE: LUIS is not configured. "
                 + "To enable all capabilities, add 'LuisAppId', 'LuisAPIKey' and 'LuisAPIHostName' "
-                + "to the appsettings.json file.", null, InputHints.IGNORING_INPUT);
+                + "to the application.properties file.", null, InputHints.IGNORING_INPUT);
             return stepContext.getContext().sendActivity(text)
                 .thenCompose(sendResult -> stepContext.next(null));
         }
@@ -122,7 +121,6 @@ public class MainDialog extends ComponentDialog {
                         stepContext.getContext(), fromEntities, toEntities)
                         .thenCompose(showResult -> {
                                 // Initialize BookingDetails with any entities we may have found in the response.
-
                                 BookingDetails bookingDetails = new BookingDetails();
                                 bookingDetails.setDestination(toEntities.get("airport").asText());
                                 bookingDetails.setOrigin(fromEntities.get("airport").asText());

@@ -4,8 +4,6 @@
 package com.microsoft.bot.sample.corebot.app.insights;
 
 import com.codepoetics.protonpack.collectors.CompletableFutures;
-import com.microsoft.applicationinsights.core.dependencies.apachecommons.io.IOUtils;
-import com.microsoft.applicationinsights.core.dependencies.apachecommons.lang3.StringUtils;
 import com.microsoft.bot.builder.ConversationState;
 import com.microsoft.bot.builder.MessageFactory;
 import com.microsoft.bot.builder.TurnContext;
@@ -16,7 +14,6 @@ import com.microsoft.bot.schema.Attachment;
 import com.microsoft.bot.schema.ChannelAccount;
 import com.microsoft.bot.schema.Serialization;
 
-import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -86,10 +83,10 @@ public class DialogAndWelcomeBot<T extends Dialog> extends DialogBot {
             String adaptiveCardJson = IOUtils
                 .toString(inputStream, StandardCharsets.UTF_8.toString());
 
-            return new Attachment() {{
-                setContentType("application/vnd.microsoft.card.adaptive");
-                setContent(Serialization.jsonToTree(adaptiveCardJson));
-            }};
+            Attachment attachment = new Attachment();
+            attachment.setContentType("application/vnd.microsoft.card.adaptive");
+            attachment.setContent(Serialization.jsonToTree(adaptiveCardJson));
+            return attachment;
 
         } catch (IOException e) {
             e.printStackTrace();

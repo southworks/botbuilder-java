@@ -61,7 +61,7 @@ public class Application extends BotDependencyConfiguration {
         ConversationState conversationState
     ) {
         TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();
-        telemetryConfiguration.setInstrumentationKey(configuration.getProperty("InstrumentationKey"));
+        telemetryConfiguration.setInstrumentationKey(configuration.getProperty("ApplicationInsights.InstrumentationKey"));
         telemetryConfiguration.setChannel(configuration.getProperty("Channel"));
         TelemetryClient telemetryClient = new TelemetryClient(telemetryConfiguration);
         BotTelemetryClient botTelemetryClient = new ApplicationInsightsBotTelemetryClient(telemetryClient);
@@ -82,4 +82,3 @@ public class Application extends BotDependencyConfiguration {
         return new AdapterWithErrorHandler(configuration);
     }
 }
-

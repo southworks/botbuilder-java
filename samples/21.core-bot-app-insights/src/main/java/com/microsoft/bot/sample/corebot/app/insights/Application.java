@@ -1,18 +1,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-package com.microsoft.bot.sample.core;
+package com.microsoft.bot.sample.corebot.app.insights;
 
+import com.microsoft.applicationinsights.TelemetryClient;
+import com.microsoft.applicationinsights.TelemetryConfiguration;
+import com.microsoft.bot.applicationinsights.ApplicationInsightsBotTelemetryClient;
+import com.microsoft.bot.applicationinsights.core.TelemetryInitializerMiddleware;
 import com.microsoft.bot.builder.Bot;
+import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.ConversationState;
+import com.microsoft.bot.builder.TelemetryLoggerMiddleware;
 import com.microsoft.bot.builder.UserState;
 import com.microsoft.bot.integration.AdapterWithErrorHandler;
 import com.microsoft.bot.integration.BotFrameworkHttpAdapter;
 import com.microsoft.bot.integration.Configuration;
 import com.microsoft.bot.integration.spring.BotController;
 import com.microsoft.bot.integration.spring.BotDependencyConfiguration;
-import com.microsoft.bot.sample.corebot.app.insights.DialogAndWelcomeBot;
-import com.microsoft.bot.sample.corebot.app.insights.MainDialog;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -62,14 +66,10 @@ public class Application extends BotDependencyConfiguration {
         UserState userState,
         ConversationState conversationState
     ) {
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();
-        telemetryConfiguration.setInstrumentationKey(configuration.getProperty("ApplicationInsights.InstrumentationKey"));
-        telemetryConfiguration.setChannel(configuration.getProperty("Channel"));
-        TelemetryClient telemetryClient = new TelemetryClient(telemetryConfiguration);
-        BotTelemetryClient botTelemetryClient = new ApplicationInsightsBotTelemetryClient(telemetryClient);
-
+        BotTelemetryClient botTelemetryClient = getBotTelemetryClient(configuration);
         FlightBookingRecognizer recognizer =  new FlightBookingRecognizer(configuration, botTelemetryClient);
         MainDialog dialog = new MainDialog(recognizer, new BookingDialog(), botTelemetryClient);
+
         return new DialogAndWelcomeBot<>(conversationState, userState, dialog);
     }
 
@@ -81,6 +81,28 @@ public class Application extends BotDependencyConfiguration {
      */
     @Override
     public BotFrameworkHttpAdapter getBotFrameworkHttpAdaptor(Configuration configuration) {
-        return new AdapterWithErrorHandler(configuration);
+        BotTelemetryClient botTelemetryClient = getBotTelemetryClient(configuration);
+        TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(botTelemetryClient, true);
+        TelemetryInitializerMiddleware telemetryInitializerMiddleware = new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, true);
+
+        AdapterWithErrorHandler adapter = new AdapterWithErrorHandler(configuration);
+        adapter.use(telemetryInitializerMiddleware);
+
+        return adapter;
+    }
+
+    /**
+     * Returns a Bot Telemetry Client.
+     *
+     * @param configuration The Configuration object to use.
+     * @return A Bot Telemetry Client.
+     */
+    @Bean
+    public BotTelemetryClient getBotTelemetryClient(Configuration configuration) {
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();
+        telemetryConfiguration.setInstrumentationKey(configuration.getProperty("ApplicationInsights.InstrumentationKey"));
+        TelemetryClient telemetryClient = new TelemetryClient(telemetryConfiguration);
+
+        return new ApplicationInsightsBotTelemetryClient(telemetryClient);
     }
 }

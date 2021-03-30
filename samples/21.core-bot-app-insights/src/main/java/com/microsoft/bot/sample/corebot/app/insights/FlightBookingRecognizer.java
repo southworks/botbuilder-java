@@ -6,7 +6,7 @@ package com.microsoft.bot.sample.corebot.app.insights;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.microsoft.applicationinsights.core.dependencies.apachecommons.lang3.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.microsoft.bot.ai.luis.LuisApplication;
 import com.microsoft.bot.ai.luis.LuisRecognizer;
 import com.microsoft.bot.ai.luis.LuisRecognizerOptionsV3;
@@ -39,7 +39,7 @@ public class FlightBookingRecognizer implements Recognizer {
             LuisApplication luisApplication = new LuisApplication(
                 configuration.getProperty("LuisAppId"),
                 configuration.getProperty("LuisAPIKey"),
-                String.format("https://%s", configuration.getProperty("LuisAPIHostName"))
+                "https://".concat(configuration.getProperty("LuisAPIHostName"))
             );
 
             // Set the recognizer options depending on which endpoint version you want to use.

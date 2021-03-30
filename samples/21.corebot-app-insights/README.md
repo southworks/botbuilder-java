@@ -33,7 +33,7 @@ Application Insights resource creation steps can be found [here](https://docs.mi
 
 - From the root of this project folder:
     - Build the sample using `mvn package`
-    - Run it by using `java -jar .\target\bot-core-app-insights-sample.jar`
+    - Run it by using `java -jar .\target\bot-corebot-app-insights-sample.jar`
 
 ## Testing the bot using Bot Framework Emulator
 

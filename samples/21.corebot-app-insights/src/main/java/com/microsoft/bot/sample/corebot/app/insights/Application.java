@@ -10,6 +10,7 @@ import com.microsoft.bot.applicationinsights.core.TelemetryInitializerMiddleware
 import com.microsoft.bot.builder.Bot;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.ConversationState;
+import com.microsoft.bot.builder.NullBotTelemetryClient;
 import com.microsoft.bot.builder.Storage;
 import com.microsoft.bot.builder.TelemetryLoggerMiddleware;
 import com.microsoft.bot.builder.UserState;
@@ -17,6 +18,7 @@ import com.microsoft.bot.integration.BotFrameworkHttpAdapter;
 import com.microsoft.bot.integration.Configuration;
 import com.microsoft.bot.integration.spring.BotController;
 import com.microsoft.bot.integration.spring.BotDependencyConfiguration;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -67,7 +69,7 @@ public class Application extends BotDependencyConfiguration {
         ConversationState conversationState
     ) {
         BotTelemetryClient botTelemetryClient = getBotTelemetryClient(configuration);
-        FlightBookingRecognizer recognizer =  new FlightBookingRecognizer(configuration, botTelemetryClient);
+        FlightBookingRecognizer recognizer = new FlightBookingRecognizer(configuration, botTelemetryClient);
         MainDialog dialog = new MainDialog(recognizer, new BookingDialog(), botTelemetryClient);
 
         return new DialogAndWelcomeBot<>(conversationState, userState, dialog);
@@ -104,10 +106,14 @@ public class Application extends BotDependencyConfiguration {
      */
     @Bean
     public BotTelemetryClient getBotTelemetryClient(Configuration configuration) {
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();
-        telemetryConfiguration.setInstrumentationKey(configuration.getProperty("ApplicationInsights.InstrumentationKey"));
-        TelemetryClient telemetryClient = new TelemetryClient(telemetryConfiguration);
+        String instrumentationKey = configuration.getProperty("ApplicationInsights.InstrumentationKey");
+        if (StringUtils.isNotBlank(instrumentationKey)) {
+            TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();
+            telemetryConfiguration.setInstrumentationKey(configuration.getProperty("ApplicationInsights.InstrumentationKey"));
+            TelemetryClient telemetryClient = new TelemetryClient(telemetryConfiguration);
+            return new ApplicationInsightsBotTelemetryClient(telemetryClient);
+        }
 
-        return new ApplicationInsightsBotTelemetryClient(telemetryClient);
+        return new NullBotTelemetryClient();
     }
 }

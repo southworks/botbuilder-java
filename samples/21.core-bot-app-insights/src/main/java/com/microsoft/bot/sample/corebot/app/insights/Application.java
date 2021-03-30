@@ -11,6 +11,8 @@ import com.microsoft.bot.integration.BotFrameworkHttpAdapter;
 import com.microsoft.bot.integration.Configuration;
 import com.microsoft.bot.integration.spring.BotController;
 import com.microsoft.bot.integration.spring.BotDependencyConfiguration;
+import com.microsoft.bot.sample.corebot.app.insights.DialogAndWelcomeBot;
+import com.microsoft.bot.sample.corebot.app.insights.MainDialog;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;

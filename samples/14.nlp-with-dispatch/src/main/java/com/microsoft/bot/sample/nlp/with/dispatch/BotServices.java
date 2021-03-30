@@ -17,7 +17,6 @@ public interface BotServices {
      */
     LuisRecognizer getDispatch();
 
-
     /**
      * Gets the {@link QnAMaker} application
      * @return The QnAMaker application

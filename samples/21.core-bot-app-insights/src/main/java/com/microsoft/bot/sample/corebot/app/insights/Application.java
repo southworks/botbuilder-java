@@ -10,6 +10,7 @@ import com.microsoft.bot.applicationinsights.core.TelemetryInitializerMiddleware
 import com.microsoft.bot.builder.Bot;
 import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.ConversationState;
+import com.microsoft.bot.builder.Storage;
 import com.microsoft.bot.builder.TelemetryLoggerMiddleware;
 import com.microsoft.bot.builder.UserState;
 import com.microsoft.bot.integration.BotFrameworkHttpAdapter;
@@ -80,15 +81,17 @@ public class Application extends BotDependencyConfiguration {
      */
     @Override
     public BotFrameworkHttpAdapter getBotFrameworkHttpAdaptor(Configuration configuration) {
+        Storage storage = getStorage();
+        ConversationState conversationState = getConversationState(storage);
         BotTelemetryClient botTelemetryClient = getBotTelemetryClient(configuration);
-        TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(botTelemetryClient, true);
+        TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(botTelemetryClient, false);
         TelemetryInitializerMiddleware telemetryInitializerMiddleware = new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, true);
 
         AdapterWithErrorHandler adapter = new AdapterWithErrorHandler(
             configuration,
             telemetryInitializerMiddleware,
             botTelemetryClient,
-            null);
+            conversationState);
 
         return adapter;
     }

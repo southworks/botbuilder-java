@@ -26,6 +26,9 @@ public class BookingDialog extends CancelAndHelpDialog {
     private final String destinationStepMsgText = "Where would you like to travel to?";
     private final String originStepMsgText = "Where are you traveling from?";
     
+    /**
+     * The constructor of the Booking Dialog class.
+     */
     public BookingDialog() {
         super("BookingDialog");
         
@@ -42,8 +45,7 @@ public class BookingDialog extends CancelAndHelpDialog {
         
         addDialog(new WaterfallDialog("WaterfallDialog", Arrays.asList(waterfallSteps)));
     }
-    
-    
+        
     private CompletableFuture<DialogTurnResult> destinationStep(WaterfallStepContext stepContext) {
         BookingDetails bookingDetails = (BookingDetails) stepContext.getOptions();
         
@@ -56,12 +58,11 @@ public class BookingDialog extends CancelAndHelpDialog {
         
         return stepContext.next(bookingDetails.getDestination);
     }
-    
-    
+     
     private CompletableFuture<DialogTurnResult> originStep(WaterfallStepContext stepContext) {
         BookingDetails bookingDetails = (BookingDetails) stepContext.getOptions();
 
-        bookingDetails.setDestination(stepContext.getResult().toString());
+        bookingDetails.setDestination((String) stepContext.getResult());
 
         if (bookingDetails.getOrigin().isEmpty()) {
             Activity promptMessage =
@@ -75,11 +76,10 @@ public class BookingDialog extends CancelAndHelpDialog {
         return stepContext.next(bookingDetails.getOrigin());
     }
 
-
     private CompletableFuture<DialogTurnResult> travelDateStep(WaterfallStepContext stepContext) {
         BookingDetails bookingDetails = (BookingDetails) stepContext.getOptions();
 
-        bookingDetails.setOrigin(stepContext.getResult().toString());
+        bookingDetails.setOrigin((String) stepContext.getResult());
 
         if (bookingDetails.getTravelDate() == null || isAmbiguous(bookingDetails.getTravelDate())) {
             return stepContext.beginDialog("DateResolverDialog", bookingDetails.getTravelDate());
@@ -88,11 +88,10 @@ public class BookingDialog extends CancelAndHelpDialog {
         return stepContext.next(bookingDetails.getTravelDate());
     }
 
-
     private CompletableFuture<DialogTurnResult> confirmStep(WaterfallStepContext stepContext) {
         BookingDetails bookingDetails = (BookingDetails) stepContext.getOptions();
 
-        bookingDetails.setTravelDate(stepContext.getResult().toString());
+        bookingDetails.setTravelDate((String) stepContext.getResult());
 
         String messageText =
             String.format(
@@ -108,7 +107,6 @@ public class BookingDialog extends CancelAndHelpDialog {
 
         return stepContext.prompt("ConfirmPrompt", promptOptions);
     }
-
 
     private CompletableFuture<DialogTurnResult> finalStep(WaterfallStepContext stepContext) {
         if ((Boolean) stepContext.getResult()) {

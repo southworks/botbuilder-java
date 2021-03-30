@@ -31,14 +31,12 @@ public class DateResolverDialog extends CancelAndHelpDialog {
     private final String repromptMsgText =
         "I'm sorry, to make your booking please enter a full travel date including Day Month and Year.";
 
-
     /**
      * The constructor of the DateResolverDialog class.
      * @param id The dialog's id.
      */
     public DateResolverDialog(@Nullable String id) {
         super(id != null ? id : "DateResolverDialog");
-
 
         addDialog(new DateTimePrompt("DateTimePrompt",
             DateResolverDialog::dateTimePromptValidator, null));

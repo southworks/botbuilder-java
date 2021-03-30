@@ -97,6 +97,7 @@
       <dependency>
         <groupId>com.microsoft.bot</groupId>
         <artifactId>bot-applicationinsights</artifactId>
+        <version>4.6.0-preview9</version>
       </dependency>
   </dependencies>
 

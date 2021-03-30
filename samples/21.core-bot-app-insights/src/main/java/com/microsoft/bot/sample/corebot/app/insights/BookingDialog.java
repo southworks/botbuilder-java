@@ -34,7 +34,7 @@ public class BookingDialog extends CancelAndHelpDialog {
         
         addDialog(new TextPrompt("TextPrompt"));
         addDialog(new ConfirmPrompt("ConfirmPrompt"));
-        addDialog(new DateResolverDialog());
+        addDialog(new DateResolverDialog(null));
         WaterfallStep[] waterfallSteps = {
             this::destinationStep,
             this::originStep,

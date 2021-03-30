@@ -4,6 +4,7 @@
 package com.microsoft.bot.sample.corebot.app.insights;
 
 import com.codepoetics.protonpack.collectors.CompletableFutures;
+import com.microsoft.applicationinsights.core.dependencies.apachecommons.io.IOUtils;
 import com.microsoft.bot.builder.ConversationState;
 import com.microsoft.bot.builder.MessageFactory;
 import com.microsoft.bot.builder.TurnContext;
@@ -13,6 +14,7 @@ import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.Attachment;
 import com.microsoft.bot.schema.ChannelAccount;
 import com.microsoft.bot.schema.Serialization;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;

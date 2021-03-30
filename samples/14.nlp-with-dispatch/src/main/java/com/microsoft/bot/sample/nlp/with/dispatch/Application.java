@@ -1,4 +1,4 @@
-package com.microsoft.bot.sample.nlpwithdispatch;
+package com.microsoft.bot.sample.nlp.with.dispatch;
 
 public class Application {
 }

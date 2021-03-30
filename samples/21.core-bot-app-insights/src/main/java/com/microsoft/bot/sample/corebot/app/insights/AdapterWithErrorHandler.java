@@ -62,8 +62,14 @@ public class AdapterWithErrorHandler extends BotFrameworkHttpAdapter {
 
             // Send the exception telemetry:
             adapterBotTelemetryClient.trackException((Exception) exception, properties, null);
+
+            // Log any leaked exception from the application.
+            // NOTE: In production environment, you should consider logging this to
+            // Azure Application Insights. Visit https://aka.ms/bottelemetry to see how
+            // to add telemetry capture to your bot.
             LoggerFactory.getLogger(AdapterWithErrorHandler.class).error("onTurnError", exception);
 
+            // Send a message to the user
             return turnContext.sendActivities(
                 MessageFactory.text(ERROR_MSG_ONE), MessageFactory.text(ERROR_MSG_TWO)
             ).thenCompose(resourceResponse -> sendTraceActivity(turnContext, exception))
@@ -96,6 +102,7 @@ public class AdapterWithErrorHandler extends BotFrameworkHttpAdapter {
             traceActivity.setValue(ExceptionUtils.getStackTrace(exception));
             traceActivity.setValueType("https://www.botframework.com/schemas/error");
 
+            // Send a trace activity, which will be displayed in the Bot Framework Emulator
             return turnContext.sendActivity(traceActivity).thenApply(resourceResponse -> null);
         }
 

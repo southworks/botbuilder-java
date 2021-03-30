@@ -44,19 +44,25 @@ public class BookingDialog extends CancelAndHelpDialog {
         };
         
         addDialog(new WaterfallDialog("WaterfallDialog", Arrays.asList(waterfallSteps)));
+        
+        // The initial child Dialog to run.
+        setInitialDialogId("WaterfallDialog");
     }
         
     private CompletableFuture<DialogTurnResult> destinationStep(WaterfallStepContext stepContext) {
         BookingDetails bookingDetails = (BookingDetails) stepContext.getOptions();
         
-        if (bookingDetails.getDestination == null) {
-            Activity promptMessage = MessageFactory.text(destinationStepMsgText, destinationStepMsgText);
+        if (bookingDetails.getDestination() == null) {
+            Activity promptMessage = 
+                MessageFactory.text(destinationStepMsgText, destinationStepMsgText,
+                    InputHints.EXPECTING_INPUT
+                );
             PromptOptions promptOptions = new PromptOptions();
             promptOptions.setPrompt(promptMessage);
             return stepContext.prompt("TextPrompt", promptOptions);
         }
         
-        return stepContext.next(bookingDetails.getDestination);
+        return stepContext.next(bookingDetails.getDestination());
     }
      
     private CompletableFuture<DialogTurnResult> originStep(WaterfallStepContext stepContext) {
@@ -64,7 +70,7 @@ public class BookingDialog extends CancelAndHelpDialog {
 
         bookingDetails.setDestination((String) stepContext.getResult());
 
-        if (bookingDetails.getOrigin().isEmpty()) {
+        if (bookingDetails.getOrigin() == null) {
             Activity promptMessage =
                 MessageFactory
                     .text(originStepMsgText, originStepMsgText, InputHints.EXPECTING_INPUT);

@@ -12,7 +12,6 @@ import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.ConversationState;
 import com.microsoft.bot.builder.TelemetryLoggerMiddleware;
 import com.microsoft.bot.builder.UserState;
-import com.microsoft.bot.integration.AdapterWithErrorHandler;
 import com.microsoft.bot.integration.BotFrameworkHttpAdapter;
 import com.microsoft.bot.integration.Configuration;
 import com.microsoft.bot.integration.spring.BotController;
@@ -85,8 +84,11 @@ public class Application extends BotDependencyConfiguration {
         TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(botTelemetryClient, true);
         TelemetryInitializerMiddleware telemetryInitializerMiddleware = new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, true);
 
-        AdapterWithErrorHandler adapter = new AdapterWithErrorHandler(configuration);
-        adapter.use(telemetryInitializerMiddleware);
+        AdapterWithErrorHandler adapter = new AdapterWithErrorHandler(
+            configuration,
+            telemetryInitializerMiddleware,
+            botTelemetryClient,
+            null);
 
         return adapter;
     }

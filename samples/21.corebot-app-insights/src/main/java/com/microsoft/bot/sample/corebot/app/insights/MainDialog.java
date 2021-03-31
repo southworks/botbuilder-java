@@ -42,11 +42,13 @@ public class MainDialog extends ComponentDialog {
      * @param bookingDialog       The BookingDialog object with booking dialogs.
      * @param withTelemetryClient The BotTelemetryClient to use.
      */
-    public MainDialog(FlightBookingRecognizer withLuisRecognizer, BookingDialog bookingDialog, BotTelemetryClient withTelemetryClient) {
+    public MainDialog(FlightBookingRecognizer withLuisRecognizer,
+                      BookingDialog bookingDialog,
+                      BotTelemetryClient withTelemetryClient) {
         super("MainDialog");
 
         luisRecognizer = withLuisRecognizer;
-        
+
         // Set the telemetry client for this and all child dialogs
         this.setTelemetryClient(withTelemetryClient);
 

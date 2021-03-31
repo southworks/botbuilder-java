@@ -28,7 +28,7 @@ public class FlightBookingRecognizer implements Recognizer {
      * The constructor of the FlightBookingRecognizer class.
      *
      * @param configuration The Configuration object to use.
-     * @param telemetryClient
+     * @param telemetryClient The BotTelemetryClient to use.
      */
     public FlightBookingRecognizer(Configuration configuration, BotTelemetryClient telemetryClient) {
         Boolean luisIsConfigured = StringUtils.isNotBlank(configuration.getProperty("LuisAppId"))

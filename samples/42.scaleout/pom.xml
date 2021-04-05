@@ -91,10 +91,9 @@
         <scope>compile</scope>
       </dependency>
       <dependency>
-        <groupId>com.microsoft.bot</groupId>
-        <artifactId>bot-azure</artifactId>
-        <version>4.6.0-preview9</version>
-        <scope>compile</scope>
+        <groupId>com.azure</groupId>
+        <artifactId>azure-storage-blob</artifactId>
+        <version>12.10.0</version>
       </dependency>
   </dependencies>
 

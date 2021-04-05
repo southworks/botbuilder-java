@@ -21,20 +21,16 @@ import java.util.function.Supplier;
 public class RefAccessor<T extends Class> implements StatePropertyAccessor<T> {
     private T value;
 
+    public RefAccessor(T withValue) {
+        value = withValue;
+    }
+
     public T getValue() {
         return value;
     }
 
     public String getName() {
         return value.getTypeName();
-    }
-
-    public RefAccessor(T withValue) {
-        value = withValue;
-    }
-
-    private void setValue(T withValue) {
-        this.value = withValue;
     }
 
     public CompletableFuture<T> get(TurnContext turnContext, Supplier<T> defaultValueFactory) {
@@ -57,5 +53,9 @@ public class RefAccessor<T extends Class> implements StatePropertyAccessor<T> {
     @Override
     public CompletableFuture<Void> set(TurnContext turnContext, T value) {
         throw new UnsupportedOperationException();
+    }
+
+    private void setValue(T withValue) {
+        this.value = withValue;
     }
 }

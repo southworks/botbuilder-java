@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.microsoft.bot.sample</groupId>
-  <artifactId>timex-resolution</artifactId>
+  <artifactId>bot-timex-resolution</artifactId>
   <version>sample</version>
   <packaging>jar</packaging>
 
@@ -41,7 +41,7 @@
     <java.version>1.8</java.version>
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven.compiler.source>1.8</maven.compiler.source>
-    <start-class>com.microsoft.bot.sample.timex.Application</start-class>
+    <start-class>com.microsoft.bot.sample.timex.resolution.Application</start-class>
   </properties>
 
   <dependencies>
@@ -76,23 +76,6 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
       <version>2.13.2</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.microsoft.bot</groupId>
-      <artifactId>bot-integration-spring</artifactId>
-      <version>4.6.0-preview9</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.bot</groupId>
-      <artifactId>bot-dialogs</artifactId>
-      <version>4.6.0-preview9</version>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.bot</groupId>
-      <artifactId>bot-ai-luis-v3</artifactId>
-      <version>4.6.0-preview9</version>
     </dependency>
   </dependencies>
 
@@ -130,7 +113,7 @@
                   <goal>repackage</goal>
                 </goals>
                 <configuration>
-                  <mainClass>com.microsoft.bot.sample.core.Application</mainClass>
+                  <mainClass>com.microsoft.bot.sample.timex.resolution.Application</mainClass>
                 </configuration>
               </execution>
             </executions>

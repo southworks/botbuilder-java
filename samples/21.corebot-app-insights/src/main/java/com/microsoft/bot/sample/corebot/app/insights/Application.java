@@ -58,6 +58,9 @@ public class Application extends BotDependencyConfiguration {
      * @Bean annotation.
      * </p>
      *
+     * @param configuration The Configuration object to use.
+     * @param userState The UserState object to use.
+     * @param conversationState The ConversationState object to use.
      * @return The Bot implementation for this application.
      */
     @Bean
@@ -85,7 +88,8 @@ public class Application extends BotDependencyConfiguration {
         ConversationState conversationState = getConversationState(storage);
         BotTelemetryClient botTelemetryClient = getBotTelemetryClient(configuration);
         TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(botTelemetryClient, false);
-        TelemetryInitializerMiddleware telemetryInitializerMiddleware = new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, false);
+        TelemetryInitializerMiddleware telemetryInitializerMiddleware =
+            new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, false);
 
         AdapterWithErrorHandler adapter = new AdapterWithErrorHandler(
             configuration,

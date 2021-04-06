@@ -43,6 +43,9 @@ public class AdapterWithErrorHandler extends BotFrameworkHttpAdapter {
      * </p>
      *
      * @param withConfiguration The Configuration object to use.
+     * @param telemetryInitializerMiddleware The TelemetryInitializerMiddleware object to use.
+     * @param botTelemetryClient The BotTelemetryClient object to use.
+     * @param withConversationState The ConversationState object to use.
      */
     public AdapterWithErrorHandler(
         Configuration withConfiguration,

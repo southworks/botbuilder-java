@@ -3,6 +3,7 @@
 
 package com.microsoft.bot.sample.scaleout;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.microsoft.bot.schema.Pair;
 
 import java.util.concurrent.CompletableFuture;
@@ -14,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface Store {
 
-    CompletableFuture<Pair<Object, String>> load(String key);
+    CompletableFuture<Pair<JsonNode, String>> load(String key);
 
-    CompletableFuture<Boolean> save(String key, Object content, String etag);
+    CompletableFuture<Boolean> save(String key, JsonNode content, String etag);
 }

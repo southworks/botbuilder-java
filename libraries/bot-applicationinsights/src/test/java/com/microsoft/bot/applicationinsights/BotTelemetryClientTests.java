@@ -16,6 +16,7 @@ import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.Severity;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -26,19 +27,14 @@ import java.util.Map;
 
 public class BotTelemetryClientTests {
 
-    private BotTelemetryClient botTelemetryClient;
+    private ApplicationInsightsBotTelemetryClient botTelemetryClient;
     private TelemetryChannel mockTelemetryChannel;
 
     @Before
     public void initialize() {
+        botTelemetryClient = new ApplicationInsightsBotTelemetryClient("fakeKey");
         mockTelemetryChannel = Mockito.mock(TelemetryChannel.class);
-
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();
-        telemetryConfiguration.setInstrumentationKey("UNITTEST-INSTRUMENTATION-KEY");
-        telemetryConfiguration.setChannel(mockTelemetryChannel);
-        TelemetryClient telemetryClient = new TelemetryClient(telemetryConfiguration);
-
-        botTelemetryClient = new ApplicationInsightsBotTelemetryClient(telemetryClient);
+        botTelemetryClient.getTelemetryConfiguration().setChannel(mockTelemetryChannel);
     }
 
     @Test
@@ -49,16 +45,20 @@ public class BotTelemetryClientTests {
     }
 
     @Test
-    public void nonNullTelemetryClientSucceeds() {
-        TelemetryClient telemetryClient = new TelemetryClient();
+    public void emptyTelemetryClientThrows() {
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            new ApplicationInsightsBotTelemetryClient("");
+        });
+    }
 
-        BotTelemetryClient botTelemetryClient = new ApplicationInsightsBotTelemetryClient(telemetryClient);
+    @Test
+    public void nonNullTelemetryClientSucceeds() {
+        BotTelemetryClient botTelemetryClient = new ApplicationInsightsBotTelemetryClient("fakeKey");
     }
 
     @Test
     public void overrideTest() {
-        TelemetryClient telemetryClient = new TelemetryClient();
-        MyBotTelemetryClient botTelemetryClient = new MyBotTelemetryClient(telemetryClient);
+        MyBotTelemetryClient botTelemetryClient = new MyBotTelemetryClient("fakeKey");
     }
 
     @Test

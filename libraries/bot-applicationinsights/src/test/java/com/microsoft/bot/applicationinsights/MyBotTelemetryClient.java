@@ -11,8 +11,8 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 
 public class MyBotTelemetryClient extends ApplicationInsightsBotTelemetryClient {
-    public MyBotTelemetryClient(TelemetryClient telemetryClient) {
-        super(telemetryClient);
+    public MyBotTelemetryClient(String instrumentationKey) {
+        super(instrumentationKey);
     }
 
     @Override

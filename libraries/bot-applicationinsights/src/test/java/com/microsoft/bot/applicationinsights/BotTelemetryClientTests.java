@@ -3,8 +3,6 @@
 
 package com.microsoft.bot.applicationinsights;
 
-import com.microsoft.applicationinsights.TelemetryClient;
-import com.microsoft.applicationinsights.TelemetryConfiguration;
 import com.microsoft.applicationinsights.channel.TelemetryChannel;
 import com.microsoft.applicationinsights.telemetry.EventTelemetry;
 import com.microsoft.applicationinsights.telemetry.RemoteDependencyTelemetry;
@@ -16,7 +14,6 @@ import com.microsoft.bot.builder.BotTelemetryClient;
 import com.microsoft.bot.builder.Severity;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 

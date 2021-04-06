@@ -3,7 +3,6 @@
 
 package com.microsoft.bot.applicationinsights;
 
-import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.bot.builder.Severity;
 
 import java.time.Duration;

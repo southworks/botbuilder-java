@@ -3,8 +3,6 @@
 
 package com.microsoft.bot.sample.corebot.app.insights;
 
-import com.microsoft.applicationinsights.TelemetryClient;
-import com.microsoft.applicationinsights.TelemetryConfiguration;
 import com.microsoft.bot.applicationinsights.ApplicationInsightsBotTelemetryClient;
 import com.microsoft.bot.applicationinsights.core.TelemetryInitializerMiddleware;
 import com.microsoft.bot.builder.Bot;
@@ -87,7 +85,7 @@ public class Application extends BotDependencyConfiguration {
         ConversationState conversationState = getConversationState(storage);
         BotTelemetryClient botTelemetryClient = getBotTelemetryClient(configuration);
         TelemetryLoggerMiddleware telemetryLoggerMiddleware = new TelemetryLoggerMiddleware(botTelemetryClient, false);
-        TelemetryInitializerMiddleware telemetryInitializerMiddleware = new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, true);
+        TelemetryInitializerMiddleware telemetryInitializerMiddleware = new TelemetryInitializerMiddleware(telemetryLoggerMiddleware, false);
 
         AdapterWithErrorHandler adapter = new AdapterWithErrorHandler(
             configuration,
@@ -108,10 +106,7 @@ public class Application extends BotDependencyConfiguration {
     public BotTelemetryClient getBotTelemetryClient(Configuration configuration) {
         String instrumentationKey = configuration.getProperty("ApplicationInsights.InstrumentationKey");
         if (StringUtils.isNotBlank(instrumentationKey)) {
-            TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();
-            telemetryConfiguration.setInstrumentationKey(configuration.getProperty("ApplicationInsights.InstrumentationKey"));
-            TelemetryClient telemetryClient = new TelemetryClient(telemetryConfiguration);
-            return new ApplicationInsightsBotTelemetryClient(telemetryClient);
+            return new ApplicationInsightsBotTelemetryClient(instrumentationKey);
         }
 
         return new NullBotTelemetryClient();

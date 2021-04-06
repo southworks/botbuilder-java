@@ -42,7 +42,8 @@ public class ApplicationInsightsBotTelemetryClient implements BotTelemetryClient
     /**
      * Initializes a new instance of the {@link BotTelemetryClient}.
      *
-     * @param instrumentationKey The instrumentation key provided to create the {@link BotTelemetryClient}.
+     * @param instrumentationKey The instrumentation key provided to create
+     *                           the {@link ApplicationInsightsBotTelemetryClient}.
      */
     public ApplicationInsightsBotTelemetryClient(String instrumentationKey) {
         if (StringUtils.isBlank(instrumentationKey)) {

@@ -35,40 +35,59 @@ public class ScaleoutBot <T extends Dialog> extends ActivityHandler {
         dialog = withDialog;
     }
 
+    /**
+     * This bot runs Dialogs that send message Activites in a way that can be scaled out with a multi-machine deployment.
+     * The bot logic makes use of the standard HTTP ETag/If-Match mechanism for optimistic locking. This mechanism
+     * is commonly supported on cloud storage technologies from multiple vendors including teh Azure Blob Storage
+     * service. A full implementation against Azure Blob Storage is included in this sample.
+     *
+     * @param turnContext The ITurnContext object created by the integration layer.
+     * @return A task.
+     */
     @Override
     protected CompletableFuture<Void> onMessageActivity(TurnContext turnContext) {
-        // Create the storage key for this conversation.
-        String key = String.format(
-            "%s/conversations/%s",
-            turnContext.getActivity().getChannelId(),
-            turnContext.getActivity().getConversation().getId());
+        String key = null;
+        if (turnContext.getActivity().getConversation() != null) {
+            // Create the storage key for this conversation.
+            key = String.format(
+                "%s/conversations/%s",
+                turnContext.getActivity().getChannelId(),
+                turnContext.getActivity().getConversation().getId());
+        }
 
+        final Boolean[] shouldBreak = { false };
+        String finalKey = key;
         // The execution sits in a loop because there might be a retry if the save operation fails.
         while (true) {
             // Load any existing state associated with this key
-            store.load(key)
+            store.load(finalKey)
                 .thenCompose(pairOldState -> {
                     // Run the dialog system with the old state and inbound activity,
                     // the result is a new state and outbound activities.
                     return DialogHost.run(dialog, turnContext.getActivity(), pairOldState.getLeft())
                         .thenCompose(pairNewState -> {
                             // Save the updated state associated with this key.
-                            return store.save(key, pairNewState.getRight(), pairOldState.getRight())
+                            return store.save(finalKey, pairNewState.getRight(), pairOldState.getRight())
                                 .thenCompose(success -> {
                                     // Following a successful save, send any outbound Activities,
                                     // otherwise retry everything.
                                     if (success) {
-                                        if (!pairNewState.getLeft().isEmpty()) {
+                                        if (pairNewState.getLeft().length > 0) {
                                             // This is an actual send on the TurnContext we were given
                                             // and so will actual do a send this time.
                                             return turnContext.sendActivities(pairNewState.getLeft())
                                                 .thenApply(result -> null);
                                         }
+                                        shouldBreak[0] = true;
                                     }
                                     return null;
                                 });
                         });
                 });
+            if (shouldBreak[0]) {
+                break;
+            }
         }
+        return CompletableFuture.completedFuture(null);
     }
 }

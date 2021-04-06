@@ -33,6 +33,8 @@ public class DialogHost {
      * The... ummm... logger.
      */
     private static Logger logger = LoggerFactory.getLogger(DialogHost.class);
+
+    // The serializer to use. Moving the serialization to this layer will make the storage layer more pluggable.
     private static ObjectMapper objectMapper = new ObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .findAndRegisterModules()

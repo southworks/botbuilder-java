@@ -180,4 +180,13 @@ public class BotTelemetryClientTests {
             Assert.assertEquals(0, Double.compare(0.6, pageViewTelemetry.getMetrics().get("metric")));
         }).send(Mockito.any(PageViewTelemetry.class));
     }
+
+    @Test
+    public void flushTest() {
+        botTelemetryClient.flush();
+
+        Mockito.verify(mockTelemetryChannel, invocations -> {
+            Assert.assertEquals(1, invocations.getAllInvocations().size());
+        }).send(Mockito.any());
+    }
 }

@@ -91,9 +91,9 @@
         <scope>compile</scope>
       </dependency>
       <dependency>
-        <groupId>com.azure</groupId>
-        <artifactId>azure-storage-blob</artifactId>
-        <version>12.10.0</version>
+        <groupId>com.microsoft.azure</groupId>
+        <artifactId>azure-storage</artifactId>
+        <version>8.0.0</version>
       </dependency>
   </dependencies>
 

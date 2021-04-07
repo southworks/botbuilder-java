@@ -105,7 +105,6 @@ public final class DialogHost {
         // Run the dialog.
         return Dialog.run(dialog, turnContext, accessor)
             .thenApply(result -> {
-                String s = "";
                 // Serialize the result (available as Value on the accessor),
                 // and put its value back into a new JsonNode.
                 return JsonNodeFactory

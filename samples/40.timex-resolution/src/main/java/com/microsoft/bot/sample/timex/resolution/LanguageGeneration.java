@@ -17,7 +17,8 @@ public class LanguageGeneration {
         // Note natural language is often relative, for example the sentence "Yesterday all my troubles seemed so far away."
         // Having your bot say something like "next Wednesday" in a response can make it sound more natural.
         LocalDateTime referenceDate = LocalDateTime.now();
-        System.out.println(t.getTimexValue() + t.toNaturalLanguage(referenceDate));
+        String output = String.format("%s %s", t.getTimexValue(), t.toNaturalLanguage(referenceDate));
+        System.out.println(output);
     }
 
     public static void examples() {

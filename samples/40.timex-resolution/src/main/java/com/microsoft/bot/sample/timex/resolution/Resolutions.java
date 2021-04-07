@@ -33,7 +33,6 @@ public class Resolutions {
     
         System.out.println(resolution.getValues().get(3).getTimex());
         System.out.println(resolution.getValues().get(3).getType());
-        System.out.println(resolution.getValues().get(3).getValue());
-        
+        System.out.println(resolution.getValues().get(3).getValue());        
     }
 }

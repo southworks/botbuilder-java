@@ -56,7 +56,7 @@ public class DialogHost {
         // Run the dialog using this TurnContext with the existing state.
         return runTurn(dialog, turnContext, oldState)
             .thenApply(newState -> new Pair<>(
-                (Activity[]) adapter.getResponses().toArray(),
+                (adapter.getResponses().toArray(new Activity[adapter.getResponses().size()])),
                 newState));
     }
 
@@ -73,8 +73,11 @@ public class DialogHost {
      */
     private static CompletableFuture<JsonNode> runTurn(Dialog dialog, TurnContext turnContext, JsonNode state) {
         // If we have some satte, desearlize it. (This mimics the sape produced by BotState.java)
-        JsonNode dialogStateProperty = state.get("DialogState");
-        DialogState dialogState = null;
+        JsonNode dialogStateProperty = null;
+        if(state != null) {
+            dialogStateProperty = state.get("DialogState");
+        }
+        DialogState dialogState;
         try {
             Class<?> cls = Class.forName(DialogState.class.getName());
             dialogState = (DialogState) objectMapper.treeToValue(dialogStateProperty, cls);
@@ -95,9 +98,12 @@ public class DialogHost {
 
         // Run the dialog.
         return Dialog.run(dialog, turnContext, accessor)
-            .thenAccept(result -> {
+            .thenApply(result -> {
+                String s = "";
                 // Serialize the result (available as Value on the accessor), and put its value back into a new JsonNode.
-                return JsonNodeFactory.instance.objectNode().put("DialogState", objectMapper.valueToTree(accessor.getValue()));;
+                return JsonNodeFactory
+                    .instance
+                    .objectNode().set("DialogState", objectMapper.valueToTree(accessor.getValue()));
             });
     }
 }

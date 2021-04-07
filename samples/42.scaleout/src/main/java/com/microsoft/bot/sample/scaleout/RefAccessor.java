@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  * because the caller of the constructor could pass in null for the state, in which case
  * the factory provided on the GetAsync call will be used.
  */
-public class RefAccessor<T extends Class> implements StatePropertyAccessor<T> {
+public class RefAccessor<T> implements StatePropertyAccessor<T> {
     private T value;
 
     public RefAccessor(T withValue) {
@@ -30,7 +30,7 @@ public class RefAccessor<T extends Class> implements StatePropertyAccessor<T> {
     }
 
     public String getName() {
-        return value.getTypeName();
+        return value.getClass().getTypeName();
     }
 
     public CompletableFuture<T> get(TurnContext turnContext, Supplier<T> defaultValueFactory) {

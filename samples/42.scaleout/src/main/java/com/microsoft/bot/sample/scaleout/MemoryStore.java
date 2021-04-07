@@ -30,17 +30,18 @@ public class MemoryStore implements Store {
     @Override
     public CompletableFuture<Pair<JsonNode, String>> load(String key) {
         try {
-            semaphore.wait();
+            semaphore.acquire();
 
             Pair<JsonNode, String> value = store.get(key);
             if (value != null) {
                 return CompletableFuture.completedFuture(value);
             }
+            return CompletableFuture.completedFuture(new Pair<>(null, null));
         } catch (InterruptedException e) {
             e.printStackTrace();
+            return CompletableFuture.completedFuture(new Pair<>(null, null));
         } finally {
             semaphore.release();
-            return CompletableFuture.completedFuture(new Pair<>(null, null));
         }
     }
 
@@ -50,7 +51,7 @@ public class MemoryStore implements Store {
     @Override
     public CompletableFuture<Boolean> save(String key, JsonNode content, String eTag) {
         try {
-            semaphore.wait();
+            semaphore.acquire();
             Pair<JsonNode, String> value = store.get(key);
             if (eTag != null && value != null) {
                 if (eTag != value.getRight()) {
@@ -59,11 +60,12 @@ public class MemoryStore implements Store {
             }
 
             store.put(key, new Pair<>(content, UUID.randomUUID().toString()));
+            return CompletableFuture.completedFuture(true);
         } catch (InterruptedException e) {
             e.printStackTrace();
+            return CompletableFuture.completedFuture(true);
         } finally {
             semaphore.release();
-            return CompletableFuture.completedFuture(true);
         }
     }
 }

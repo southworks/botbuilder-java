@@ -75,7 +75,7 @@ public class ScaleoutBot <T extends Dialog> extends ActivityHandler {
                                         if (pairNewState.getLeft().length > 0) {
                                             // This is an actual send on the TurnContext we were given
                                             // and so will actual do a send this time.
-                                            return turnContext.sendActivities(pairNewState.getLeft())
+                                            turnContext.sendActivities(pairNewState.getLeft())
                                                 .thenApply(result -> null);
                                         }
                                         shouldBreak[0] = true;

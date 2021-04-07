@@ -21,7 +21,7 @@ import java.util.Map;
  * A TIMEX expression can include a date and time parts. So ambiguity of date can be combined with multiple results.
  * Code that deals with TIMEX expressions is frequently dealing with sets of TIMEX expressions.
  */
-public class Ambiguity {
+public final class Ambiguity {
 
     public static void dateAmbiguity() {
         // Run the recognizer.

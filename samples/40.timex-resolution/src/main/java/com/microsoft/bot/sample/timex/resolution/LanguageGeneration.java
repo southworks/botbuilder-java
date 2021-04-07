@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  * As an experiment try feeding the result of language generation back into a recognizer.
  * You should get back the same TIMEX expression in the result.
  */
-public class LanguageGeneration {
+public final class LanguageGeneration {
     private static void describe(TimexProperty t) {
         // Note natural language is often relative, for example the sentence "Yesterday all my troubles seemed so far away."
         // Having your bot say something like "next Wednesday" in a response can make it sound more natural.

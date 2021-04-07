@@ -14,7 +14,7 @@ import com.microsoft.recognizers.datatypes.timex.expression.TimexProperty;
     * inferred type datetime (its still a date).
     * Logic can be written against the inferred type, perhaps to have the bot ask the user for disambiguation.
     */
-public class Parsing
+public final class Parsing
 {
     private static void describe(TimexProperty t)
     {

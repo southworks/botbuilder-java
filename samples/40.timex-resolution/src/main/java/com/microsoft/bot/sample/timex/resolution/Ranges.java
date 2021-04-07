@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class Ranges {
+public final class Ranges {
     
     /**
      * TIMEX expressions can represent date and time ranges. Here are a couple of examples.

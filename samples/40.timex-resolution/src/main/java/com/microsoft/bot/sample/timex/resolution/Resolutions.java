@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 /**
  * Given the TIMEX expressions it is easy to create the computed example values that the recognizer gives.
  */
-public class Resolutions {
+public final class Resolutions {
     public static void examples() {
         // When you give the recognizer the text "Wednesday 4 o'clock" you get these distinct TIMEX values back.
         

@@ -17,7 +17,13 @@ import java.util.List;
  * The constraints themselves are TIMEX expressions. This is designed to appear a little like a database join,
  * of course its a little less generic than that because dates can be complicated things.
  */
-public class Constraints {
+public final class Constraints {
+    private Constraints() {
+    }
+
+    /**
+     * This method runs the resolver examples.
+     */
     public static void examples() {
         // When you give the recognizer the text "Wednesday 4 o'clock" you get these distinct TIMEX values back.
 

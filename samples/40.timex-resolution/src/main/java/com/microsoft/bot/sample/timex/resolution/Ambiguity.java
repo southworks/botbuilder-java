@@ -21,8 +21,13 @@ import java.util.Map;
  * A TIMEX expression can include a date and time parts. So ambiguity of date can be combined with multiple results.
  * Code that deals with TIMEX expressions is frequently dealing with sets of TIMEX expressions.
  */
-public class Ambiguity {
+public final class Ambiguity {
+    private Ambiguity() {
+    }
 
+    /**
+     * This method avoid ambiguity obtaining 2 values, backwards and forwards in the calendar.
+     */
     public static void dateAmbiguity() {
         // Run the recognizer.
         List<ModelResult> results = DateTimeRecognizer.recognizeDateTime(
@@ -46,14 +51,19 @@ public class Ambiguity {
                 // If you use ToString() on a TimeProperty object you will get same "value".
             }
 
-            // The TIMEX expression captures date ambiguity so there will be a single distinct expression for each result.
+            // The TIMEX expression captures date ambiguity so there will be a single distinct
+            // expression for each result.
             String output = String.format("%s ( %s )", result.text, String.join(",", distinctTimexExpressions));
             System.out.println(output);
 
-            // The result also includes a reference to the original string - but note the start and end index are both inclusive.
+            // The result also includes a reference to the original string
+            // but note the start and end index are both inclusive.
         }
     }
 
+    /**
+     * This method avoid ambiguity obtaining 2 values, one for AM and one for PM.
+     */
     public static void timeAmbiguity() {
         // Run the recognizer.
         List<ModelResult> results = DateTimeRecognizer.recognizeDateTime(
@@ -80,9 +90,14 @@ public class Ambiguity {
         }
     }
 
+    /**
+     * This method avoid ambiguity obtaining 4 different values, backwards and forwards in the calendar and then AM and PM.
+     */
     public static void dateTimeAmbiguity() {
         // Run the recognizer.
-        List<ModelResult> results = DateTimeRecognizer.recognizeDateTime("It will be ready Wednesday at 5 o'clock.", Culture.English);
+        List<ModelResult> results = DateTimeRecognizer.recognizeDateTime(
+            "It will be ready Wednesday at 5 o'clock.",
+            Culture.English);
 
         // We should find a single result in this example.
         for (ModelResult result : results) {

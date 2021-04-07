@@ -10,12 +10,20 @@ import java.time.LocalDateTime;
 /**
  * Given the TIMEX expressions it is easy to create the computed example values that the recognizer gives.
  */
-public class Resolutions {
+public final class Resolutions {
+    private static final Integer THREE = 3;
+    
+    private Resolutions() {
+    }
+    
+    /**
+     * This method runs the resolver examples.
+     */
     public static void examples() {
         // When you give the recognizer the text "Wednesday 4 o'clock" you get these distinct TIMEX values back.
         
         LocalDateTime today = LocalDateTime.now();
-        Resolution resolution = TimexResolver.resolve(new String[] { "XXXX-WXX-3T04", "XXXX-WXX-3T16" }, today);
+        Resolution resolution = TimexResolver.resolve(new String[] {"XXXX-WXX-3T04", "XXXX-WXX-3T16"}, today);
         
         System.out.println(resolution.getValues().size());
         
@@ -31,8 +39,8 @@ public class Resolutions {
         System.out.println(resolution.getValues().get(2).getType());
         System.out.println(resolution.getValues().get(2).getValue());
     
-        System.out.println(resolution.getValues().get(3).getTimex());
-        System.out.println(resolution.getValues().get(3).getType());
-        System.out.println(resolution.getValues().get(3).getValue());        
+        System.out.println(resolution.getValues().get(THREE).getTimex());
+        System.out.println(resolution.getValues().get(THREE).getType());
+        System.out.println(resolution.getValues().get(THREE).getValue());
     }
 }

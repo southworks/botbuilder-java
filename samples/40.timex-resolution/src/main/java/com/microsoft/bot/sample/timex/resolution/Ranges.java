@@ -10,14 +10,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class Ranges {
+/**
+ * Class with date and time ranges examples.
+ */
+public final class Ranges {
+    private Ranges() {
+    }
     
     /**
      * TIMEX expressions can represent date and time ranges. Here are a couple of examples.
      */
     public static void dateRange() {        
         // Run the recognizer.
-        List<ModelResult> results = DateTimeRecognizer.recognizeDateTime("Some time in the next two weeks.", Culture.English);
+        List<ModelResult> results = 
+                DateTimeRecognizer.recognizeDateTime("Some time in the next two weeks.", 
+                Culture.English);
         
         // We should find a single result in this example.
         for (ModelResult result : results) {
@@ -38,9 +45,14 @@ public class Ranges {
         }
     }
     
+    /**
+     * This method has examples of time ranges.
+     */
     public static void timeRange() {
         // Run the recognizer.
-        List<ModelResult> results = DateTimeRecognizer.recognizeDateTime("Some time between 6pm and 6:30pm.", Culture.English);
+        List<ModelResult> results = 
+                DateTimeRecognizer.recognizeDateTime("Some time between 6pm and 6:30pm.", 
+                Culture.English);
         
         // We should find a single result in this example.
         for (ModelResult result : results) {

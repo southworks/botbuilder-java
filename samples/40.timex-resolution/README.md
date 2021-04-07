@@ -1,6 +1,6 @@
 # Timex Resolution
 
-This bot has been created using [Bot Framework](https://dev.botframework.com), is shows how to use TIMEX expressions.
+This bot has been created using [Bot Framework](https://dev.botframework.com), it shows how to use TIMEX expressions.
 
 A number of topics are covered within this readme.
 

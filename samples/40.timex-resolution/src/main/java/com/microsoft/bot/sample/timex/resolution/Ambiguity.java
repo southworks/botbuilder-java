@@ -91,7 +91,7 @@ public final class Ambiguity {
     }
 
     /**
-     * This method avoid ambiguity obtaining 4 different values, backwards and forward in the calendar and then AM and PM.
+     * This method avoid ambiguity obtaining 4 different values, backwards and forwards in the calendar and then AM and PM.
      */
     public static void dateTimeAmbiguity() {
         // Run the recognizer.

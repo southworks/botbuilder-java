@@ -11,11 +11,17 @@ import java.time.LocalDateTime;
  * Given the TIMEX expressions it is easy to create the computed example values that the recognizer gives.
  */
 public final class Resolutions {
+    private Resolutions() {
+    }
+    
+    /**
+     * This method runs the resolver examples.
+     */
     public static void examples() {
         // When you give the recognizer the text "Wednesday 4 o'clock" you get these distinct TIMEX values back.
         
         LocalDateTime today = LocalDateTime.now();
-        Resolution resolution = TimexResolver.resolve(new String[] { "XXXX-WXX-3T04", "XXXX-WXX-3T16" }, today);
+        Resolution resolution = TimexResolver.resolve(new String[] {"XXXX-WXX-3T04", "XXXX-WXX-3T16"}, today);
         
         System.out.println(resolution.getValues().size());
         

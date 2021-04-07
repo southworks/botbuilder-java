@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
  * Given the TIMEX expressions it is easy to create the computed example values that the recognizer gives.
  */
 public final class Resolutions {
+    private static final int THREE = 3;
+    
     private Resolutions() {
     }
     
@@ -37,8 +39,8 @@ public final class Resolutions {
         System.out.println(resolution.getValues().get(2).getType());
         System.out.println(resolution.getValues().get(2).getValue());
     
-        System.out.println(resolution.getValues().get(3).getTimex());
-        System.out.println(resolution.getValues().get(3).getType());
-        System.out.println(resolution.getValues().get(3).getValue());        
+        System.out.println(resolution.getValues().get(THREE).getTimex());
+        System.out.println(resolution.getValues().get(THREE).getType());
+        System.out.println(resolution.getValues().get(THREE).getValue());
     }
 }

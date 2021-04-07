@@ -24,11 +24,12 @@ import java.util.Map;
 public final class Ambiguity {
     private Ambiguity() {
     }
-    
+
     /**
-     * Run the recognizer.
+     * This method avoid ambiguity obtaining 2 values, backwards and forwards in the calendar.
      */
     public static void dateAmbiguity() {
+        // Run the recognizer.
         List<ModelResult> results = DateTimeRecognizer.recognizeDateTime(
             "Either Saturday or Sunday would work.",
             Culture.English);
@@ -61,9 +62,10 @@ public final class Ambiguity {
     }
 
     /**
-     * Run the recognizer.
+     * This method avoid ambiguity obtaining 2 values, one for AM and one for PM.
      */
     public static void timeAmbiguity() {
+        // Run the recognizer.
         List<ModelResult> results = DateTimeRecognizer.recognizeDateTime(
             "We would like to arrive at 4 o'clock or 5 o'clock.",
             Culture.English);
@@ -89,11 +91,13 @@ public final class Ambiguity {
     }
 
     /**
-     * Run the recognizer.
+     * This method avoid ambiguity obtaining 4 different values, backwards and forward in the calendar and then AM and PM.
      */
     public static void dateTimeAmbiguity() {
+        // Run the recognizer.
         List<ModelResult> results = DateTimeRecognizer.recognizeDateTime(
-            "It will be ready Wednesday at 5 o'clock.", Culture.English);
+            "It will be ready Wednesday at 5 o'clock.",
+            Culture.English);
 
         // We should find a single result in this example.
         for (ModelResult result : results) {

@@ -14,34 +14,32 @@ import com.microsoft.recognizers.datatypes.timex.expression.TimexProperty;
     * inferred type datetime (its still a date).
     * Logic can be written against the inferred type, perhaps to have the bot ask the user for disambiguation.
     */
-public final class Parsing
-{
-    private static void describe(TimexProperty t)
-    {
+public final class Parsing {
+    private Parsing() {
+    }
+    
+    private static void describe(TimexProperty t) {
         System.out.print(t.getTimexValue() + " ");
 
-        if (t.getTypes().contains(TimexTypes.DATE))
-        {
-            if (t.getTypes().contains(TimexTypes.DEFINITE))
-            {
+        if (t.getTypes().contains(TimexTypes.DATE)) {
+            if (t.getTypes().contains(TimexTypes.DEFINITE)) {
                 System.out.print("We have a definite calendar date. ");
-            }
-            else
-            {
+            } else {
                 System.out.print("We have a date but there is some ambiguity. ");
             }
         }
 
-        if (t.getTypes().contains(TimexTypes.TIME))
-        {
+        if (t.getTypes().contains(TimexTypes.TIME)) {
             System.out.print("We have a time.");
         }
 
         System.out.println();
     }
 
-    public static void examples()
-    {
+    /**
+     * This method runs the parsing examples.
+     */
+    public static void examples() {
         describe(new TimexProperty("2017-05-29"));
         describe(new TimexProperty("XXXX-WXX-6"));
         describe(new TimexProperty("XXXX-WXX-6T16"));

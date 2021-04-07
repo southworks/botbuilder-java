@@ -22,9 +22,12 @@ import java.util.Map;
  * Code that deals with TIMEX expressions is frequently dealing with sets of TIMEX expressions.
  */
 public final class Ambiguity {
-
+    private Ambiguity() {
+    }
+    /**
+     * Run the recognizer.
+     */
     public static void dateAmbiguity() {
-        // Run the recognizer.
         List<ModelResult> results = DateTimeRecognizer.recognizeDateTime(
             "Either Saturday or Sunday would work.",
             Culture.English);
@@ -46,16 +49,20 @@ public final class Ambiguity {
                 // If you use ToString() on a TimeProperty object you will get same "value".
             }
 
-            // The TIMEX expression captures date ambiguity so there will be a single distinct expression for each result.
+            // The TIMEX expression captures date ambiguity so there will be a single distinct
+            // expression for each result.
             String output = String.format("%s ( %s )", result.text, String.join(",", distinctTimexExpressions));
             System.out.println(output);
 
-            // The result also includes a reference to the original string - but note the start and end index are both inclusive.
+            // The result also includes a reference to the original string
+            // but note the start and end index are both inclusive.
         }
     }
 
+    /**
+     * Run the recognizer.
+     */
     public static void timeAmbiguity() {
-        // Run the recognizer.
         List<ModelResult> results = DateTimeRecognizer.recognizeDateTime(
             "We would like to arrive at 4 o'clock or 5 o'clock.",
             Culture.English);
@@ -80,9 +87,12 @@ public final class Ambiguity {
         }
     }
 
+    /**
+     * Run the recognizer.
+     */
     public static void dateTimeAmbiguity() {
-        // Run the recognizer.
-        List<ModelResult> results = DateTimeRecognizer.recognizeDateTime("It will be ready Wednesday at 5 o'clock.", Culture.English);
+        List<ModelResult> results = DateTimeRecognizer.recognizeDateTime(
+            "It will be ready Wednesday at 5 o'clock.", Culture.English);
 
         // We should find a single result in this example.
         for (ModelResult result : results) {

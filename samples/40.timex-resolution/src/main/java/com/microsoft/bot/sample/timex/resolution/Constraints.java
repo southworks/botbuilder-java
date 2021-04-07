@@ -18,6 +18,12 @@ import java.util.List;
  * of course its a little less generic than that because dates can be complicated things.
  */
 public final class Constraints {
+    private Constraints() {
+    }
+
+    /**
+     * This method runs the resolver examples.
+     */
     public static void examples() {
         // When you give the recognizer the text "Wednesday 4 o'clock" you get these distinct TIMEX values back.
 

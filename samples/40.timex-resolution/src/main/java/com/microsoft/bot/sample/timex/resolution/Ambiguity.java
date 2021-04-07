@@ -24,6 +24,7 @@ import java.util.Map;
 public final class Ambiguity {
     private Ambiguity() {
     }
+    
     /**
      * Run the recognizer.
      */

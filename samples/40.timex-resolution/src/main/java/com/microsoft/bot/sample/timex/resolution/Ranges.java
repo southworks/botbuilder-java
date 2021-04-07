@@ -23,7 +23,8 @@ public final class Ranges {
     public static void dateRange() {        
         // Run the recognizer.
         List<ModelResult> results = 
-                DateTimeRecognizer.recognizeDateTime("Some time in the next two weeks.", Culture.English);
+                DateTimeRecognizer.recognizeDateTime("Some time in the next two weeks.", 
+                Culture.English);
         
         // We should find a single result in this example.
         for (ModelResult result : results) {
@@ -50,7 +51,8 @@ public final class Ranges {
     public static void timeRange() {
         // Run the recognizer.
         List<ModelResult> results = 
-                DateTimeRecognizer.recognizeDateTime("Some time between 6pm and 6:30pm.", Culture.English);
+                DateTimeRecognizer.recognizeDateTime("Some time between 6pm and 6:30pm.", 
+                Culture.English);
         
         // We should find a single result in this example.
         for (ModelResult result : results) {

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * Given the TIMEX expressions it is easy to create the computed example values that the recognizer gives.
  */
 public final class Resolutions {
-    private static final int THREE = 3;
+    private static final Integer THREE = 3;
     
     private Resolutions() {
     }

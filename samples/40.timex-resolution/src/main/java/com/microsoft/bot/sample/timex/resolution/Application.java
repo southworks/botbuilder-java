@@ -15,7 +15,7 @@ public class Application {
         // Manipulating TIMEX expressions in code using the TIMEX Datatype package.
         Parsing.examples();
         LanguageGeneration.examples();
-        Resolution.examples();
+        Resolutions.examples();
         Constraints.examples();
     }
 }

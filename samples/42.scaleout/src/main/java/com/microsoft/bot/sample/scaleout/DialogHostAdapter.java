@@ -23,10 +23,17 @@ public class DialogHostAdapter extends BotAdapter {
 
     private List<Activity> response = new ArrayList<Activity>();
 
+    /**
+     * Gets the response object.
+     * @return The response object.
+     */
     public List<Activity> getResponses() {
         return response;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CompletableFuture<ResourceResponse[]> sendActivities(TurnContext turnContext, List<Activity> activities) {
         for (Activity activity: activities) {
@@ -36,11 +43,17 @@ public class DialogHostAdapter extends BotAdapter {
         return CompletableFuture.completedFuture(new ResourceResponse[0]);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CompletableFuture<Void> deleteActivity(TurnContext context, ConversationReference reference) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CompletableFuture<ResourceResponse> updateActivity(TurnContext context, Activity activity) {
         throw new UnsupportedOperationException();

@@ -32,7 +32,17 @@ public class BlobStore implements Store {
     private final CloudBlobContainer container;
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
-    public BlobStore(String accountName, String accountKey, String containerName) throws URISyntaxException, StorageException {
+    /**
+     * The constructor of the {@link BlobStore} class.
+     * @param accountName The account name of the Storage Account.
+     * @param accountKey The account key of the Storage Account.
+     * @param containerName The container name.
+     * @throws URISyntaxException Throws an {@link URISyntaxException}
+     *                            if the {@link CloudStorageAccount} cannot be created.
+     * @throws StorageException Throws a {@link StorageException} if the specified container doesn't exist.
+     */
+    public BlobStore(String accountName, String accountKey, String containerName)
+        throws URISyntaxException, StorageException {
         if (StringUtils.isBlank(accountName)) {
             throw new IllegalArgumentException("accountName cannot be null or empty");
         }

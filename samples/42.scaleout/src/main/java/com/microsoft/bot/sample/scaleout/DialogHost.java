@@ -27,7 +27,7 @@ import java.util.concurrent.CompletableFuture;
  * unintended or harmful side-effects, for example, any outbound service calls made directly from the
  * dialog implementation should be idempotent.
  */
-public class DialogHost {
+public final class DialogHost {
 
     /**
      * The... ummm... logger.
@@ -41,6 +41,11 @@ public class DialogHost {
         .enableDefaultTyping();
 
     /**
+     * Added due to the checkstyle.
+     */
+    private DialogHost() { }
+
+    /**
      * A function to run a dialog while buffering the outbound Activities.
      *
      * @param dialog The dialog to run.
@@ -48,7 +53,8 @@ public class DialogHost {
      * @param oldState The existing or old state.
      * @return An array of Activities 'sent' from the dialog as it executed. And the updated or new state.
      */
-    public static CompletableFuture<Pair<Activity[], JsonNode>> run(Dialog dialog, Activity activity, JsonNode oldState) {
+    public static CompletableFuture<Pair<Activity[], JsonNode>> run(Dialog dialog,
+                                                                    Activity activity, JsonNode oldState) {
         // A custom adapter and corresponding TurnContext that buffers any messages sent.
         DialogHostAdapter adapter = new DialogHostAdapter();
         TurnContext turnContext = new TurnContextImpl(adapter, activity);
@@ -74,7 +80,7 @@ public class DialogHost {
     private static CompletableFuture<JsonNode> runTurn(Dialog dialog, TurnContext turnContext, JsonNode state) {
         // If we have some satte, desearlize it. (This mimics the sape produced by BotState.java)
         JsonNode dialogStateProperty = null;
-        if(state != null) {
+        if (state != null) {
             dialogStateProperty = state.get("DialogState");
         }
         DialogState dialogState;
@@ -100,7 +106,8 @@ public class DialogHost {
         return Dialog.run(dialog, turnContext, accessor)
             .thenApply(result -> {
                 String s = "";
-                // Serialize the result (available as Value on the accessor), and put its value back into a new JsonNode.
+                // Serialize the result (available as Value on the accessor),
+                // and put its value back into a new JsonNode.
                 return JsonNodeFactory
                     .instance
                     .objectNode().set("DialogState", objectMapper.valueToTree(accessor.getValue()));

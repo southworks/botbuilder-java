@@ -20,6 +20,9 @@ import java.util.concurrent.CompletableFuture;
  */
 public class RootDialog extends ComponentDialog {
 
+    /**
+     * The constructor of the {@link RootDialog} class, which creates the main dialogs.
+     */
     public RootDialog() {
         super("root");
         addDialog(createWaterfall());

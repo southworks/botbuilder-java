@@ -17,22 +17,41 @@ import java.util.function.Supplier;
  * the state itself is available as a public property on this class. The reason its here is
  * because the caller of the constructor could pass in null for the state, in which case
  * the factory provided on the GetAsync call will be used.
+ * @param <T> The value type of the RefAccessor class.
  */
 public class RefAccessor<T> implements StatePropertyAccessor<T> {
     private T value;
 
+    /**
+     * Sets the value object.
+     * @param withValue The specified new value.
+     */
     public RefAccessor(T withValue) {
         value = withValue;
     }
 
+    /**
+     * Gets the value object.
+     * @return The value object.
+     */
     public T getValue() {
         return value;
     }
 
+    /**
+     * Gets the TypeName of the value's class.
+     * @return The String representing the TypeName of the value's class.
+     */
     public String getName() {
         return value.getClass().getTypeName();
     }
 
+    /**
+     * Gets the value object.
+     * @param turnContext Context object containing information for a single turn of conversation with a user.
+     * @param defaultValueFactory The defaultValueFactory object.
+     * @return The completable future representing the value object.
+     */
     public CompletableFuture<T> get(TurnContext turnContext, Supplier<T> defaultValueFactory) {
         if (value == null) {
             if (defaultValueFactory == null) {
@@ -45,11 +64,17 @@ public class RefAccessor<T> implements StatePropertyAccessor<T> {
         return CompletableFuture.completedFuture(value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CompletableFuture<Void> delete(TurnContext turnContext) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CompletableFuture<Void> set(TurnContext turnContext, T value) {
         throw new UnsupportedOperationException();

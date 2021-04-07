@@ -12,8 +12,9 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Represents a bot that processes incoming Activities.
  * For each user interaction, an instance of this class is created and the OnTurnAsync method is called.
+ * @param <T> is a Dialog.
  */
-public class ScaleoutBot <T extends Dialog> extends ActivityHandler {
+public class ScaleoutBot<T extends Dialog> extends ActivityHandler {
 
     private final Store store;
     private final Dialog dialog;
@@ -36,7 +37,8 @@ public class ScaleoutBot <T extends Dialog> extends ActivityHandler {
     }
 
     /**
-     * This bot runs Dialogs that send message Activites in a way that can be scaled out with a multi-machine deployment.
+     * This bot runs Dialogs that send message Activites in a way that can be scaled out
+     * with a multi-machine deployment.
      * The bot logic makes use of the standard HTTP ETag/If-Match mechanism for optimistic locking. This mechanism
      * is commonly supported on cloud storage technologies from multiple vendors including teh Azure Blob Storage
      * service. A full implementation against Azure Blob Storage is included in this sample.
@@ -55,7 +57,7 @@ public class ScaleoutBot <T extends Dialog> extends ActivityHandler {
                 turnContext.getActivity().getConversation().getId());
         }
 
-        final Boolean[] shouldBreak = { false };
+        final Boolean[] shouldBreak = {false};
         String finalKey = key;
         // The execution sits in a loop because there might be a retry if the save operation fails.
         while (true) {

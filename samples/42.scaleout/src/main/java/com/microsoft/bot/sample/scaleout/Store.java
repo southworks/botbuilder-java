@@ -15,7 +15,19 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface Store {
 
+    /**
+     * Loads a value from the Store.
+     * @param key The key.
+     * @return A pair object.
+     */
     CompletableFuture<Pair<JsonNode, String>> load(String key);
 
+    /**
+     * Saves a values to the Store if the etag matches.
+     * @param key The key.
+     * @param content The content to save.
+     * @param etag The string representing the etag.
+     * @return True if the content was saved.
+     */
     CompletableFuture<Boolean> save(String key, JsonNode content, String etag);
 }

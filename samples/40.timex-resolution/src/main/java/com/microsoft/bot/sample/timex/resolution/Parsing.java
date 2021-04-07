@@ -18,23 +18,23 @@ public class Parsing
 {
     private static void describe(TimexProperty t)
     {
-        System.out.println(t.getTimexValue());
+        System.out.print(t.getTimexValue() + " ");
 
         if (t.getTypes().contains(TimexTypes.DATE))
         {
             if (t.getTypes().contains(TimexTypes.DEFINITE))
             {
-                System.out.println("We have a definite calendar date. ");
+                System.out.print("We have a definite calendar date. ");
             }
             else
             {
-                System.out.println("We have a date but there is some ambiguity. ");
+                System.out.print("We have a date but there is some ambiguity. ");
             }
         }
 
         if (t.getTypes().contains(TimexTypes.TIME))
         {
-            System.out.println("We have a time.");
+            System.out.print("We have a time.");
         }
 
         System.out.println();

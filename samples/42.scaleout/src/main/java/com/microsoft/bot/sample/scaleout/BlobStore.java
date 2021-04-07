@@ -65,15 +65,13 @@ public class BlobStore implements Store {
             JsonNode obj = objectMapper.readTree(content);
             String etag = blob.getProperties().getEtag();
             return CompletableFuture.completedFuture(new Pair<>(obj, etag));
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
+            return CompletableFuture.completedFuture(new Pair<>(null, null));
         } catch (StorageException e) {
             if (e.getHttpStatusCode() == HttpStatus.NOT_FOUND.value()) {
                 return CompletableFuture.completedFuture(new Pair<>(objectMapper.nullNode(), null));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
             return CompletableFuture.completedFuture(new Pair<>(null, null));
         }
     }
@@ -107,16 +105,15 @@ public class BlobStore implements Store {
             } else {
                 blob.uploadText(content);
             }
-        } catch (URISyntaxException e) {
+            return CompletableFuture.completedFuture(true);
+        } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
+            return CompletableFuture.completedFuture(false);
         } catch (StorageException e) {
             if (e.getHttpStatusCode() == HttpStatus.PRECONDITION_FAILED.value()) {
                 return CompletableFuture.completedFuture(false);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            return CompletableFuture.completedFuture(true);
+            return CompletableFuture.completedFuture(null);
         }
     }
 }

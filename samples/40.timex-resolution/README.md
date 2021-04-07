@@ -37,9 +37,11 @@ TIMEX expressions can be additionally described with a type. The notion of type 
 TIMEX has been introduced into the bot authoring platform by the [Text Recognizers](https://github.com/Microsoft/Recognizers-Text) package. One of the best ways to understand the TIMEX behavior is to experiment directly with the Rcognizers. You can do this by install the appropriate Recognizer package, instantiating the date time recognizer and calling it with your test string. In Node you can use the following 3 lines of code, but the behavior is identical in C#, Python and Java.
 
 ```
-  const Recognizer = require('@microsoft/recognizers-text-date-time')
-  const result = Recognizer.recognizeDateTime("next Wednesday 4pm", Recognizer.Culture.English);
-  console.log(JSON.stringify(result, null, 2));
+  Recognizer recognizer = require("@microsoft/recognizers-text-date-time")
+  String result = recognizer.recognize("next Wednesday 4pm", Culture.English);
+  JSONObject obj = (result, null, 2);
+  String JSON = obj.toString();
+  System.out.println(JSON);
 ```
 
 Alternatively you can use [LUIS](https://www.luis.ai/home). When you add a datetime2 datatype to your LUIS model you are asking LUIS to run this exact same recognizer on the input.
@@ -319,7 +321,7 @@ Can be resolved with the constraint of T14 to get to the specific date time of:
 
 ## TIMEX resolution using the TimexExpressions library
 
-The approach to dealing with TIMEX expressions outlines in above is implemented in the [TimexExpressions](https://github.com/microsoft/Recognizers-Text/tree/master/Java/libraries/recognizers-text-datatypes-timex-expression) library current available for .NET Java and JavaScript. And examples of its usage are included in this sample.
+The approach to dealing with TIMEX expressions outlines in above is implemented in the [TimexExpressions](https://github.com/microsoft/Recognizers-Text/tree/master/Java/libraries/recognizers-text-datatypes-timex-expression) library current available for .NET, Java and JavaScript. And examples of its usage are included in this sample.
 
 This library includes support for parsing TIMEX expressions to extract their component parts. As described above, the datatype can be inferred from the underlying TIMEX expression. This notion of datatype has more in common with tagging. That is, a particular TIMEX instance can often be multiple types. For example, a datetime is also a date and also a time. This allows application code (and the resolution logic itself) to switch appropriately gives the content of the underlying TIMEX.
 

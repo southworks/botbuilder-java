@@ -34,13 +34,13 @@ public class BlobStore implements Store {
 
     public BlobStore(String accountName, String accountKey, String containerName) throws URISyntaxException, StorageException {
         if (StringUtils.isBlank(accountName)) {
-            throw new IllegalArgumentException("accountName cannot be null");
+            throw new IllegalArgumentException("accountName cannot be null or empty");
         }
         if (StringUtils.isBlank(accountKey)) {
-            throw new IllegalArgumentException("accountKey cannot be null");
+            throw new IllegalArgumentException("accountKey cannot be null or empty");
         }
         if (StringUtils.isBlank(containerName)) {
-            throw new IllegalArgumentException("containerName cannot be null");
+            throw new IllegalArgumentException("containerName cannot be null or empty");
         }
 
         // Create storage credential from name and key
@@ -57,7 +57,7 @@ public class BlobStore implements Store {
     @Override
     public CompletableFuture<Pair<JsonNode, String>> load(String key) {
         if (StringUtils.isBlank(key)) {
-            throw new IllegalArgumentException("key cannot be null");
+            throw new IllegalArgumentException("key cannot be null or empty");
         }
         try {
             CloudBlockBlob blob = container.getBlockBlobReference(key);
@@ -84,11 +84,11 @@ public class BlobStore implements Store {
     @Override
     public CompletableFuture<Boolean> save(String key, JsonNode obj, String etag) {
         if (StringUtils.isBlank(key)) {
-            throw new IllegalArgumentException("key cannot be null");
+            throw new IllegalArgumentException("key cannot be null or empty");
         }
 
         if (obj == null) {
-            throw new IllegalArgumentException("obj cannot be null");
+            throw new IllegalArgumentException("obj cannot be null or empty");
         }
 
         try {

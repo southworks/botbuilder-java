@@ -7,8 +7,7 @@ import com.microsoft.recognizers.text.Culture;
 import com.microsoft.recognizers.text.ModelResult;
 import com.microsoft.recognizers.text.datetime.DateTimeRecognizer;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +37,7 @@ public final class Ambiguity {
         // We should find two results in this example.
         for (ModelResult result : results) {
             // The resolution includes two example values: going backwards and forwards from NOW in the calendar.
-            HashSet<String> distinctTimexExpressions = new HashSet<String>();
+            LinkedHashSet<String> distinctTimexExpressions = new LinkedHashSet<>();
             List<Map<String, String>> values = (List<Map<String, String>>) result.resolution.get("values");
             for (Map<String, String> value : values) {
                 // Each result includes a TIMEX expression that captures the inherent date but not time ambiguity.
@@ -74,7 +73,7 @@ public final class Ambiguity {
         // We should find two results in this example.
         for (ModelResult result : results) {
             // The resolution includes two example values: one for AM and one for PM.
-            List<String> distinctTimexExpressions = new ArrayList<String>();
+            LinkedHashSet<String> distinctTimexExpressions = new LinkedHashSet<>();
             List<Map<String, String>> values = (List<Map<String, String>>) result.resolution.get("values");
             for (Map<String, String> value : values) {
                 // Each result includes a TIMEX expression that captures the inherent date but not time ambiguity.
@@ -92,7 +91,8 @@ public final class Ambiguity {
     }
 
     /**
-     * This method avoid ambiguity obtaining 4 different values, backwards and forwards in the calendar and then AM and PM.
+     * This method avoid ambiguity obtaining 4 different values,
+     * backwards and forwards in the calendar and then AM and PM.
      */
     public static void dateTimeAmbiguity() {
         // Run the recognizer.
@@ -103,7 +103,7 @@ public final class Ambiguity {
         // We should find a single result in this example.
         for (ModelResult result : results) {
             // The resolution includes four example values: backwards and forward in the calendar and then AM and PM.
-            HashSet<String> distinctTimexExpressions = new HashSet<String>();
+            LinkedHashSet<String> distinctTimexExpressions = new LinkedHashSet<String>();
             List<Map<String, String>> values = (List<Map<String, String>>) result.resolution.get("values");
             for (Map<String, String> value : values) {
                 // Each result includes a TIMEX expression that captures the inherent date but not time ambiguity.

@@ -7,6 +7,7 @@ import com.microsoft.recognizers.text.Culture;
 import com.microsoft.recognizers.text.ModelResult;
 import com.microsoft.recognizers.text.datetime.DateTimeRecognizer;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +74,7 @@ public final class Ambiguity {
         // We should find two results in this example.
         for (ModelResult result : results) {
             // The resolution includes two example values: one for AM and one for PM.
-            HashSet<String> distinctTimexExpressions = new HashSet<String>();
+            List<String> distinctTimexExpressions = new ArrayList<String>();
             List<Map<String, String>> values = (List<Map<String, String>>) result.resolution.get("values");
             for (Map<String, String> value : values) {
                 // Each result includes a TIMEX expression that captures the inherent date but not time ambiguity.

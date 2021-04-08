@@ -14,7 +14,7 @@ public final class Application {
      * This is the entry point method.
      * @param args String array to capture any command line parameters.
      */
-    static void main(String[] args) {
+    public static void main(String[] args) {
         // Creating TIMEX expressions from natural language using the Recognizer package.
         Ambiguity.dateAmbiguity();
         Ambiguity.timeAmbiguity();

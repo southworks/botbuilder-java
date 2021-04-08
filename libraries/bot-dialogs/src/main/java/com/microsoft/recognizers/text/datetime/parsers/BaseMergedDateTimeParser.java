@@ -438,7 +438,7 @@ public class BaseMergedDateTimeParser implements IDateTimeParser {
         }
 
         List<Map<String, String>> resolutions = new ArrayList<>();
-        Map<String, Object> res = new HashMap<>();
+        LinkedHashMap<String, Object> res = new LinkedHashMap<>();
 
         DateTimeResolutionResult val = (DateTimeResolutionResult)slot.getValue();
         if (val == null) {
@@ -614,7 +614,7 @@ public class BaseMergedDateTimeParser implements IDateTimeParser {
         }
     }
 
-    private void resolveAmPm(Map<String, Object> resolutionDic, String keyName) {
+    private void resolveAmPm(LinkedHashMap<String, Object> resolutionDic, String keyName) {
         if (resolutionDic.containsKey(keyName)) {
             Map<String, String> resolution = (Map<String, String>)resolutionDic.get(keyName);
 

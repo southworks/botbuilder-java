@@ -614,7 +614,7 @@ public class BaseMergedDateTimeParser implements IDateTimeParser {
         }
     }
 
-    private void resolveAmPm(LinkedHashMap<String, Object> resolutionDic, String keyName) {
+    private void resolveAmPm(Map<String, Object> resolutionDic, String keyName) {
         if (resolutionDic.containsKey(keyName)) {
             Map<String, String> resolution = (Map<String, String>)resolutionDic.get(keyName);
 

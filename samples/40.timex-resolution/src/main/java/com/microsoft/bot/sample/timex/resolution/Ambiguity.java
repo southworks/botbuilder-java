@@ -103,7 +103,7 @@ public final class Ambiguity {
         // We should find a single result in this example.
         for (ModelResult result : results) {
             // The resolution includes four example values: backwards and forward in the calendar and then AM and PM.
-            LinkedHashSet<String> distinctTimexExpressions = new LinkedHashSet<String>();
+            LinkedHashSet<String> distinctTimexExpressions = new LinkedHashSet<>();
             List<Map<String, String>> values = (List<Map<String, String>>) result.resolution.get("values");
             for (Map<String, String> value : values) {
                 // Each result includes a TIMEX expression that captures the inherent date but not time ambiguity.

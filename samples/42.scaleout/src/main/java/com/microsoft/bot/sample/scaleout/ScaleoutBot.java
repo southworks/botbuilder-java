@@ -65,7 +65,6 @@ public class ScaleoutBot<T extends Dialog> extends ActivityHandler {
         // The execution sits in a loop because there might be a retry if the save operation fails.
         while (true) {
             // Load any existing state associated with this key
-            // CompletableFuture<Pair<JsonNode, String>> loadTask = ;
             CompletableFuture<Pair<JsonNode, String>> saveTask = store.load(finalKey).thenCompose(pairOldState -> {
                 // Run the dialog system with the old state and inbound activity,
                 // the result is a new state and outbound activities.

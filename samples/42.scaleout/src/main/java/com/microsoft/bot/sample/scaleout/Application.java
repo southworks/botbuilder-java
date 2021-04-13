@@ -58,12 +58,7 @@ public class Application extends BotDependencyConfiguration {
         // String accountName = "<ACCOUNT-NAME>";
         // String accountKey = "<ACCOUNT-KEY>";
         // String container = "dialogs";
-        // Store store = null;
-        // try {
-        //     store = new BlobStore(accountName, accountKey, container);
-        // } catch (URISyntaxException | StorageException e) {
-        //     e.printStackTrace();
-        // }
+        // Store store = new BlobStore(accountName, accountKey, container);
 
         // Create the storage we'll be using for the Dialog state. (Memory is great for testing purposes.)
         Store store = new MemoryStore();

@@ -11,12 +11,12 @@ import java.util.function.Supplier;
 
 /**
  * This is an accessor for any object. By definition objects (as opposed to values)
- * are returned by reference in the GetAsync call on the accessor. As such the SetAsync
+ * are returned by reference in the get call on the accessor. As such the set
  * call is never used. The actual act of saving any state to an external store therefore
  * cannot be encapsulated in the Accessor implementation itself. And so to facilitate this
  * the state itself is available as a public property on this class. The reason its here is
  * because the caller of the constructor could pass in null for the state, in which case
- * the factory provided on the GetAsync call will be used.
+ * the factory provided on the get call will be used.
  * @param <T> The value type of the RefAccessor class.
  */
 public class RefAccessor<T> implements StatePropertyAccessor<T> {
@@ -27,6 +27,7 @@ public class RefAccessor<T> implements StatePropertyAccessor<T> {
      * @param withValue The specified new value.
      */
     public RefAccessor(T withValue) {
+
         value = withValue;
     }
 
@@ -50,7 +51,7 @@ public class RefAccessor<T> implements StatePropertyAccessor<T> {
      * Gets the value object.
      * @param turnContext Context object containing information for a single turn of conversation with a user.
      * @param defaultValueFactory The defaultValueFactory object.
-     * @return The completable future representing the value object.
+     * @return The CompletableFuture representing the value object.
      */
     public CompletableFuture<T> get(TurnContext turnContext, Supplier<T> defaultValueFactory) {
         if (value == null) {

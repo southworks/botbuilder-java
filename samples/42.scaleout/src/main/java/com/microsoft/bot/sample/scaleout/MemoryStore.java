@@ -63,7 +63,7 @@ public class MemoryStore implements Store {
             return CompletableFuture.completedFuture(true);
         } catch (InterruptedException e) {
             e.printStackTrace();
-            return CompletableFuture.completedFuture(true);
+            return CompletableFuture.completedFuture(false);
         } finally {
             SEMAPHORE.release();
         }

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 /**
  * An implementation of the ETag aware IStore interface against Azure Blob Storage.
@@ -30,6 +31,7 @@ import java.util.concurrent.CompletableFuture;
 public class BlobStore implements Store {
 
     private final CloudBlobContainer container;
+    private CloudBlobContainer tempContainer;
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     /**
@@ -41,8 +43,7 @@ public class BlobStore implements Store {
      *                            if the {@link CloudStorageAccount} cannot be created.
      * @throws StorageException Throws a {@link StorageException} if the specified container doesn't exist.
      */
-    public BlobStore(String accountName, String accountKey, String containerName)
-        throws URISyntaxException, StorageException {
+    public BlobStore(String accountName, String accountKey, String containerName) {
         if (StringUtils.isBlank(accountName)) {
             throw new IllegalArgumentException("accountName cannot be null or empty");
         }
@@ -56,9 +57,15 @@ public class BlobStore implements Store {
         // Create storage credential from name and key
         StorageCredentials storageCredentials = new StorageCredentialsAccountAndKey(accountName, accountKey);
         // Create storage account
-        CloudStorageAccount cloudStorageAccount = new CloudStorageAccount(storageCredentials, true);
-        CloudBlobClient client = cloudStorageAccount.createCloudBlobClient();
-        container = client.getContainerReference(containerName);
+        CloudStorageAccount cloudStorageAccount = null;
+        try {
+            cloudStorageAccount = new CloudStorageAccount(storageCredentials, true);
+            CloudBlobClient client = cloudStorageAccount.createCloudBlobClient();
+            tempContainer = client.getContainerReference(containerName);
+        } catch (URISyntaxException | StorageException e) {
+            e.printStackTrace();
+        }
+        container = tempContainer;
     }
 
     /**
@@ -75,14 +82,13 @@ public class BlobStore implements Store {
             JsonNode obj = objectMapper.readTree(content);
             String etag = blob.getProperties().getEtag();
             return CompletableFuture.completedFuture(new Pair<>(obj, etag));
-        } catch (URISyntaxException | IOException e) {
-            e.printStackTrace();
-            return CompletableFuture.completedFuture(new Pair<>(null, null));
-        } catch (StorageException e) {
-            if (e.getHttpStatusCode() == HttpStatus.NOT_FOUND.value()) {
-                return CompletableFuture.completedFuture(new Pair<>(objectMapper.nullNode(), null));
+        } catch (IOException | URISyntaxException | StorageException e) {
+            if (e instanceof StorageException) {
+                if (((StorageException) e).getHttpStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                    return CompletableFuture.completedFuture(new Pair<>(objectMapper.nullNode(), null));
+                }
             }
-            return CompletableFuture.completedFuture(new Pair<>(null, null));
+            throw new CompletionException(e);
         }
     }
 
@@ -98,7 +104,6 @@ public class BlobStore implements Store {
         if (obj == null) {
             throw new IllegalArgumentException("obj cannot be null or empty");
         }
-
         try {
             CloudBlockBlob blob = container.getBlockBlobReference(key);
             blob.getProperties().setContentType("application/json");
@@ -116,14 +121,13 @@ public class BlobStore implements Store {
                 blob.uploadText(content);
             }
             return CompletableFuture.completedFuture(true);
-        } catch (URISyntaxException | IOException e) {
-            e.printStackTrace();
-            return CompletableFuture.completedFuture(false);
-        } catch (StorageException e) {
-            if (e.getHttpStatusCode() == HttpStatus.PRECONDITION_FAILED.value()) {
-                return CompletableFuture.completedFuture(false);
+        } catch (IOException | URISyntaxException | StorageException e) {
+            if (e instanceof StorageException) {
+                if (((StorageException) e).getHttpStatusCode() == HttpStatus.PRECONDITION_FAILED.value()) {
+                    return CompletableFuture.completedFuture(false);
+                }
             }
-            return CompletableFuture.completedFuture(null);
+            throw new CompletionException(e);
         }
     }
 }

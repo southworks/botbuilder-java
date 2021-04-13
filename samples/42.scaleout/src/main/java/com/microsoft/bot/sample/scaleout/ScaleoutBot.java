@@ -9,8 +9,6 @@ import com.microsoft.bot.builder.TurnContext;
 import com.microsoft.bot.dialogs.Dialog;
 import com.microsoft.bot.schema.Pair;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -66,40 +64,29 @@ public class ScaleoutBot<T extends Dialog> extends ActivityHandler {
         String finalKey = key;
         // The execution sits in a loop because there might be a retry if the save operation fails.
         while (true) {
-            CompletableFuture<Pair<JsonNode, String>> loadTask = null;
-            try {
-                // Load any existing state associated with this key
-                loadTask = store.load(finalKey);
-            } catch (IOException | URISyntaxException exception) {
-                exception.printStackTrace();
-                throw new CompletionException(exception);
-            }
-            CompletableFuture<Void> saveTask = loadTask.thenCompose(pairOldState -> {
+            // Load any existing state associated with this key
+            // CompletableFuture<Pair<JsonNode, String>> loadTask = ;
+            CompletableFuture<Pair<JsonNode, String>> saveTask = store.load(finalKey).thenCompose(pairOldState -> {
                 // Run the dialog system with the old state and inbound activity,
                 // the result is a new state and outbound activities.
                 return DialogHost.run(dialog, turnContext.getActivity(), pairOldState.getLeft())
                     .thenCompose(pairNewState -> {
                         // Save the updated state associated with this key.
-                        try {
-                            return store.save(finalKey, pairNewState.getRight(), pairOldState.getRight())
-                                .thenCompose(success -> {
-                                    // Following a successful save, send any outbound Activities,
-                                    // otherwise retry everything.
-                                    if (success) {
-                                        if (pairNewState.getLeft().length > 0) {
-                                            // This is an actual send on the TurnContext we were given
-                                            // and so will actual do a send this time.
-                                            turnContext.sendActivities(pairNewState.getLeft())
-                                                .thenApply(result -> null);
-                                        }
-                                        shouldBreak[0] = true;
+                        return store.save(finalKey, pairNewState.getRight(), pairOldState.getRight())
+                            .thenCompose(success -> {
+                                // Following a successful save, send any outbound Activities,
+                                // otherwise retry everything.
+                                if (success) {
+                                    if (pairNewState.getLeft().length > 0) {
+                                        // This is an actual send on the TurnContext we were given
+                                        // and so will actual do a send this time.
+                                        turnContext.sendActivities(pairNewState.getLeft())
+                                            .thenApply(result -> null);
                                     }
-                                    return CompletableFuture.completedFuture(null);
-                                });
-                        } catch (IOException | URISyntaxException e) {
-                            e.printStackTrace();
-                            throw new CompletionException(e);
-                        }
+                                    shouldBreak[0] = true;
+                                }
+                                return CompletableFuture.completedFuture(null);
+                            });
                     });
             });
             if (saveTask.isCompletedExceptionally()) {

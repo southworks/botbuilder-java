@@ -40,9 +40,6 @@ public final class DialogHost {
         .findAndRegisterModules()
         .enableDefaultTyping();
 
-    /**
-     * Added due to the checkstyle.
-     */
     private DialogHost() { }
 
     /**
@@ -53,8 +50,10 @@ public final class DialogHost {
      * @param oldState The existing or old state.
      * @return An array of Activities 'sent' from the dialog as it executed. And the updated or new state.
      */
-    public static CompletableFuture<Pair<Activity[], JsonNode>> run(Dialog dialog,
-                                                                    Activity activity, JsonNode oldState) {
+    public static CompletableFuture<Pair<Activity[], JsonNode>> run(
+        Dialog dialog,
+        Activity activity,
+        JsonNode oldState) {
         // A custom adapter and corresponding TurnContext that buffers any messages sent.
         DialogHostAdapter adapter = new DialogHostAdapter();
         TurnContext turnContext = new TurnContextImpl(adapter, activity);

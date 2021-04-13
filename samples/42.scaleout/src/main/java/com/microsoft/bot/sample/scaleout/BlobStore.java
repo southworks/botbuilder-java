@@ -30,8 +30,7 @@ import java.util.concurrent.CompletionException;
  */
 public class BlobStore implements Store {
 
-    private final CloudBlobContainer container;
-    private CloudBlobContainer tempContainer;
+    private CloudBlobContainer container;
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     /**
@@ -39,9 +38,6 @@ public class BlobStore implements Store {
      * @param accountName The account name of the Storage Account.
      * @param accountKey The account key of the Storage Account.
      * @param containerName The container name.
-     * @throws URISyntaxException Throws an {@link URISyntaxException}
-     *                            if the {@link CloudStorageAccount} cannot be created.
-     * @throws StorageException Throws a {@link StorageException} if the specified container doesn't exist.
      */
     public BlobStore(String accountName, String accountKey, String containerName) {
         if (StringUtils.isBlank(accountName)) {
@@ -61,11 +57,10 @@ public class BlobStore implements Store {
         try {
             cloudStorageAccount = new CloudStorageAccount(storageCredentials, true);
             CloudBlobClient client = cloudStorageAccount.createCloudBlobClient();
-            tempContainer = client.getContainerReference(containerName);
+            container = client.getContainerReference(containerName);
         } catch (URISyntaxException | StorageException e) {
             e.printStackTrace();
         }
-        container = tempContainer;
     }
 
     /**

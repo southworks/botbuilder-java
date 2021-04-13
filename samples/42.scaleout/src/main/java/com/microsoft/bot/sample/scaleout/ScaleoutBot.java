@@ -40,7 +40,7 @@ public class ScaleoutBot<T extends Dialog> extends ActivityHandler {
     }
 
     /**
-     * This bot runs Dialogs that send message Activites in a way that can be scaled out
+     * This bot runs Dialogs that send message Activities in a way that can be scaled out
      * with a multi-machine deployment.
      * The bot logic makes use of the standard HTTP ETag/If-Match mechanism for optimistic locking. This mechanism
      * is commonly supported on cloud storage technologies from multiple vendors including teh Azure Blob Storage

@@ -648,7 +648,7 @@ public class FrenchDateTime {
     public static final String RelativeDayRegex = "\\b(((la\\s+)?{RelativeRegex}\\s+journ[ée]e))\\b"
             .replace("{RelativeRegex}", RelativeRegex);
 
-    public static final String ConnectorRegex = "^(,|pour|t|vers)$";
+    public static final String ConnectorRegex = "^(,|pour|t|vers|le)$";
 
     public static final String ConnectorAndRegex = "\\b(et\\s*(le|las?)?)\\b.+";
 

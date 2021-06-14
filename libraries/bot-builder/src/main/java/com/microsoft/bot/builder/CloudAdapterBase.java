@@ -79,18 +79,10 @@ public abstract class CloudAdapterBase extends BotAdapter {
         return CompletableFuture.supplyAsync(() -> {
             ResourceResponse[] responses = new ResourceResponse[activities.size()];
 
-            /*
-             * NOTE: we're using for here (vs. foreach) because we want to simultaneously
-             * index into the activities array to get the activity to process as well as use
-             * that index to assign the response to the responses array and this is the most
-             * cost effective way to do that.
-             */
             for (int index = 0; index < activities.size(); index++) {
                 Activity activity = activities.get(index);
 
-                // Clients and bots SHOULD NOT include an id field in activities they generate.
                 activity.setId(null);
-
                 ResourceResponse response;
 
                 logger.info(String.format("Sending activity. ReplyToId: %s", activity.getReplyToId()));
@@ -162,7 +154,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
             return Async.completeExceptionally(new IllegalArgumentException("reference"));
         }
 
-        logger.info(String.format("deleteActivity conversation id: %d, activityId: %d",
+        logger.info(String.format("deleteActivity Conversation id: %d, activityId: %d",
             reference.getConversation().getId(),
             activity.getId()));
 
@@ -300,7 +292,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
     ) {
         logger.info(
             String.format(
-                "processProactive for conversation Id: %d",
+                "processProactive for Conversation Id: %d",
                 continuationActivity.getConversation().getId()));
 
         // Create the connector factory and  the inbound request, extracting parameters
@@ -341,9 +333,8 @@ public abstract class CloudAdapterBase extends BotAdapter {
 
         // Authenticate the inbound request,
         // extracting parameters and create a ConnectorFactory for creating a Connector for outbound requests.
-        return BotFrameworkAuthentication.authenticationRequest(activity, authHeader).thenCompose(authenticationRequestResult -> {
-           return processActivity(authenticateRequestResult, activity, callback);
-        });
+        return BotFrameworkAuthentication.authenticationRequest(activity, authHeader).thenCompose(
+            authenticateRequestResult -> processActivity(authenticateRequestResult, activity, callback));
     }
 
     /**
@@ -416,9 +407,9 @@ public abstract class CloudAdapterBase extends BotAdapter {
         BotCallbackHandler callback,
         ConnectorFactory connectorFactory
     ) {
-        TurnContextImpl turnContext = new TurnContextImpl(this, activity);
+        TurnContext turnContext = new TurnContextImpl(this, activity);
         turnContext.getTurnState().add(BotAdapter.BOT_IDENTITY_KEY, claimsIdentity);
-        turnContext.getTurnState().add(connectorClient);
+        turnContext.getTurnState().add(BotFrameworkAdapter.CONNECTOR_CLIENT_KEY, connectorClient);
         turnContext.getTurnState().add(userTokenClient);
         turnContext.getTurnState().add(callback);
         turnContext.getTurnState().add(connectorFactory);

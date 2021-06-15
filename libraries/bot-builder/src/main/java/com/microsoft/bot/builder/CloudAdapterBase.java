@@ -24,6 +24,8 @@ import java.util.concurrent.CompletableFuture;
  * both public and private.
  */
 public abstract class CloudAdapterBase extends BotAdapter {
+    public static final String CONNECTOR_FACTORY_KEY = "ConnectorFactory";
+    public static final String USER_TOKEN_CLIENT_KEY = "UserTokenClient";
 
     protected BotFrameworkAuthentication botFrameworkAuthentication;
     protected Logger logger = LoggerFactory.getLogger(CloudAdapterBase.class);
@@ -88,7 +90,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
                 logger.info(String.format("Sending activity. ReplyToId: %s", activity.getReplyToId()));
 
                 if (activity.isType(ActivityTypes.DELAY)) {
-                    int delayMs = (int) activity.getValue();
+                    int delayMs = (int) activity.getValue() != null ? (int) activity.getValue() : 1000;
                     try {
                         Thread.sleep(delayMs);
                     } catch (InterruptedException e) {
@@ -410,9 +412,9 @@ public abstract class CloudAdapterBase extends BotAdapter {
         TurnContext turnContext = new TurnContextImpl(this, activity);
         turnContext.getTurnState().add(BotAdapter.BOT_IDENTITY_KEY, claimsIdentity);
         turnContext.getTurnState().add(BotFrameworkAdapter.CONNECTOR_CLIENT_KEY, connectorClient);
-        turnContext.getTurnState().add(userTokenClient);
-        turnContext.getTurnState().add(callback);
-        turnContext.getTurnState().add(connectorFactory);
+        turnContext.getTurnState().add(CloudAdapterBase.USER_TOKEN_CLIENT_KEY, userTokenClient);
+        turnContext.getTurnState().add(TurnContextImpl.BOT_CALLBACK_HANDLER_KEY, callback);
+        turnContext.getTurnState().add(CloudAdapterBase.CONNECTOR_FACTORY_KEY, connectorFactory);
         // in non-skills scenarios the oauth scope value here will be null, so use Set
         turnContext.getTurnState().add(BotAdapter.OAUTH_SCOPE_KEY, oauthScope);
 
@@ -442,7 +444,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
 
         // Handle Invoke scenarios where the Bot will return a specific body and return code.
         if (turnContext.getActivity().isType(ActivityTypes.INVOKE)) {
-            Activity activityInvokeResponse = turnContext.getTurnState().get(INVOKE_RESPONSE_KEY);
+            Activity activityInvokeResponse = turnContext.getTurnState().get(BotFrameworkAdapter.INVOKE_RESPONSE_KEY);
             if (activityInvokeResponse == null) {
                 return new InvokeResponse(HttpURLConnection.HTTP_NOT_IMPLEMENTED, null);
             }

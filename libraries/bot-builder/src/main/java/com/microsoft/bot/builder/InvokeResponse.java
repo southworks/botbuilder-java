@@ -11,6 +11,13 @@ package com.microsoft.bot.builder;
  */
 @Deprecated // Use the one of bot-schema
 public class InvokeResponse extends com.microsoft.bot.schema.InvokeResponse {
+
+    /**
+     * Initializes new instance of InvokeResponse.
+     *
+     * @param withStatus The invoke response status.
+     * @param withBody   The invoke response body.
+     */
     public InvokeResponse(int withStatus, Object withBody) {
         super(withStatus, withBody);
     }

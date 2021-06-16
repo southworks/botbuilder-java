@@ -7,6 +7,7 @@ import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 
 import com.microsoft.bot.schema.Activity;
+import com.microsoft.bot.schema.TypedInvokeResponse;
 
 /**
  * A Bot Framework client.

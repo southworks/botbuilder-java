@@ -13,6 +13,8 @@ import com.microsoft.bot.schema.Activity;
 
 import java.util.concurrent.CompletableFuture;
 
+import javax.annotation.Nullable;
+
 /**
  * Creates a BotFrameworkAuthentication instance from configuration.
  */
@@ -20,73 +22,91 @@ public class ConfigurationBotFrameworkAuthentication extends BotFrameworkAuthent
     private final BotFrameworkAuthentication inner;
 
     /**
-     * Initializes a new instance of the ConfigurationBotFrameworkAuthentication class.
-     * @param configuration A Configuration instance.
-     * @param credentialsFactory An ServiceClientCredentialsFactory instance.
-     * @param authConfiguration An AuthenticationConfiguration instance.
+     * Initializes a new instance of the ConfigurationBotFrameworkAuthentication
+     * class.
+     *
+     * @param configuration      A {@link Configuration} instance.
+     * @param credentialsFactory A {@link ServiceClientCredentialsFactory} instance.
+     * @param authConfiguration  An {@link AuthenticationConfiguration} instance.
      */
     public ConfigurationBotFrameworkAuthentication(Configuration configuration,
-                                                   ServiceClientCredentialsFactory credentialsFactory,
-                                                   AuthenticationConfiguration authConfiguration) {
+            @Nullable ServiceClientCredentialsFactory credentialsFactory,
+            @Nullable AuthenticationConfiguration authConfiguration) {
         String channelService = configuration.getProperty("ChannelService");
         String validateAuthority = configuration.getProperty("ValidateAuthority");
         String toChannelFromBotLoginUrl = configuration.getProperty("ToChannelFromBotLoginUrl");
         String toChannelFromBotOAuthScope = configuration.getProperty("ToChannelFromBotOAuthScope");
-
-        String toBotFromChannelTokenIssuer = configuration.getProperty("ToBotFromChannelTokenIssuer") != null ?
-                                             configuration.getProperty("ToBotFromChannelTokenIssuer") :
-                                             configuration.getProperty(AuthenticationConstants.BOT_OPENID_METADATA_KEY);
-        String oAuthUrl = configuration.getProperty("OAuthUrl") != null ?
-                          configuration.getProperty("OAuthUrl") :
-                          configuration.getProperty(AuthenticationConstants.OAUTH_URL_KEY);
-        String toBotFromChannelOpenIdMetadataUrl = configuration.getProperty("ToBotFromChannelOpenIdMetadataUrl");
+        String toBotFromChannelTokenIssuer = configuration.getProperty("ToBotFromChannelTokenIssuer");
+        String oAuthUrl = configuration.getProperty("OAuthUrl") != null ? configuration.getProperty("OAuthUrl")
+                : configuration.getProperty(AuthenticationConstants.OAUTH_URL_KEY);
+        String toBotFromChannelOpenIdMetadataUrl = configuration
+                .getProperty("ToBotFromChannelOpenIdMetadataUrl") != null
+                        ? configuration.getProperty("ToBotFromChannelOpenIdMetadataUrl")
+                        : configuration.getProperty(AuthenticationConstants.BOT_OPENID_METADATA_KEY);
         String toBotFromEmulatorOpenIdMetadataUrl = configuration.getProperty("ToBotFromEmulatorOpenIdMetadataUrl");
         String callerId = configuration.getProperty("CallerId");
 
-        inner = BotFrameworkAuthenticationFactory.create(
-            channelService,
-            validateAuthority == null || Boolean.parseBoolean(validateAuthority),
-            toChannelFromBotLoginUrl,
-            toChannelFromBotOAuthScope,
-            toBotFromChannelTokenIssuer,
-            oAuthUrl,
-            toBotFromChannelOpenIdMetadataUrl,
-            toBotFromEmulatorOpenIdMetadataUrl,
-            callerId,
-            credentialsFactory != null ? credentialsFactory : new ConfigurationServiceClientCredentialFactory(configuration),
-            authConfiguration != null ? authConfiguration : new AuthenticationConfiguration());
+        inner = BotFrameworkAuthenticationFactory.create(channelService,
+                Boolean.parseBoolean(validateAuthority) || true, toChannelFromBotLoginUrl, toChannelFromBotOAuthScope,
+                toBotFromChannelTokenIssuer, oAuthUrl, toBotFromChannelOpenIdMetadataUrl,
+                toBotFromEmulatorOpenIdMetadataUrl, callerId,
+                credentialsFactory != null ? credentialsFactory
+                        : new ConfigurationServiceClientCredentialFactory(configuration),
+                authConfiguration != null ? authConfiguration : new AuthenticationConfiguration());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getOriginatingAudience() {
         return inner.getOriginatingAudience();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CompletableFuture<ClaimsIdentity> authenticateChannelRequest(String authHeader) {
         return inner.authenticateChannelRequest(authHeader);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CompletableFuture<AuthenticateRequestResult> authenticateRequest(Activity activity, String authHeader) {
         return authenticateRequest(activity, authHeader);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public CompletableFuture<AuthenticateRequestResult> authenticateStreamingRequest(String authHeader, String channelIdHeader) {
+    public CompletableFuture<AuthenticateRequestResult> authenticateStreamingRequest(String authHeader,
+            String channelIdHeader) {
         return inner.authenticateStreamingRequest(authHeader, channelIdHeader);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ConnectorFactory createConnectorFactory(ClaimsIdentity claimsIdentity) {
         return inner.createConnectorFactory(claimsIdentity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CompletableFuture<UserTokenClient> createUserTokenClient(ClaimsIdentity claimsIdentity) {
         return inner createUserTokenClient(claimsIdentity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BotFrameworkClient createBotFrameworkClient() {
         return inner.createBotFrameworkClient();

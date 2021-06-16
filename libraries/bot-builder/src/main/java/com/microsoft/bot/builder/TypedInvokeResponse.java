@@ -3,6 +3,8 @@
 
 package com.microsoft.bot.builder;
 
+import com.microsoft.bot.schema.InvokeResponse;
+
 /**
  * Tuple class containing an HTTP Status Code and a JSON Serializable object.
  * The HTTP Status code is, in the invoke activity scenario, what will be set in

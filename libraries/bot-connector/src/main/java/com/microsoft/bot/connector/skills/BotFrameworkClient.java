@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-package com.microsoft.bot.builder.skills;
+package com.microsoft.bot.connector.skills;
 
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 
-import com.microsoft.bot.builder.TypedInvokeResponse;
 import com.microsoft.bot.schema.Activity;
 
 /**

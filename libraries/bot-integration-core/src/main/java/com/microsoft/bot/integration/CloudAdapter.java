@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package com.microsoft.bot.integration;
 
 import com.microsoft.bot.builder.Bot;
@@ -14,11 +17,17 @@ import java.util.concurrent.CompletableFuture;
  * both public and private.
  */
 public class CloudAdapter extends CloudAdapterBase {
+
+    /**
+     * The... ummm... logger.
+     */
+    private Logger logger = LoggerFactory.getLogger(CloudAdapter.class);
+
     /**
      * Initializes a new instance of the "CloudAdapter" class. (Public cloud. No auth. For testing.)
      */
     public CloudAdapter() {
-        BotFrameworkAuthenticationFactory.create();
+        this(BotFrameworkAuthenticationFactory.create());
     }
 
     /**
@@ -36,10 +45,8 @@ public class CloudAdapter extends CloudAdapterBase {
      * The Configuration instance.
      */
     public CloudAdapter(Configuration configuration) {
-        CloudAdapter(ConfigurationBotFrameworkAuthentication(configuration));
+        this(new ConfigurationBotFrameworkAuthentication(configuration));
     }
-
-    protected Logger logger = LoggerFactory.getLogger(CloudAdapter.class);
 
     /**
      * Process the inbound HTTP request with the bot resulting in the outbound http response, this method can be called

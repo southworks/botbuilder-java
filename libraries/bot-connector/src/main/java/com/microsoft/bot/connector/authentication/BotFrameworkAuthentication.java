@@ -78,8 +78,8 @@ public abstract class BotFrameworkAuthentication {
      *
      * @return The originating audience.
      */
-    public CompletableFuture<ClaimsIdentity> authenticateChannelRequestAsync(String authHeader) {
-        throw new NotImplementedException("authenticateChannelRequestAsync is not implemented");
+    public CompletableFuture<ClaimsIdentity> authenticateChannelRequest(String authHeader) {
+        throw new NotImplementedException("authenticateChannelRequest is not implemented");
     }
 
     /**

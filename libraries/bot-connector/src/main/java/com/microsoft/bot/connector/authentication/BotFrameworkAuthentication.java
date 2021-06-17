@@ -5,7 +5,6 @@ package com.microsoft.bot.connector.authentication;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.microsoft.bot.connector.rest.RestOAuthClient;
 import com.microsoft.bot.connector.skills.BotFrameworkClient;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.CallerIdConstants;
@@ -54,7 +53,7 @@ public abstract class BotFrameworkAuthentication {
      * @param claimsIdentity The inbound @{link Activity}'s {@link ClaimsIdentity}.
      * @return Asynchronous Task with {@link UserTokenClient} instance.
      */
-    public abstract CompletableFuture<RestOAuthClient> createUserTokenClient(ClaimsIdentity claimsIdentity);
+    public abstract CompletableFuture<UserTokenClient> createUserTokenClient(ClaimsIdentity claimsIdentity);
 
     /**
      * Creates a {@link BotFrameworkClient} used for calling Skills.

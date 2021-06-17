@@ -7,13 +7,13 @@ import com.microsoft.bot.connector.Async;
 import com.microsoft.bot.connector.Channels;
 import com.microsoft.bot.connector.ConnectorClient;
 import com.microsoft.bot.connector.ExecutorFactory;
+
 import com.microsoft.bot.connector.authentication.AuthenticateRequestResult;
 import com.microsoft.bot.connector.authentication.AuthenticationConstants;
 import com.microsoft.bot.connector.authentication.BotFrameworkAuthentication;
 import com.microsoft.bot.connector.authentication.ClaimsIdentity;
 import com.microsoft.bot.connector.authentication.ConnectorFactory;
-import com.microsoft.bot.connector.rest.RestOAuthClient;
-
+import com.microsoft.bot.connector.authentication.UserTokenClient;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityTypes;
 import com.microsoft.bot.schema.ConversationReference;
@@ -425,7 +425,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
         ClaimsIdentity claimsIdentity,
         String oauthScope,
         ConnectorClient connectorClient,
-        RestOAuthClient userTokenClient,
+        UserTokenClient userTokenClient,
         BotCallbackHandler callback,
         ConnectorFactory connectorFactory
     ) {

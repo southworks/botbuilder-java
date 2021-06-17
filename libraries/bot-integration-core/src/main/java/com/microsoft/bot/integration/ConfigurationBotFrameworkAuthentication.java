@@ -11,7 +11,7 @@ import com.microsoft.bot.connector.authentication.BotFrameworkAuthenticationFact
 import com.microsoft.bot.connector.authentication.ClaimsIdentity;
 import com.microsoft.bot.connector.authentication.ConnectorFactory;
 import com.microsoft.bot.connector.authentication.ServiceClientCredentialsFactory;
-import com.microsoft.bot.connector.rest.RestOAuthClient;
+import com.microsoft.bot.connector.authentication.UserTokenClient;
 import com.microsoft.bot.connector.skills.BotFrameworkClient;
 import com.microsoft.bot.schema.Activity;
 
@@ -110,7 +110,7 @@ public class ConfigurationBotFrameworkAuthentication extends BotFrameworkAuthent
      * {@inheritDoc}
      */
     @Override
-    public CompletableFuture<RestOAuthClient> createUserTokenClient(ClaimsIdentity claimsIdentity) {
+    public CompletableFuture<UserTokenClient> createUserTokenClient(ClaimsIdentity claimsIdentity) {
         return inner.createUserTokenClient(claimsIdentity);
     }
 

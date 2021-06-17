@@ -106,18 +106,18 @@ public class PasswordServiceClientCredentialFactory extends ServiceClientCredent
             String loginEndpoint, Boolean validateAuthority) {
         if (loginEndpoint.toLowerCase()
                 .startsWith(AuthenticationConstants.TO_CHANNEL_FROM_BOT_LOGIN_URL_TEMPLATE.toLowerCase())) {
-            ServiceClientCredentials credentials = this.appId == null ? MicrosoftAppCredentials.empty()
-                    : new MicrosoftAppCredentials(this.appId, this.password);
+            ServiceClientCredentials credentials = appId == null ? MicrosoftAppCredentials.empty()
+                    : new MicrosoftAppCredentials(appId, this.password);
             return CompletableFuture.completedFuture(credentials);
         } else if (loginEndpoint.toLowerCase()
                 .equals(GovernmentAuthenticationConstants.TO_CHANNEL_FROM_BOT_LOGIN_URL.toLowerCase())) {
-            ServiceClientCredentials credentials = this.appId == null ? MicrosoftGovernmentAppCredentials.empty()
-                    : new MicrosoftGovernmentAppCredentials(this.appId, this.password);
+            ServiceClientCredentials credentials = appId == null ? MicrosoftGovernmentAppCredentials.empty()
+                    : new MicrosoftGovernmentAppCredentials(appId, this.password);
             return CompletableFuture.completedFuture(credentials);
         } else {
-            ServiceClientCredentials credentials = this.appId == null
+            ServiceClientCredentials credentials = appId == null
                     ? new PrivateCloudAppCredentials(null, null, null, loginEndpoint, validateAuthority)
-                    : new PrivateCloudAppCredentials(this.appId, this.password, oauthScope, loginEndpoint,
+                    : new PrivateCloudAppCredentials(appId, this.password, oauthScope, loginEndpoint,
                             validateAuthority);
             return CompletableFuture.completedFuture(credentials);
         }

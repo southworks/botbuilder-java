@@ -3,13 +3,24 @@
 
 package com.microsoft.bot.builder;
 
+import com.microsoft.bot.connector.Async;
+import com.microsoft.bot.connector.Channels;
 import com.microsoft.bot.connector.ConnectorClient;
+import com.microsoft.bot.connector.ExecutorFactory;
+import com.microsoft.bot.connector.authentication.AuthenticateRequestResult;
+import com.microsoft.bot.connector.authentication.AuthenticationConstants;
+import com.microsoft.bot.connector.authentication.BotFrameworkAuthentication;
 import com.microsoft.bot.connector.authentication.ClaimsIdentity;
+import com.microsoft.bot.connector.authentication.ConnectorFactory;
 import com.microsoft.bot.connector.rest.RestOAuthClient;
-import com.microsoft.bot.schema.Activity;
-import com.microsoft.bot.schema.ResourceResponse;
-import com.microsoft.bot.schema.ConversationReference;
 
+import com.microsoft.bot.schema.Activity;
+import com.microsoft.bot.schema.ActivityTypes;
+import com.microsoft.bot.schema.ConversationReference;
+import com.microsoft.bot.schema.DeliveryModes;
+import com.microsoft.bot.schema.ExpectedReplies;
+import com.microsoft.bot.schema.InvokeResponse;
+import com.microsoft.bot.schema.ResourceResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +38,10 @@ public abstract class CloudAdapterBase extends BotAdapter {
     public static final String CONNECTOR_FACTORY_KEY = "ConnectorFactory";
     public static final String USER_TOKEN_CLIENT_KEY = "UserTokenClient";
 
-    protected BotFrameworkAuthentication botFrameworkAuthentication;
-    protected Logger logger = LoggerFactory.getLogger(CloudAdapterBase.class);
+    private static final Integer DEFAULT_MS_DELAY = 1000;
+
+    private BotFrameworkAuthentication botFrameworkAuthentication;
+    private Logger logger = LoggerFactory.getLogger(CloudAdapterBase.class);
 
     /**
      * Gets a {@link Logger} to use within this adapter and its subclasses.
@@ -90,7 +103,8 @@ public abstract class CloudAdapterBase extends BotAdapter {
                 logger.info(String.format("Sending activity. ReplyToId: %s", activity.getReplyToId()));
 
                 if (activity.isType(ActivityTypes.DELAY)) {
-                    int delayMs = (int) activity.getValue() != null ? (int) activity.getValue() : 1000;
+                    int delayMs = Integer.valueOf((String) activity.getValue()) != null
+                        ? (int) activity.getValue() : DEFAULT_MS_DELAY;
                     try {
                         Thread.sleep(delayMs);
                     } catch (InterruptedException e) {
@@ -107,10 +121,12 @@ public abstract class CloudAdapterBase extends BotAdapter {
                     // no-op
                     response = null;
                 } else if (StringUtils.isNotBlank(activity.getReplyToId())) {
-                    ConnectorClient connectorClient = context.getTurnState().get(BotFrameworkAdapter.CONNECTOR_CLIENT_KEY);
+                    ConnectorClient connectorClient = context.getTurnState()
+                        .get(BotFrameworkAdapter.CONNECTOR_CLIENT_KEY);
                     response = connectorClient.getConversations().replyToActivity(activity).join();
                 } else {
-                    ConnectorClient connectorClient = context.getTurnState().get(BotFrameworkAdapter.CONNECTOR_CLIENT_KEY);
+                    ConnectorClient connectorClient = context.getTurnState()
+                        .get(BotFrameworkAdapter.CONNECTOR_CLIENT_KEY);
                     response = connectorClient.getConversations().sendToConversation(activity).join();
                 }
                 if (response == null) {
@@ -158,7 +174,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
 
         logger.info(String.format("deleteActivity Conversation id: %d, activityId: %d",
             reference.getConversation().getId(),
-            activity.getId()));
+            reference.getActivityId()));
 
         ConnectorClient connectorClient = context.getTurnState().get(BotFrameworkAdapter.CONNECTOR_CLIENT_KEY);
         return connectorClient.getConversations()
@@ -299,23 +315,24 @@ public abstract class CloudAdapterBase extends BotAdapter {
 
         // Create the connector factory and  the inbound request, extracting parameters
         // and then create a connector for outbound requests.
-        ConnectorFactory connectorFactory = BotFrameworkAuthentication.createConnectorFactory(claimsIdentity);
+        ConnectorFactory connectorFactory = this.botFrameworkAuthentication.createConnectorFactory(claimsIdentity);
 
         // Create the connector client to use for outbound requests.
         return connectorFactory.create(continuationActivity.getServiceUrl(), audience).thenCompose(connectorClient -> {
             // Create a UserTokenClient instance for the application to use. (For example, in the OAuthPrompt.)
-            return BotFrameworkAuthentication.createUserTokenClient(claimsIdentity).thenCompose(userTokenClient -> {
-                // Create a turn context and run the pipeline.
-                TurnContext context = createTurnContext(
-                    continuationActivity,
-                    claimsIdentity,
-                    audience,
-                    connectorClient,
-                    userTokenClient,
-                    callback,
-                    connectorFactory);
-                // Run the pipeline
-                return runPipeline(context, callback);
+            return this.botFrameworkAuthentication.createUserTokenClient(claimsIdentity).thenCompose(userTokenClient
+                -> {
+                    // Create a turn context and run the pipeline.
+                    TurnContext context = createTurnContext(
+                        continuationActivity,
+                        claimsIdentity,
+                        audience,
+                        connectorClient,
+                        userTokenClient,
+                        callback,
+                        connectorFactory);
+                    // Run the pipeline
+                    return runPipeline(context, callback);
             });
         });
     }
@@ -335,7 +352,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
 
         // Authenticate the inbound request,
         // extracting parameters and create a ConnectorFactory for creating a Connector for outbound requests.
-        return BotFrameworkAuthentication.authenticationRequest(activity, authHeader).thenCompose(
+        return this.botFrameworkAuthentication.authenticateRequest(activity, authHeader).thenCompose(
             authenticateRequestResult -> processActivity(authenticateRequestResult, activity, callback));
     }
 
@@ -359,23 +376,26 @@ public abstract class CloudAdapterBase extends BotAdapter {
             activity.getServiceUrl(),
             authenticateRequestResult.getAudience())
             .thenCompose(connectorClient -> {
-            // Create a UserTokenClient instance for the application to use. (For example, it would be used in a sign-in prompt.)
-            BotFrameworkAuthentication.createUserTokenClient(authenticateRequestResult.getClaimsIdentity())
+            // Create a UserTokenClient instance for the application to use.
+            // (For example, it would be used in a sign-in prompt.)
+            return this.botFrameworkAuthentication.createUserTokenClient(authenticateRequestResult.getClaimsIdentity())
                 .thenCompose(userTokenClient -> {
                     // Create a turn context and run the pipeline.
-                    TurnContext context = createTurnContext(
+                    TurnContextImpl context = createTurnContext(
                         activity,
                         authenticateRequestResult.getClaimsIdentity(),
                         authenticateRequestResult.getAudience(),
                         connectorClient,
-                        userTokenClient);
+                        userTokenClient,
+                        null,
+                        null);
 
                     // Run the pipeline
-                    runPipeline(context, callbackHandler).thenApply(task -> {
+                    return runPipeline(context, callbackHandler).thenApply(task -> {
                         // If there are any results they will have been left on the TurnContext.
                         return CompletableFuture.completedFuture(processTurnResults(context));
-                    });
-            });
+                    }).thenApply(null);
+                });
         });
     }
 
@@ -400,7 +420,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
         return claimsIdentity;
     }
 
-    private TurnContext createTurnContext(
+    private TurnContextImpl createTurnContext(
         Activity activity,
         ClaimsIdentity claimsIdentity,
         String oauthScope,
@@ -409,7 +429,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
         BotCallbackHandler callback,
         ConnectorFactory connectorFactory
     ) {
-        TurnContext turnContext = new TurnContextImpl(this, activity);
+        TurnContextImpl turnContext = new TurnContextImpl(this, activity);
         turnContext.getTurnState().add(BotAdapter.BOT_IDENTITY_KEY, claimsIdentity);
         turnContext.getTurnState().add(BotFrameworkAdapter.CONNECTOR_CLIENT_KEY, connectorClient);
         turnContext.getTurnState().add(CloudAdapterBase.USER_TOKEN_CLIENT_KEY, userTokenClient);
@@ -433,10 +453,10 @@ public abstract class CloudAdapterBase extends BotAdapter {
         }
     }
 
-    private InvokeResponse processTurnResults(TurnContext turnContext) {
+    private InvokeResponse processTurnResults(TurnContextImpl turnContext) {
         // Handle ExpectedReplies scenarios where the all the activities have been buffered
         // and sent back at once in an invoke response.
-        if (turnContext.getActivity().getDeliveryMode() == DeliveryModes.EXPECT_REPLIES) {
+        if (turnContext.getActivity().getDeliveryMode().equals(DeliveryModes.EXPECT_REPLIES)) {
             return new InvokeResponse(
                 HttpURLConnection.HTTP_OK,
                 new ExpectedReplies(turnContext.getBufferedReplyActivities()));

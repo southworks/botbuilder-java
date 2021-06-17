@@ -5,6 +5,7 @@ package com.microsoft.bot.connector.authentication;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.microsoft.bot.connector.rest.RestOAuthClient;
 import com.microsoft.bot.connector.skills.BotFrameworkClient;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.CallerIdConstants;
@@ -39,7 +40,7 @@ public abstract class BotFrameworkAuthentication {
 
     /**
      * Creates a {@link ConnectorFactory} that can be used to create
-     * {@link ConnectorClient} that use credentials from this particular cloud
+     * {@link com.microsoft.bot.connector.ConnectorClient} that use credentials from this particular cloud
      * environment.
      *
      * @param claimsIdentity The inbound @{link Activity}'s {@link ClaimsIdentity}.
@@ -53,7 +54,7 @@ public abstract class BotFrameworkAuthentication {
      * @param claimsIdentity The inbound @{link Activity}'s {@link ClaimsIdentity}.
      * @return Asynchronous Task with {@link UserTokenClient} instance.
      */
-    public abstract CompletableFuture<UserTokenClient> createUserTokenClient(ClaimsIdentity claimsIdentity);
+    public abstract CompletableFuture<RestOAuthClient> createUserTokenClient(ClaimsIdentity claimsIdentity);
 
     /**
      * Creates a {@link BotFrameworkClient} used for calling Skills.
@@ -75,8 +76,8 @@ public abstract class BotFrameworkAuthentication {
 
     /**
      * Authenticate Bot Framework Protocol requests to Skills.
-     *
-     * @return The originating audience.
+     * @param authHeader The http auth header received in the skill request.
+     * @return A {@link ClaimsIdentity}.
      */
     public CompletableFuture<ClaimsIdentity> authenticateChannelRequest(String authHeader) {
         throw new NotImplementedException("authenticateChannelRequest is not implemented");

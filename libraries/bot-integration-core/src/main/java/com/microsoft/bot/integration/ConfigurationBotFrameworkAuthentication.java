@@ -3,12 +3,16 @@
 
 package com.microsoft.bot.integration;
 
-import com.microsoft.bot.builder.skills.BotFrameworkClient;
 import com.microsoft.bot.connector.authentication.AuthenticateRequestResult;
 import com.microsoft.bot.connector.authentication.AuthenticationConfiguration;
 import com.microsoft.bot.connector.authentication.AuthenticationConstants;
+import com.microsoft.bot.connector.authentication.BotFrameworkAuthentication;
 import com.microsoft.bot.connector.authentication.BotFrameworkAuthenticationFactory;
 import com.microsoft.bot.connector.authentication.ClaimsIdentity;
+import com.microsoft.bot.connector.authentication.ConnectorFactory;
+import com.microsoft.bot.connector.authentication.ServiceClientCredentialsFactory;
+import com.microsoft.bot.connector.authentication.UserTokenClient;
+import com.microsoft.bot.connector.skills.BotFrameworkClient;
 import com.microsoft.bot.schema.Activity;
 
 import java.util.concurrent.CompletableFuture;
@@ -30,8 +34,8 @@ public class ConfigurationBotFrameworkAuthentication extends BotFrameworkAuthent
      * @param authConfiguration  An {@link AuthenticationConfiguration} instance.
      */
     public ConfigurationBotFrameworkAuthentication(Configuration configuration,
-            @Nullable ServiceClientCredentialsFactory credentialsFactory,
-            @Nullable AuthenticationConfiguration authConfiguration) {
+                                                   @Nullable ServiceClientCredentialsFactory credentialsFactory,
+                                                   @Nullable AuthenticationConfiguration authConfiguration) {
         String channelService = configuration.getProperty("ChannelService");
         String validateAuthority = configuration.getProperty("ValidateAuthority");
         String toChannelFromBotLoginUrl = configuration.getProperty("ToChannelFromBotLoginUrl");
@@ -46,13 +50,19 @@ public class ConfigurationBotFrameworkAuthentication extends BotFrameworkAuthent
         String toBotFromEmulatorOpenIdMetadataUrl = configuration.getProperty("ToBotFromEmulatorOpenIdMetadataUrl");
         String callerId = configuration.getProperty("CallerId");
 
-        inner = BotFrameworkAuthenticationFactory.create(channelService,
-                Boolean.parseBoolean(validateAuthority) || true, toChannelFromBotLoginUrl, toChannelFromBotOAuthScope,
-                toBotFromChannelTokenIssuer, oAuthUrl, toBotFromChannelOpenIdMetadataUrl,
-                toBotFromEmulatorOpenIdMetadataUrl, callerId,
-                credentialsFactory != null ? credentialsFactory
-                        : new ConfigurationServiceClientCredentialFactory(configuration),
-                authConfiguration != null ? authConfiguration : new AuthenticationConfiguration());
+        inner = BotFrameworkAuthenticationFactory.create(
+            channelService,
+            Boolean.parseBoolean(validateAuthority != null ? validateAuthority : "true"),
+            toChannelFromBotLoginUrl,
+            toChannelFromBotOAuthScope,
+            toBotFromChannelTokenIssuer,
+            oAuthUrl,
+            toBotFromChannelOpenIdMetadataUrl,
+            toBotFromEmulatorOpenIdMetadataUrl,
+            callerId,
+            credentialsFactory != null ? credentialsFactory
+                    : new ConfigurationServiceClientCredentialFactory(configuration),
+            authConfiguration != null ? authConfiguration : new AuthenticationConfiguration());
     }
 
     /**
@@ -101,7 +111,7 @@ public class ConfigurationBotFrameworkAuthentication extends BotFrameworkAuthent
      */
     @Override
     public CompletableFuture<UserTokenClient> createUserTokenClient(ClaimsIdentity claimsIdentity) {
-        return inner createUserTokenClient(claimsIdentity);
+        return inner.createUserTokenClient(claimsIdentity);
     }
 
     /**

@@ -39,7 +39,7 @@ public abstract class BotFrameworkAuthentication {
 
     /**
      * Creates a {@link ConnectorFactory} that can be used to create
-     * {@link ConnectorClient} that use credentials from this particular cloud
+     * {@link com.microsoft.bot.connector.ConnectorClient} that use credentials from this particular cloud
      * environment.
      *
      * @param claimsIdentity The inbound @{link Activity}'s {@link ClaimsIdentity}.
@@ -75,11 +75,11 @@ public abstract class BotFrameworkAuthentication {
 
     /**
      * Authenticate Bot Framework Protocol requests to Skills.
-     *
-     * @return The originating audience.
+     * @param authHeader The http auth header received in the skill request.
+     * @return A {@link ClaimsIdentity}.
      */
-    public CompletableFuture<ClaimsIdentity> authenticateChannelRequestAsync(String authHeader) {
-        throw new NotImplementedException("authenticateChannelRequestAsync is not implemented");
+    public CompletableFuture<ClaimsIdentity> authenticateChannelRequest(String authHeader) {
+        throw new NotImplementedException("authenticateChannelRequest is not implemented");
     }
 
     /**

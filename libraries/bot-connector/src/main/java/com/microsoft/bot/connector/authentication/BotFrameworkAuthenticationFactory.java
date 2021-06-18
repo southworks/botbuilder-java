@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public final class BotFrameworkAuthenticationFactory {
 
+    private BotFrameworkAuthenticationFactory() { }
+
     /**
      * Creates the a {@link BotFrameworkAuthentication} instance for anonymous testing scenarios.
      * @return A new {@link BotFrameworkAuthentication} instance.
@@ -30,6 +32,7 @@ public final class BotFrameworkAuthenticationFactory {
             new AuthenticationConfiguration());
     }
 
+    @SuppressWarnings("checkstyle:ParameterNumber")
     public static BotFrameworkAuthentication create(
         String channelService,
         Boolean validateAuthority,
@@ -43,13 +46,13 @@ public final class BotFrameworkAuthenticationFactory {
         ServiceClientCredentialsFactory credentialFactory,
         AuthenticationConfiguration authConfiguration
     ) {
-        if (StringUtils.isNotBlank(toChannelFromBotLoginUrl) ||
-            StringUtils.isNotBlank(toChannelFromBotOAuthScope) ||
-            StringUtils.isNotBlank(toBotFromChannelTokenIssuer) ||
-            StringUtils.isNotBlank(oAuthUrl) ||
-            StringUtils.isNotBlank(toBotFromChannelOpenIdMetadataUrl) ||
-            StringUtils.isNotBlank(toBotFromEmulatorOpenIdMetadataUrl) ||
-            StringUtils.isNotBlank(callerId)) {
+        if (StringUtils.isNotBlank(toChannelFromBotLoginUrl)
+            || StringUtils.isNotBlank(toChannelFromBotOAuthScope)
+            || StringUtils.isNotBlank(toBotFromChannelTokenIssuer)
+            || StringUtils.isNotBlank(oAuthUrl)
+            || StringUtils.isNotBlank(toBotFromChannelOpenIdMetadataUrl)
+            || StringUtils.isNotBlank(toBotFromEmulatorOpenIdMetadataUrl)
+            || StringUtils.isNotBlank(callerId)) {
             // if we have any of the 'parameterized' properties defined we'll assume this is the parameterized code
             return new ParameterizedBotFrameworkAuthentication(
                 validateAuthority,

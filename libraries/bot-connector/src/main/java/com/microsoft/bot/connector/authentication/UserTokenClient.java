@@ -44,7 +44,7 @@ public abstract class UserTokenClient {
      * @param activity       The {@link Activity} from which to derive the token
      *                       exchange state.
      * @param finalRedirect  The final URL that the OAuth flow will redirect to.
-     * @return A {@link SignInResponse}.
+     * @return A {@link SignInResource}
      */
     public abstract CompletableFuture<SignInResource> getSignInResource(String connectionName, Activity activity,
             String finalRedirect);
@@ -55,6 +55,7 @@ public abstract class UserTokenClient {
      * @param userId         The user id that will be associated with the token.
      * @param connectionName Name of the auth connection to use.
      * @param channelId      The channel Id that will be associated with the token.
+     * @return A Task representing the result of the asynchronous operation.
      */
     public abstract CompletableFuture<Void> signOutUser(String userId, String connectionName, String channelId);
 

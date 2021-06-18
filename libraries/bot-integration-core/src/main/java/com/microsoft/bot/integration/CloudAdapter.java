@@ -5,7 +5,7 @@ package com.microsoft.bot.integration;
 
 import com.microsoft.bot.builder.Bot;
 import com.microsoft.bot.builder.CloudAdapterBase;
-import com.microsoft.bot.connector.authentication.AuthenticateRequestResult
+import com.microsoft.bot.connector.authentication.BotFrameworkAuthentication;
 import com.microsoft.bot.connector.authentication.BotFrameworkAuthenticationFactory;
 import com.microsoft.bot.schema.Activity;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ public class CloudAdapter extends CloudAdapterBase {
      * The Configuration instance.
      */
     public CloudAdapter(Configuration configuration) {
-        this(new ConfigurationBotFrameworkAuthentication(configuration));
+        this(new ConfigurationBotFrameworkAuthentication(configuration, null, null));
     }
 
     /**
@@ -57,6 +57,6 @@ public class CloudAdapter extends CloudAdapterBase {
      * @return void
      */
     public CompletableFuture<Void> processIncomingActivity(String authHeader, Activity activity, Bot bot) {
-        return processActivity(authHeader, activity, bot::onTurn).thenApply(result -> { return null; });
+        return processActivity(authHeader, activity, bot::onTurn).thenApply(result -> null);
     }
 }

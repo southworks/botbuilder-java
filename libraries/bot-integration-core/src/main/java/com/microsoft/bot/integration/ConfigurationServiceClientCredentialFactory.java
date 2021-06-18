@@ -8,14 +8,16 @@ import com.microsoft.bot.connector.authentication.PasswordServiceClientCredentia
 
 /**
  * Credential provider which uses {@link Configuration} to lookup appId and password.
- * This will populate the {@PasswordServiceClientCredentialFactory.appId} from an configuration entry with the
- * key of {@MicrosoftAppCredentials.MICROSOFTAPPID} and the {@PasswordServiceClientCredentialFactory.password}
- * from a configuration entry with the key of {@MicrosoftAppCredentials.MICROSOFTAPPPASSWORD}.
+ * This will populate the {@link PasswordServiceClientCredentialFactory#getAppId()} from an configuration entry with the
+ * key of {@link MicrosoftAppCredentials#MICROSOFTAPPID} and the {@link PasswordServiceClientCredentialFactory#getPassword()}
+ * from a configuration entry with the key of {@link MicrosoftAppCredentials#MICROSOFTAPPPASSWORD}.
  *
  * NOTE: if the keys are not present, a null value will be used.
  */
 public class ConfigurationServiceClientCredentialFactory extends PasswordServiceClientCredentialFactory {
+
     /**
+     * Initializes a new instance of the {@link ConfigurationServiceClientCredentialFactory} class.
      * @param configuration An instance of {@link Configuration}.
      */
     public ConfigurationServiceClientCredentialFactory(Configuration configuration) {

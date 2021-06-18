@@ -89,7 +89,7 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
                                           JwtTokenValidation.getAppIdFromClaims(claimsIdentity.claims()) :
                                           this.toChannelFromBotOAuthScope;
 
-                return generateCallerId(this.credentialsFactory, claimsIdentity, this.callerId).thenCompose(callerId -> {
+                return generateCallerId(this.credentialsFactory, claimsIdentity, this.callerId).thenCompose(resultCallerId -> {
                         ConnectorFactoryImpl connectorFactory = new ConnectorFactoryImpl(
                             getAppId(claimsIdentity),
                             this.toChannelFromBotOAuthScope,
@@ -100,7 +100,7 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
                         AuthenticateRequestResult authenticateRequestResult = new AuthenticateRequestResult();
                         authenticateRequestResult.setClaimsIdentity(claimsIdentity);
                         authenticateRequestResult.setAudience(outboundAudience);
-                        authenticateRequestResult.setCallerId(callerId);
+                        authenticateRequestResult.setCallerId(resultCallerId);
                         authenticateRequestResult.setConnectorFactory(connectorFactory);
 
                         return authenticateRequestResult;
@@ -123,11 +123,11 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
                                 JwtTokenValidation.getAppIdFromClaims(claimsIdentity.claims()) :
                                 this.toChannelFromBotOAuthScope;
 
-                            return generateCallerId(this.credentialsFactory, claimsIdentity, this.callerId).thenCompose(callerId -> {
+                            return generateCallerId(this.credentialsFactory, claimsIdentity, this.callerId).thenCompose(resultCallerId -> {
                                 AuthenticateRequestResult authenticateRequestResult = new AuthenticateRequestResult();
                                 authenticateRequestResult.setClaimsIdentity(claimsIdentity);
                                 authenticateRequestResult.setAudience(outboundAudience);
-                                authenticateRequestResult.setCallerId(callerId);
+                                authenticateRequestResult.setCallerId(resultCallerId);
 
                                 return CompletableFuture.completedFuture(authenticateRequestResult);
                             });
@@ -429,12 +429,15 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
         // async validation.
 
         // Look for the "aud" claim, but only if issued from the Bot Framework
-        String audienceClaim = identity.getClaimValue(AuthenticationConstants.AUDIENCE_CLAIM);
-
+        if (!identity.getClaimValue(AuthenticationConstants.ISSUER_CLAIM).equals(this.toBotFromChannelTokenIssuer)) {
+            // The relevant Audiance Claim MUST be present. Not Authorized.
+            throw new AuthenticationException("Unauthorized. Issuer Claim MUST be present.");
+        }
         // The AppId from the claim in the token must match the AppId specified by the developer.
         // In this case, the token is destined for the app, so we find the app ID in the audience claim.
+        String audienceClaim = identity.getClaimValue(AuthenticationConstants.AUDIENCE_CLAIM);
         if (StringUtils.isBlank(audienceClaim)) {
-            // Claim is present, but doesn't have a value. Not Authorized.
+            // Claim is not present or is present, but doesn't have a value. Not Authorized.
             throw new AuthenticationException("Unauthorized. Issuer Claim MUST be present.");
         }
 

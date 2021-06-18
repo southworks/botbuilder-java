@@ -108,6 +108,6 @@ public class ClaimsIdentity {
      * @return The claim value or null if not found
      */
     public String getClaimValue(String claimType) {
-        return claims().keySet().stream().filter(k -> k == claimType).findFirst().orElse(null);
+        return claims().get(claimType);
     }
 }

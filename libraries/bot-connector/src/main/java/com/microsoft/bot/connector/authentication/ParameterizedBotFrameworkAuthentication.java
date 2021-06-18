@@ -103,7 +103,7 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
                         authenticateRequestResult.setCallerId(resultCallerId);
                         authenticateRequestResult.setConnectorFactory(connectorFactory);
 
-                        return authenticateRequestResult;
+                        return CompletableFuture.completedFuture(authenticateRequestResult);
                     }
                 );
             }

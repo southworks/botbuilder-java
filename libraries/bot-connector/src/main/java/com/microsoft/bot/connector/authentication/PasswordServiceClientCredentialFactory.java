@@ -8,9 +8,6 @@ import java.util.concurrent.CompletableFuture;
 import com.microsoft.bot.restclient.credentials.ServiceClientCredentials;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * A simple implementation of the {@link ServiceClientCredentialsFactory}
  * interface.
@@ -19,11 +16,6 @@ public class PasswordServiceClientCredentialFactory extends ServiceClientCredent
 
     private String appId;
     private String password;
-
-    /**
-     * The... ummm... logger.
-     */
-    private final Logger logger = LoggerFactory.getLogger(PasswordServiceClientCredentialFactory.class);
 
     /**
      * Gets the app ID for this credential.
@@ -104,13 +96,23 @@ public class PasswordServiceClientCredentialFactory extends ServiceClientCredent
     @Override
     public CompletableFuture<ServiceClientCredentials> createCredentials(String appId, String oauthScope,
             String loginEndpoint, Boolean validateAuthority) {
+        if (this.isAuthenticationDisabled().join()) {
+            return CompletableFuture.completedFuture(MicrosoftAppCredentials.empty());
+        }
+
+        if (!this.isValidAppId(appId).join()) {
+            throw new IllegalArgumentException("Invalid appId.");
+        }
+
         if (loginEndpoint.toLowerCase()
                 .startsWith(AuthenticationConstants.TO_CHANNEL_FROM_BOT_LOGIN_URL_TEMPLATE.toLowerCase())) {
+            // TODO: Unpack necessity of these empty credentials based on the loginEndpoint
+            //  as no tokens are fetched when auth is disabled.
             ServiceClientCredentials credentials = appId == null ? MicrosoftAppCredentials.empty()
                     : new MicrosoftAppCredentials(appId, this.password);
             return CompletableFuture.completedFuture(credentials);
-        } else if (loginEndpoint.toLowerCase()
-                .equals(GovernmentAuthenticationConstants.TO_CHANNEL_FROM_BOT_LOGIN_URL.toLowerCase())) {
+        } else if (loginEndpoint
+                .equalsIgnoreCase(GovernmentAuthenticationConstants.TO_CHANNEL_FROM_BOT_LOGIN_URL)) {
             ServiceClientCredentials credentials = appId == null ? MicrosoftGovernmentAppCredentials.empty()
                     : new MicrosoftGovernmentAppCredentials(appId, this.password);
             return CompletableFuture.completedFuture(credentials);

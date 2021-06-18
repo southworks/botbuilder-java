@@ -3,7 +3,6 @@
 
 package com.microsoft.bot.connector.authentication;
 
-import com.microsoft.bot.connector.Async;
 import com.microsoft.bot.connector.Channels;
 import com.microsoft.bot.connector.skills.BotFrameworkClient;
 import com.microsoft.bot.schema.Activity;
@@ -11,11 +10,11 @@ import com.microsoft.bot.schema.RoleTypes;
 import org.apache.commons.lang3.StringUtils;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthentication {
+
     private Boolean validateAuthority;
     private String toChannelFromBotLoginUrl;
     private String toChannelFromBotOAuthScope;
@@ -39,133 +38,169 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
         ServiceClientCredentialsFactory withCredentialsFactory,
         AuthenticationConfiguration withAuthConfiguration
     ) {
-        validateAuthority = withValidateAuthority;
-        toChannelFromBotLoginUrl = withToChannelFromBotLoginUrl;
-        toChannelFromBotOAuthScope = withToChannelFromBotOAuthScope;
-        toBotFromChannelTokenIssuer = withToBotFromChannelTokenIssuer;
-        oAuthUrl = withOAuthUrl;
-        toBotFromChannelOpenIdMetadataUrl = withToBotFromChannelOpenIdMetadataUrl;
-        toBotFromEmulatorOpenIdMetadataUrl = withToBotFromEmulatorOpenIdMetadataUrl;
-        callerId = withCallerId;
-        credentialsFactory = withCredentialsFactory;
-        authConfiguration = withAuthConfiguration;
+        this.validateAuthority = withValidateAuthority;
+        this.toChannelFromBotLoginUrl = withToChannelFromBotLoginUrl;
+        this.toChannelFromBotOAuthScope = withToChannelFromBotOAuthScope;
+        this.toBotFromChannelTokenIssuer = withToBotFromChannelTokenIssuer;
+        this.oAuthUrl = withOAuthUrl;
+        this.toBotFromChannelOpenIdMetadataUrl = withToBotFromChannelOpenIdMetadataUrl;
+        this.toBotFromEmulatorOpenIdMetadataUrl = withToBotFromEmulatorOpenIdMetadataUrl;
+        this.callerId = withCallerId;
+        this.credentialsFactory = withCredentialsFactory;
+        this.authConfiguration = withAuthConfiguration;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getOriginatingAudience() {
-        return toChannelFromBotOAuthScope;
+        return this.toChannelFromBotOAuthScope;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CompletableFuture<ClaimsIdentity> authenticateChannelRequest(String authHeader) {
+        if (StringUtils.isBlank(authHeader.trim())) {
+            return this.credentialsFactory.isAuthenticationDisabled().thenApply(isAuthDisabled -> {
+               if (!isAuthDisabled) {
+                   throw new AuthenticationException("Unauthorized Access. Request is not authorized");
+               }
+
+                // In the scenario where auth is disabled, we still want to have the isAuthenticated flag set in the
+                // ClaimsIdentity. To do this requires adding in an empty claim. Since ChannelServiceHandler calls are
+                // always a skill callback call, we set the skill claim too.
+                return SkillValidation.createAnonymousSkillClaim();
+            });
+        }
+
         return jwtTokenValidation_ValidateAuthHeader(authHeader, "unknown", null);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CompletableFuture<AuthenticateRequestResult> authenticateRequest(Activity activity, String authHeader) {
         return jwtTokenValidation_AuthenticateRequest(activity, authHeader).thenCompose(claimsIdentity -> {
                 String outboundAudience = SkillValidation.isSkillClaim(claimsIdentity.claims()) ?
                                           JwtTokenValidation.getAppIdFromClaims(claimsIdentity.claims()) :
-                                          toChannelFromBotOAuthScope;
+                                          this.toChannelFromBotOAuthScope;
 
-                generateCallerId(credentialsFactory, claimsIdentity, callerId).thenCompose(resultCallerId -> {
+                return generateCallerId(this.credentialsFactory, claimsIdentity, this.callerId).thenCompose(callerId -> {
                         ConnectorFactoryImpl connectorFactory = new ConnectorFactoryImpl(
-                                                             BuiltinBotFrameworkAuthentication.getAppId(claimsIdentity),
-                                                             toChannelFromBotOAuthScope,
-                                                             toChannelFromBotLoginUrl,
-                                                             validateAuthority,
-                                                             credentialsFactory);
+                            getAppId(claimsIdentity),
+                            this.toChannelFromBotOAuthScope,
+                            this.toChannelFromBotLoginUrl,
+                            this.validateAuthority,
+                            this.credentialsFactory);
 
                         AuthenticateRequestResult authenticateRequestResult = new AuthenticateRequestResult();
                         authenticateRequestResult.setClaimsIdentity(claimsIdentity);
                         authenticateRequestResult.setAudience(outboundAudience);
-                        authenticateRequestResult.setCallerId(resultCallerId);
+                        authenticateRequestResult.setCallerId(callerId);
                         authenticateRequestResult.setConnectorFactory(connectorFactory);
 
                         return authenticateRequestResult;
                     }
                 );
-                return null;
             }
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CompletableFuture<AuthenticateRequestResult> authenticateStreamingRequest(String authHeader, String channelIdHeader) {
-        credentialsFactory.isAuthenticationDisabled().thenCompose(result -> {
-                if (StringUtils.isBlank(channelIdHeader) && !result) {
-                    return Async.completeExceptionally(new RuntimeException());
+        if (StringUtils.isNotBlank(channelIdHeader)) {
+            this.credentialsFactory.isAuthenticationDisabled().thenCompose(isAuthDisabled -> {
+                if (isAuthDisabled) {
+                    return jwtTokenValidation_ValidateAuthHeader(authHeader, channelIdHeader, null).thenCompose(claimsIdentity -> {
+                            String outboundAudience = SkillValidation.isSkillClaim(claimsIdentity.claims()) ?
+                                JwtTokenValidation.getAppIdFromClaims(claimsIdentity.claims()) :
+                                this.toChannelFromBotOAuthScope;
+
+                            return generateCallerId(this.credentialsFactory, claimsIdentity, this.callerId).thenCompose(callerId -> {
+                                AuthenticateRequestResult authenticateRequestResult = new AuthenticateRequestResult();
+                                authenticateRequestResult.setClaimsIdentity(claimsIdentity);
+                                authenticateRequestResult.setAudience(outboundAudience);
+                                authenticateRequestResult.setCallerId(callerId);
+
+                                return CompletableFuture.completedFuture(authenticateRequestResult);
+                            });
+                        }
+                    );
                 }
                 return null;
-            }
-        );
-
-        return jwtTokenValidation_ValidateAuthHeader(authHeader, channelIdHeader, null).thenCompose(claimsIdentity -> {
-                String outboundAudience = SkillValidation.isSkillClaim(claimsIdentity.claims()) ?
-                                          JwtTokenValidation.getAppIdFromClaims(claimsIdentity.claims()) :
-                                          toChannelFromBotOAuthScope;
-
-                generateCallerId(credentialsFactory, claimsIdentity, callerId).thenCompose(callerId -> {
-                    AuthenticateRequestResult authenticateRequestResult = new AuthenticateRequestResult();
-                    authenticateRequestResult.setClaimsIdentity(claimsIdentity);
-                    authenticateRequestResult.setAudience(outboundAudience);
-                    authenticateRequestResult.setCallerId(callerId);
-
-                    return CompletableFuture.completedFuture(authenticateRequestResult);
-                });
-                return null;
-            }
-        );
+            });
+        }
+        throw new AuthenticationException("channelId header required");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ConnectorFactory createConnectorFactory(ClaimsIdentity claimsIdentity) {
         return new ConnectorFactoryImpl(
-            BuiltinBotFrameworkAuthentication.getAppId(claimsIdentity),
-            toChannelFromBotOAuthScope,
-            toChannelFromBotLoginUrl,
-            validateAuthority,
-            credentialsFactory);
+            getAppId(claimsIdentity),
+            this.toChannelFromBotOAuthScope,
+            this.toChannelFromBotLoginUrl,
+            this.validateAuthority,
+            this.credentialsFactory);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CompletableFuture<UserTokenClient> createUserTokenClient(ClaimsIdentity claimsIdentity) {
-        String appId = BuiltinBotFrameworkAuthentication.getAppId(claimsIdentity);
+        String appId = getAppId(claimsIdentity);
 
-        return credentialsFactory.createCredentials(appId, toChannelFromBotOAuthScope, toChannelFromBotLoginUrl, validateAuthority)
-            .thenCompose(credentials -> new UserTokenClientImpl(appId, credentials, oAuthUrl));
+        return this.credentialsFactory.createCredentials(
+            appId,
+            this.toChannelFromBotOAuthScope,
+            this.toChannelFromBotLoginUrl,
+            this.validateAuthority)
+                .thenApply(credentials -> new UserTokenClientImpl(appId, credentials, this.oAuthUrl));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BotFrameworkClient createBotFrameworkClient() {
-        return new BotFrameworkClientImpl(credentialsFactory, toChannelFromBotLoginUrl);
+        return new BotFrameworkClientImpl(this.credentialsFactory, this.toChannelFromBotLoginUrl);
     }
 
     // The following code is based on JwtTokenValidation.AuthenticateRequest
     private CompletableFuture<ClaimsIdentity> jwtTokenValidation_AuthenticateRequest(Activity activity, String authHeader) {
         if (StringUtils.isBlank(authHeader)) {
-            credentialsFactory.isAuthenticationDisabled().thenCompose(isAuthDisabled -> {
-                    if (!isAuthDisabled) {
-                        // No Auth Header. Auth is required. Request is not authorized.
-                        return Async.completeExceptionally(new RuntimeException());
-                    }
+            this.credentialsFactory.isAuthenticationDisabled().thenApply(isAuthDisabled -> {
+                if (!isAuthDisabled) {
+                    // No Auth Header. Auth is required. Request is not authorized.
+                    throw new AuthenticationException("Unauthorized Access. Request is not authorized");
+                }
                 return null;
             });
 
             // Check if the activity is for a skill call and is coming from the Emulator.
-            if (activity.getChannelId() == Channels.EMULATOR && activity.getRecipient().getRole() == RoleTypes.SKILL) {
+            if (activity.getChannelId().equals(Channels.EMULATOR) && activity.getRecipient().getRole().equals(RoleTypes.SKILL)) {
+                // Return an anonymous claim with an anonymous skill AppId
                 return CompletableFuture.completedFuture(SkillValidation.createAnonymousSkillClaim());
             }
 
             // In the scenario where Auth is disabled, we still want to have the
             // IsAuthenticated flag set in the ClaimsIdentity. To do this requires
             // adding in an empty claim.
-            return CompletableFuture.completedFuture(new ClaimsIdentity(AuthenticationConstants.ANONYMOUS_AUTH_TYPE, new HashMap<String, String>()));
+            return CompletableFuture.completedFuture(new ClaimsIdentity(AuthenticationConstants.ANONYMOUS_AUTH_TYPE));
         }
 
         // Validate the header and extract claims.
-        return jwtTokenValidation_ValidateAuthHeader(authHeader, activity.getChannelId(), activity.getServiceUrl())
-            .thenApply(result -> { return null; });
+        return jwtTokenValidation_ValidateAuthHeader(authHeader, activity.getChannelId(), activity.getServiceUrl());
     }
 
     private CompletableFuture<ClaimsIdentity> jwtTokenValidation_ValidateAuthHeader(String authHeader, String channelId, String serviceUrl) {
@@ -174,32 +209,33 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
     }
 
     private CompletableFuture<Void> jwtTokenValidation_ValidateClaims(Map<String, String> claims) {
-        if (authConfiguration.getClaimsValidator() != null) {
+        if (this.authConfiguration.getClaimsValidator() != null) {
             // Call the validation method if defined (it should throw an exception if the validation fails)
-            return authConfiguration.getClaimsValidator().validateClaims(claims);
+            return this.authConfiguration.getClaimsValidator().validateClaims(claims);
         } else if (SkillValidation.isSkillClaim(claims)) {
-            return Async.completeExceptionally(new RuntimeException("ClaimsValidator is required for validation of Skill Host calls."));
+            throw new AuthenticationException("ClaimsValidator is required for validation of Skill Host calls.");
         }
         return null;
     }
 
     private CompletableFuture<ClaimsIdentity> jwtTokenValidation_AuthenticateToken(String authHeader, String channelId, String serviceUrl) {
         if (SkillValidation.isSkillToken(authHeader)) {
-            return skillValidation_AuthenticateChannelToken(authHeader, channelId).thenApply(result -> {return null;});
+            return this.skillValidation_AuthenticateChannelToken(authHeader, channelId);
         }
 
         if (EmulatorValidation.isTokenFromEmulator(authHeader)) {
-            return emulatorValidation_AuthenticateEmulatorToken(authHeader, channelId).thenApply(result -> {return null;});
+            return this.emulatorValidation_AuthenticateEmulatorToken(authHeader, channelId);
         }
 
-        return governmentChannelValidation_AuthenticateChannelToken(authHeader, serviceUrl, channelId).thenApply(result -> {return null;});
+        return this.channelValidation_authenticateChannelToken(authHeader, serviceUrl, channelId);
     }
 
     // The following code is based on SkillValidation.AuthenticateChannelToken
     private CompletableFuture<ClaimsIdentity> skillValidation_AuthenticateChannelToken(String authHeader, String channelId) {
         TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();
         tokenValidationParameters.validateIssuer = true;
-        tokenValidationParameters.validIssuers = Arrays.asList( // TODO: presumably this table should also come from configuration
+        tokenValidationParameters.validIssuers = Arrays.asList(
+            // TODO: presumably this table should also come from configuration
             "https://sts.windows.net/d6d49420-f39b-4df7-a1dc-d59a935871db/", // Auth v3.1, 1.0 token
             "https://login.microsoftonline.com/d6d49420-f39b-4df7-a1dc-d59a935871db/v2.0", // Auth v3.1, 2.0 token
             "https://sts.windows.net/f8cdef31-a31e-4b4a-93e4-5f571e91255a/", // Auth v3.2, 1.0 token
@@ -214,68 +250,67 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
 
         // TODO: what should the openIdMetadataUrl be here?
         JwtTokenExtractor tokenExtractor = new JwtTokenExtractor(
-                                                                tokenValidationParameters,
-                                                                toBotFromEmulatorOpenIdMetadataUrl,
-                                                                AuthenticationConstants.ALLOWED_SIGNING_ALGORITHMS);
+            tokenValidationParameters,
+            this.toBotFromEmulatorOpenIdMetadataUrl,
+            AuthenticationConstants.ALLOWED_SIGNING_ALGORITHMS);
 
-        tokenExtractor.getIdentity(authHeader, channelId, authConfiguration.requiredEndorsements()).thenCompose(
+        return tokenExtractor.getIdentity(authHeader, channelId, this.authConfiguration.requiredEndorsements()).thenCompose(
             identity -> skillValidation_ValidateIdentity(identity).thenApply(result -> identity)
         );
-        return null;
     }
 
     private CompletableFuture<Void> skillValidation_ValidateIdentity(ClaimsIdentity identity) {
         if (identity == null) {
             // No valid identity. Not Authorized.
-            return Async.completeExceptionally(new RuntimeException("Invalid Identity"));
+            throw new AuthenticationException("SkillValidation.validateIdentity(): Invalid identity");
         }
 
         if (!identity.isAuthenticated()) {
             // The token is in some way invalid. Not Authorized.
-            return Async.completeExceptionally(new RuntimeException("Token Not Authenticated"));
+            throw new AuthenticationException("SkillValidation.validateIdentity(): Token not authenticated");
         }
 
-        String versionClaim = identity.claims().keySet().stream().filter
-            (k -> k == AuthenticationConstants.VERSION_CLAIM).findFirst().orElse(null);
+        String versionClaim = identity.getClaimValue(AuthenticationConstants.VERSION_CLAIM);
 
         if (versionClaim == null) {
             // No version claim
-            return Async.completeExceptionally(new RuntimeException("'{AuthenticationConstants.VersionClaim}' claim is required on skill Tokens."));
+            throw new AuthenticationException(String.format("SkillValidation.validateIdentity(): '%s' claim is required on skill Tokens.", AuthenticationConstants.VERSION_CLAIM));
         }
 
         // Look for the "aud" claim, but only if issued from the Bot Framework
-        String audienceClaim = identity.claims().keySet().stream().filter
-            (k -> k == AuthenticationConstants.AUDIENCE_CLAIM).findFirst().orElse(null);
+        String audienceClaim = identity.getClaimValue(AuthenticationConstants.AUDIENCE_CLAIM);
         if (StringUtils.isBlank(audienceClaim)) {
             // Claim is not present or doesn't have a value. Not Authorized.
-            return Async.completeExceptionally(new RuntimeException("'{AuthenticationConstants.AudienceClaim}' claim is required on skill Tokens."));
+            throw new AuthenticationException(String.format("SkillValidation.validateIdentity(): '%s' claim is required on skill Tokens.", AuthenticationConstants.AUDIENCE_CLAIM));
         }
 
-        return credentialsFactory.isValidAppId(audienceClaim).thenCompose(result -> {
+        return this.credentialsFactory.isValidAppId(audienceClaim).thenCompose(result -> {
             if (!result) {
                 // The AppId is not valid. Not Authorized.
-                return Async.completeExceptionally(new RuntimeException("Invalid audience."));
+                throw new AuthenticationException("SkillValidation.validateIdentity(): Invalid audience.");
             }
-        });
 
-        String appId = JwtTokenValidation.getAppIdFromClaims(identity.claims());
-        if (StringUtils.isBlank(appId)) {
-            // Invalid appId
-            return Async.completeExceptionally(new RuntimeException("Invalid appId."));
-        }
+            String appId = JwtTokenValidation.getAppIdFromClaims(identity.claims());
+            if (StringUtils.isBlank(appId)) {
+                // Invalid appId
+                throw new AuthenticationException("SkillValidation.validateIdentity(): Invalid appId.");
+            }
+            return null;
+        });
     }
 
     // The following code is based on EmulatorValidation.AuthenticateEmulatorToken
     private CompletableFuture<ClaimsIdentity> emulatorValidation_AuthenticateEmulatorToken(String authHeader, String channelId) {
         TokenValidationParameters toBotFromEmulatorTokenValidationParameters = new TokenValidationParameters();
         toBotFromEmulatorTokenValidationParameters.validateIssuer = true;
-        toBotFromEmulatorTokenValidationParameters.validIssuers = Arrays.asList( // TODO: presumably this table should also come from configuration
+        toBotFromEmulatorTokenValidationParameters.validIssuers = Arrays.asList(
+            // TODO: presumably this table should also come from configuration
             "https://sts.windows.net/d6d49420-f39b-4df7-a1dc-d59a935871db/",                    // Auth v3.1, 1.0 token
             "https://login.microsoftonline.com/d6d49420-f39b-4df7-a1dc-d59a935871db/v2.0",      // Auth v3.1, 2.0 token
             "https://sts.windows.net/f8cdef31-a31e-4b4a-93e4-5f571e91255a/",                    // Auth v3.2, 1.0 token
             "https://login.microsoftonline.com/f8cdef31-a31e-4b4a-93e4-5f571e91255a/v2.0",      // Auth v3.2, 2.0 token
             "https://sts.windows.net/cab8a31a-1906-4287-a0d8-4eef66b95f6e/",                    // Auth for US Gov, 1.0 token
-            "https://login.microsoftonline.us/cab8a31a-1906-4287-a0d8-4eef66b95f6e/v2.0" // Auth for US Gov, 2.0 token
+            "https://login.microsoftonline.us/cab8a31a-1906-4287-a0d8-4eef66b95f6e/v2.0"        // Auth for US Gov, 2.0 token
         );
         toBotFromEmulatorTokenValidationParameters.validateAudience = false; // Audience validation takes place manually in code.
         toBotFromEmulatorTokenValidationParameters.validateLifetime = true;
@@ -284,29 +319,28 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
 
         JwtTokenExtractor tokenExtractor = new JwtTokenExtractor(
             toBotFromEmulatorTokenValidationParameters,
-            toBotFromEmulatorOpenIdMetadataUrl,
+            this.toBotFromEmulatorOpenIdMetadataUrl,
             AuthenticationConstants.ALLOWED_SIGNING_ALGORITHMS);
 
-        return tokenExtractor.getIdentity(authHeader, channelId, authConfiguration.requiredEndorsements()).thenCompose(identity -> {
+        return tokenExtractor.getIdentity(authHeader, channelId, this.authConfiguration.requiredEndorsements()).thenCompose(identity -> {
             if (identity == null) {
                 // No valid identity. Not Authorized.
-                return Async.completeExceptionally(new RuntimeException("Invalid Identity"));
+                throw new AuthenticationException("Unauthorized. No valid identity.");
             }
 
             if (!identity.isAuthenticated()) {
                 // The token is in some way invalid. Not Authorized.
-                return Async.completeExceptionally(new RuntimeException("Token Not Authenticated"));
+                throw new AuthenticationException("Unauthorized. Is not authenticated");
             }
 
             // Now check that the AppID in the claimset matches
             // what we're looking for. Note that in a multi-tenant bot, this value
             // comes from developer code that may be reaching out to a service, hence the
             // Async validation.
-            String versionClaim = identity.claims().keySet().stream().filter
-                (k -> k == AuthenticationConstants.VERSION_CLAIM).findFirst().orElse(null);
+            String versionClaim = identity.getClaimValue(AuthenticationConstants.VERSION_CLAIM);
 
             if (versionClaim == null) {
-                return Async.completeExceptionally(new RuntimeException("'ver' claim is required on Emulator Tokens."));
+                throw new AuthenticationException("Unauthorized. 'ver' claim is required on Emulator Tokens.");
             }
 
             String tokenVersion = versionClaim;
@@ -314,66 +348,61 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
 
             // The Emulator, depending on Version, sends the AppId via either the
             // appid claim (Version 1) or the Authorized Party claim (Version 2).
-            if (StringUtils.isBlank(tokenVersion) || tokenVersion == "1.0") {
+            if (StringUtils.isBlank(tokenVersion) || tokenVersion.equals("1.0")) {
                 // either no Version or a version of "1.0" means we should look for
                 // the claim in the "appid" claim.
-                String appIdClaim = identity.claims().keySet().stream().filter
-                    (k -> k == AuthenticationConstants.APPID_CLAIM).findFirst().orElse(null);
+                String appIdClaim = identity.getClaimValue(AuthenticationConstants.APPID_CLAIM);
 
                 if (appIdClaim == null) {
                     // No claim around AppID. Not Authorized.
-                    throw new RuntimeException("'appid' claim is required on Emulator Token version '1.0'.");
+                    throw new AuthenticationException("Unauthorized. 'appid' claim is required on Emulator Token version '1.0'.");
                 }
 
                 appId = appIdClaim;
-            } else if (tokenVersion == "2.0") {
+            } else if (tokenVersion.equals("2.0")) {
                 // Emulator, "2.0" puts the AppId in the "azp" claim.
-                String appZClaim = identity.claims().keySet().stream().filter
-                    (k -> k == AuthenticationConstants.AUTHORIZED_PARTY).findFirst().orElse(null);
+                String appZClaim = identity.getClaimValue(AuthenticationConstants.AUTHORIZED_PARTY);
 
                 if (appZClaim == null) {
                     // No claim around AppID. Not Authorized.
-                    throw new RuntimeException("'azp' claim is required on Emulator Token version '2.0'.");
+                    throw new AuthenticationException("Unauthorized. 'azp' claim is required on Emulator Token version '2.0'.");
                 }
 
                 appId = appZClaim;
             } else {
                 // Unknown Version. Not Authorized.
-                throw new RuntimeException("Unknown Emulator Token version " + tokenVersion);
+                throw new AuthenticationException(String.format("Unauthorized. Unknown Emulator Token version %s.", tokenVersion));
             }
 
-            credentialsFactory.isValidAppId(appId).thenCompose(result -> {
+            return this.credentialsFactory.isValidAppId(appId).thenApply(result -> {
                 if (!result) {
-                    return Async.completeExceptionally(new RuntimeException("Invalid AppId passed on token"));
+                    throw new AuthenticationException("Unauthorized. Invalid AppId passed on token");
                 }
-                return null;
+                return identity;
             });
-
-            return CompletableFuture.completedFuture(identity);
         });
     }
 
     // The following code is based on GovernmentChannelValidation.AuthenticateChannelToken
-
-    private CompletableFuture<ClaimsIdentity> governmentChannelValidation_AuthenticateChannelToken(String authHeader, String serviceUrl, String channelId) {
-        TokenValidationParameters tokenValidationParameters = governmentChannelValidation_GetTokenValidationParameters();
+    private CompletableFuture<ClaimsIdentity> channelValidation_authenticateChannelToken(String authHeader, String serviceUrl, String channelId) {
+        TokenValidationParameters tokenValidationParameters = this.channelValidation_GetTokenValidationParameters();
 
         JwtTokenExtractor tokenExtractor = new JwtTokenExtractor(
             tokenValidationParameters,
-            toBotFromChannelOpenIdMetadataUrl,
+            this.toBotFromChannelOpenIdMetadataUrl,
             AuthenticationConstants.ALLOWED_SIGNING_ALGORITHMS);
 
-        return tokenExtractor.getIdentity(authHeader, channelId, authConfiguration.requiredEndorsements()).thenCompose(identity -> {
-            governmentChannelValidation_ValidateIdentity(identity, serviceUrl).thenApply(result -> null);
-
-            return CompletableFuture.completedFuture(identity);
-        });
+        return tokenExtractor.getIdentity(authHeader, channelId, this.authConfiguration.requiredEndorsements())
+            .thenCompose(identity -> governmentChannelValidation_ValidateIdentity(identity, serviceUrl)
+                .thenApply(result -> identity));
     }
 
-    private TokenValidationParameters governmentChannelValidation_GetTokenValidationParameters() {
+    private TokenValidationParameters channelValidation_GetTokenValidationParameters() {
         TokenValidationParameters tokenValidationParameters = new TokenValidationParameters();
         tokenValidationParameters.validateIssuer = true;
-        tokenValidationParameters.validIssuers = Arrays.asList(toBotFromChannelTokenIssuer);
+        tokenValidationParameters.validIssuers = Arrays.asList(this.toBotFromChannelTokenIssuer);
+
+        // Audience validation takes place in JwtTokenExtractor
         tokenValidationParameters.validateAudience = false;
         tokenValidationParameters.validateLifetime = true;
         tokenValidationParameters.clockSkew = Duration.ofMinutes(5);
@@ -386,12 +415,12 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
     private CompletableFuture<Void> governmentChannelValidation_ValidateIdentity(ClaimsIdentity identity, String serviceUrl) {
         if (identity == null) {
             // No valid identity. Not Authorized.
-            throw new RuntimeException();
+            throw new AuthenticationException("Unauthorized. No valid identity.");
         }
 
         if (!identity.isAuthenticated()) {
             // The token is in some way invalid. Not Authorized.
-            throw new RuntimeException();
+            throw new AuthenticationException("Unauthorized. Is not authenticated");
         }
 
         // Now check that the AppID in the claimset matches
@@ -400,43 +429,46 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
         // async validation.
 
         // Look for the "aud" claim, but only if issued from the Bot Framework
-        String audienceClaim = identity.claims().keySet().stream().filter
-            (k -> k == AuthenticationConstants.AUDIENCE_CLAIM).findFirst().orElse(null);
-
-        if (audienceClaim == null) {
-            // The relevant audience Claim MUST be present. Not Authorized.
-            throw new RuntimeException();
-        }
+        String audienceClaim = identity.getClaimValue(AuthenticationConstants.AUDIENCE_CLAIM);
 
         // The AppId from the claim in the token must match the AppId specified by the developer.
         // In this case, the token is destined for the app, so we find the app ID in the audience claim.
         if (StringUtils.isBlank(audienceClaim)) {
             // Claim is present, but doesn't have a value. Not Authorized.
-            throw new RuntimeException();
+            throw new AuthenticationException("Unauthorized. Issuer Claim MUST be present.");
         }
 
-        credentialsFactory.isValidAppId(audienceClaim).thenCompose(result -> {
+        return this.credentialsFactory.isValidAppId(audienceClaim).thenCompose(result -> {
             if (!result) {
                 // The AppId is not valid. Not Authorized.
-                return Async.completeExceptionally(new RuntimeException("Invalid AppId passed on token: " + audienceClaim));
+                throw new AuthenticationException("Invalid AppId passed on token: " + audienceClaim);
+            }
+
+            if (serviceUrl != null) {
+                String serviceUrlClaim = identity.getClaimValue(AuthenticationConstants.SERVICE_URL_CLAIM);
+
+                if (StringUtils.isBlank(serviceUrlClaim)) {
+                    // Claim must be present. Not Authorized.
+                    throw new AuthenticationException("Unauthorized. ServiceUrl claim should be present");
+                }
+
+                if (!serviceUrlClaim.equalsIgnoreCase(serviceUrlClaim)) {
+                    // Claim must match. Not Authorized.
+                    throw new AuthenticationException("Unauthorized. ServiceUrl claim do not match.");
+                }
             }
             return null;
         });
+    }
 
-        if (serviceUrl != null) {
-            String serviceUrlClaim = identity.claims().keySet().stream().filter
-                (k -> k == AuthenticationConstants.SERVICE_URL_CLAIM).findFirst().orElse(null);
-
-            if (StringUtils.isBlank(serviceUrlClaim)) {
-                // Claim must be present. Not Authorized.
-                return Async.completeExceptionally(new RuntimeException());
-            }
-
-            if (!serviceUrlClaim.equalsIgnoreCase(serviceUrlClaim)) {
-                // Claim must match. Not Authorized.
-                return Async.completeExceptionally(new RuntimeException());
-            }
-        }
-        return null;
+    private String getAppId(ClaimsIdentity claimsIdentity) {
+        // For requests from channel App Id is in Audience claim of JWT token. For emulator it is in AppId claim. For
+        // unauthenticated requests we have anonymous claimsIdentity provided auth is disabled.
+        // For Activities coming from Emulator AppId claim contains the Bot's AAD AppId.
+        String audienceClaim = claimsIdentity.getClaimValue(AuthenticationConstants.AUDIENCE_CLAIM);
+        String appId = audienceClaim != null
+            ? audienceClaim
+            : claimsIdentity.getClaimValue(AuthenticationConstants.APPID_CLAIM);
+        return appId;
     }
 }

@@ -15,17 +15,18 @@ public class CloudChannelServiceHandler extends ChannelServiceHandlerBase {
 
     /**
      * Initializes a new instance of the {@link CloudChannelServiceHandler} class, using Bot Framework Authentication.
+     * @param withAuth The Bot Framework Authentication object.
      */
     public CloudChannelServiceHandler(BotFrameworkAuthentication withAuth) {
         if (withAuth == null) {
-            throw new IllegalArgumentException("withAuth");
+            throw new IllegalArgumentException("withAuth cannot be null");
         }
 
         auth = withAuth;
     }
 
     /**
-     * {@inheritDoc
+     * {@inheritDoc}
      */
     @Override
     protected CompletableFuture<ClaimsIdentity> authenticate(String authHeader) {

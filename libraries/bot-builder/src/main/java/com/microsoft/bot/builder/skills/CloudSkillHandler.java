@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package com.microsoft.bot.builder.skills;
 
 import com.microsoft.bot.builder.Bot;
@@ -11,25 +14,25 @@ import com.microsoft.bot.schema.ResourceResponse;
 import java.util.concurrent.CompletableFuture;
 
 /**
- *  A Bot Framework Handler for skills.
+ * A Bot Framework Handler for skills.
  */
 public class CloudSkillHandler extends CloudChannelServiceHandler {
 
     // The skill conversation reference.
-    public static final String SKILL_CONVERSATION_REFERENCE_KEY = String.format(
-        "%s.SkillConversationReference",
-        CloudSkillHandler.class.getPackage());
+    public static final String SKILL_CONVERSATION_REFERENCE_KEY =
+        "com.microsoft.bot.builder.skills.SkillConversationReference";
 
+    // Delegate that implements actual logic
     private final SkillHandlerImpl inner;
 
     /**
-     * Initializes a new instance of the {@link CloudChannelServiceHandler} class, using Bot Framework Authentication.
+     * Initializes a new instance of the {@link CloudSkillHandler} class using BotFrameworkAuth.
      * @param adapter An instance of the {@link BotAdapter} that will handle the request.
      * @param bot The {@link Bot} instance.
      * @param conversationIdFactory A {@link SkillConversationIdFactoryBase} to unpack the conversation ID and map it
      *                              to the calling bot.
-     * @param auth auth.
-     **/
+     * @param auth Bot Framework Authentication to use.
+     */
     public CloudSkillHandler(
         BotAdapter adapter,
         Bot bot,
@@ -79,7 +82,7 @@ public class CloudSkillHandler extends CloudChannelServiceHandler {
      * @param conversationId  conversationId.
      * @param activity        Activity to send.
      *
-     * @return
+     * @return Task for a resource response.
      */
     @Override
     protected CompletableFuture<ResourceResponse> onSendToConversation(
@@ -108,11 +111,11 @@ public class CloudSkillHandler extends CloudChannelServiceHandler {
      *
      * @param claimsIdentity  claimsIdentity for the bot, should have
      *                        AudienceClaim, AppIdClaim and ServiceUrlClaim.
-     * @param conversationId  Conversation D.
+     * @param conversationId  Conversation ID.
      * @param activityId      activityId the reply is to (OPTIONAL).
      * @param activity        Activity to send.
      *
-     * @return
+     * @return Task for a resource response.
      */
     @Override
     protected CompletableFuture<ResourceResponse> onReplyToActivity(

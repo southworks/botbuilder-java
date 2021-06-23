@@ -57,14 +57,6 @@ public class BotFrameworkClientImpl extends BotFrameworkClient {
         Activity activity,
         Class<T> type
     ) {
-        if (fromBotId == null) {
-            throw new IllegalArgumentException("fromBotId cannot be null");
-        }
-
-        if (toBotId == null) {
-            throw new IllegalArgumentException("toBotId cannot be null");
-        }
-
         if (toUri == null) {
             throw new IllegalArgumentException("toUri cannot be null");
         }

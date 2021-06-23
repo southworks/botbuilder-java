@@ -13,12 +13,12 @@ import java.util.concurrent.CompletableFuture;
 /**
  *  A Bot Framework Handler for skills.
  */
-public class CloudSkillHanlder extends CloudChannelServiceHandler {
+public class CloudSkillHandler extends CloudChannelServiceHandler {
 
     // The skill conversation reference.
     public static final String SKILL_CONVERSATION_REFERENCE_KEY = String.format(
         "%s.SkillConversationReference",
-        CloudSkillHanlder.class.getPackage());
+        CloudSkillHandler.class.getPackage());
 
     private final SkillHandlerImpl inner;
 
@@ -30,7 +30,7 @@ public class CloudSkillHanlder extends CloudChannelServiceHandler {
      *                              to the calling bot.
      * @param auth auth.
      **/
-    public CloudSkillHanlder(
+    public CloudSkillHandler(
         BotAdapter adapter,
         Bot bot,
         SkillConversationIdFactoryBase conversationIdFactory,

@@ -57,6 +57,10 @@ public class SkillHandlerImpl {
             throw new IllegalArgumentException("bot cannot be null");
         }
 
+        if (withConversationIdFactory == null) {
+            throw new IllegalArgumentException("withConversationIdFactory cannot be null");
+        }
+
         this.skillConversationReferenceKey = withSkillConversationReferenceKey;
         this.adapter = withAdapter;
         this.bot = withBot;

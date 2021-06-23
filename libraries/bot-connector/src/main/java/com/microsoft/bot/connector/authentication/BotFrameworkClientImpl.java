@@ -30,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class BotFrameworkClientImpl extends BotFrameworkClient {
     private final ServiceClientCredentialsFactory credentialsFactory;
-    private OkHttpClient httpClient;
+    private final OkHttpClient httpClient;
     private final String loginEndpoint;
 
     private final Logger logger = LoggerFactory.getLogger(BotFrameworkClientImpl.class);
@@ -41,6 +41,7 @@ public class BotFrameworkClientImpl extends BotFrameworkClient {
     ) {
         credentialsFactory = withCredentialsFactory;
         loginEndpoint = withLoginEndpoint;
+        httpClient = new OkHttpClient();
     }
 
     /**
@@ -77,14 +78,14 @@ public class BotFrameworkClientImpl extends BotFrameworkClient {
         }
 
         if (activity == null) {
-            throw new IllegalArgumentException("conversationId cannot be null");
+            throw new IllegalArgumentException("activity cannot be null");
         }
 
         if (type == null) {
             throw new IllegalArgumentException("type cannot be null");
         }
 
-        logger.info(String.format("post to skill %1$s at %2$s", toBotId, toUri));
+        logger.info(String.format("post to skill '%s' at '%s'", toBotId, toUri));
 
         return credentialsFactory.createCredentials(fromBotId, toBotId, loginEndpoint, true)
             .thenCompose(credentials -> {
@@ -95,7 +96,7 @@ public class BotFrameworkClientImpl extends BotFrameworkClient {
             ConversationReference conversationReference = new ConversationReference();
             conversationReference.setServiceUrl(activityClone.getServiceUrl());
             conversationReference.setActivityId(activityClone.getId());
-            conversationReference.setChannelId(activity.getChannelId());
+            conversationReference.setChannelId(activityClone.getChannelId());
             conversationReference.setLocale(activityClone.getLocale());
 
             ConversationAccount conversationAccount = new ConversationAccount();
@@ -104,16 +105,16 @@ public class BotFrameworkClientImpl extends BotFrameworkClient {
             conversationAccount.setConversationType(activityClone.getConversation().getConversationType());
             conversationAccount.setAadObjectId(activityClone.getConversation().getAadObjectId());
             conversationAccount.setIsGroup(activityClone.getConversation().isGroup());
-            for (String key : conversationAccount.getProperties().keySet()) {
-                activityClone.setProperties(key, conversationAccount.getProperties().get(key));
+            for (String key : activityClone.getProperties().keySet()) {
+                conversationAccount.setProperties(key, activityClone.getProperties().get(key));
             }
             conversationAccount.setRole(activityClone.getConversation().getRole());
             conversationAccount.setTenantId(activityClone.getConversation().getTenantId());
 
             conversationReference.setConversation(conversationAccount);
-
             activityClone.setRelatesTo(conversationReference);
             activityClone.getConversation().setId(conversationId);
+            // Fixes: https://github.com/microsoft/botframework-sdk/issues/5785
             if (activityClone.getRecipient() == null) {
                 activityClone.setRecipient(new ChannelAccount());
             }
@@ -147,7 +148,7 @@ public class BotFrameworkClientImpl extends BotFrameworkClient {
                     // Otherwise we can assume we don't have a T to deserialize
                     // So just log the content so it's not lost.
                     logger.error(String.format(
-                        "Bot Framework call failed to %1$s returning %2$s and %3$s",
+                        "Bot Framework call failed to '%s' returning '%d' and '%s'",
                         toUri,
                         response.code(),
                         response.body())

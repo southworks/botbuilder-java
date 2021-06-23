@@ -57,6 +57,9 @@ public class BotFrameworkClientImpl extends BotFrameworkClient {
         Activity activity,
         Class<T> type
     ) {
+        // We are not checking fromBotId and toBotId for null to address BB-dotnet issue #5577
+        // (https://github.com/microsoft/botbuilder-dotnet/issues/5577)
+
         if (toUri == null) {
             throw new IllegalArgumentException("toUri cannot be null");
         }

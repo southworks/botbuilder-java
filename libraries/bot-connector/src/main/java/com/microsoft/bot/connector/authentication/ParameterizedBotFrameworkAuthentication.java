@@ -7,6 +7,7 @@ import com.microsoft.bot.connector.Channels;
 import com.microsoft.bot.connector.skills.BotFrameworkClient;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.RoleTypes;
+import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import java.time.Duration;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
     private String callerId;
     private ServiceClientCredentialsFactory credentialsFactory;
     private AuthenticationConfiguration authConfiguration;
+    private final OkHttpClient httpClient;
 
     public ParameterizedBotFrameworkAuthentication(
         Boolean withValidateAuthority,
@@ -36,7 +38,8 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
         String withToBotFromEmulatorOpenIdMetadataUrl,
         String withCallerId,
         ServiceClientCredentialsFactory withCredentialsFactory,
-        AuthenticationConfiguration withAuthConfiguration
+        AuthenticationConfiguration withAuthConfiguration,
+        OkHttpClient withHttpClient
     ) {
         this.validateAuthority = withValidateAuthority;
         this.toChannelFromBotLoginUrl = withToChannelFromBotLoginUrl;
@@ -48,6 +51,7 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
         this.callerId = withCallerId;
         this.credentialsFactory = withCredentialsFactory;
         this.authConfiguration = withAuthConfiguration;
+        this.httpClient = withHttpClient != null ? withHttpClient : new OkHttpClient();
     }
 
     /**
@@ -173,7 +177,7 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
      */
     @Override
     public BotFrameworkClient createBotFrameworkClient() {
-        return new BotFrameworkClientImpl(this.credentialsFactory, this.toChannelFromBotLoginUrl);
+        return new BotFrameworkClientImpl(this.credentialsFactory, this.toChannelFromBotLoginUrl, this.httpClient);
     }
 
     // The following code is based on JwtTokenValidation.AuthenticateRequest

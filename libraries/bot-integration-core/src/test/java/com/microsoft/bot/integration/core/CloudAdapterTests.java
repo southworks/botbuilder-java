@@ -23,8 +23,10 @@ import com.microsoft.bot.connector.authentication.PasswordServiceClientCredentia
 import com.microsoft.bot.connector.authentication.UserTokenClient;
 import com.microsoft.bot.integration.CloudAdapter;
 import com.microsoft.bot.restclient.credentials.ServiceClientCredentials;
+import com.microsoft.bot.restclient.serializer.JacksonAdapter;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityTypes;
+import com.microsoft.bot.schema.ChannelAccount;
 import com.microsoft.bot.schema.ConversationAccount;
 import com.microsoft.bot.schema.ConversationReference;
 import com.microsoft.bot.schema.InvokeResponse;
@@ -33,13 +35,18 @@ import com.microsoft.bot.schema.TokenExchangeRequest;
 import com.microsoft.bot.schema.TokenExchangeState;
 import com.microsoft.bot.schema.TokenResponse;
 import com.microsoft.bot.schema.TokenStatus;
+import com.sun.jndi.toolkit.url.Uri;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.omg.IOP.Encoding;
 
+import java.io.IOException;
 import java.security.Identity;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,21 +64,12 @@ public class CloudAdapterTests {
     @Test
     public void basicMessageActivity() {
         // Arrange
-        /*HttpRequest httpRequestMock = mock(HttpRequest.class);
-        when(httpRequestMock.httpMethod()).thenReturn(HttpMethod.POST);
-        when(httpRequestMock.body()).thenReturn(this.createMessageActivityStream());
-        when(httpRequestMock.headers()).thenReturn(headerDictionaryMock);
-
-        HttpResponse httpResponseMock = mock(HttpResponse.class);*/
-
         Bot botMock = mock(Bot.class);
         when(botMock.onTurn(any (TurnContext.class))).thenReturn(CompletableFuture.completedFuture());
 
-        Activity activity = new Activity("");
-
         // Act
         CloudAdapter adapter = new CloudAdapter();
-        adapter.processIncomingActivity("", activity, botMock);
+        adapter.processIncomingActivity("", createMessageActivity(), botMock);
 
         verify(botMock, atMostOnce()).onTurn(any (TurnContext.class));
     }
@@ -79,87 +77,52 @@ public class CloudAdapterTests {
     @Test
     public void invokeActivity() {
         // Arrange
-
         InvokeResponseBot botMock = mock(InvokeResponseBot.class);
         when(botMock.onTurn(any (TurnContext.class))).thenReturn(CompletableFuture.completedFuture());
 
-        Activity activity = new Activity("");
-
         // Act
         CloudAdapter adapter = new CloudAdapter();
-        adapter.processIncomingActivity(, activity, botMock);
+        adapter.processIncomingActivity("", createInvokeActivity(), botMock);
 
         verify(botMock, atMostOnce()).onTurn(any (TurnContext.class));
-    }
-
-    public void webSocketRequestShouldCallAuthenticateStreamingRequest() {
-        // Note this test only checks that a GET request will result in an auth call and a socket accept
-        // it doesn't valid that activities over that socket get to the bot or back
-
-        // Arrange
-        WebSock
     }
 
     @Test
     public void messageActivityWithHttpClient() {
         // Arrange
-        //
-        HttpRequest httpRequestMock = mock(HttpRequest.class);
-        when(httpRequestMock.httpMethod()).thenReturn(HttpMethod.POST);
-        when(httpRequestMock.body()).thenReturn(createMessageActivityStream());
-        when(httpRequestMock.headers()).thenReturn(headerDictionaryMock);
-
-        HttpResponse httpResponseMock = mock(HttpResponse.class);
-
-        /*var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        mockHttpMessageHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .Returns((HttpRequestMessage request, CancellationToken cancellationToken) => Task.FromResult(CreateInternalHttpResponse()));*/
-
-        OkHttpClient httpClient = new OkHttpClient();
-
-
-
         Bot bot = new MessageBot();
 
         // Act
-        BotFrameworkAuthentication cloudEnvironment = BotFrameworkAuthenticationFactory.create(null, false, null, null, null, null, null, null, null, new PasswordServiceClientCredentialFactory(), new AuthenticationConfiguration(), httpClientFactoryMock, null);
+        BotFrameworkAuthentication cloudEnvironment = BotFrameworkAuthenticationFactory.create(
+            null,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            new PasswordServiceClientCredentialFactory(),
+            new AuthenticationConfiguration());
         CloudAdapter adapter = new CloudAdapter(cloudEnvironment);
-        adapter.processIncomingActivity(, activity, bot);
+        adapter.processIncomingActivity("", createMessageActivity(), bot);
 
         // Assert
         verify()
     }
 
-    /*/ NOPE
-    public void constructorWithConfiguration() {
-
-        Map<String, String> appSettings = new HashMap<>();
-        static {
-            appSettings.put("MicrosoftAppId", "appId");
-            appSettings.put("MicrosoftAppPassword", "appPassword");
-            appSettings.put("ChannelService", GovernmentAuthenticationConstants.CHANNELSERVICE);
-        }
-
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(appSettings)
-            .Build();
-
-        _ = new CloudAdapter(configuration);
-
-         TODO: work out what might be a reasonable side effect
-    }*/
-
+    @Ignore
     @Test
     public void badRequest() {
         // Arrange
-        var headerDictionaryMock = new Mock<IHeaderDictionary>();
-        headerDictionaryMock.Setup(h => h[It.Is<string>(v => v == "Authorization")]).Returns<string>(null);
+        /*var headerDictionaryMock = new Mock<IHeaderDictionary>();
+        headerDictionaryMock.Setup(h => h[It.Is<string>(v => v == "Authorization")]).Returns<string>(null);*/
 
-        HttpRequest httpRequestMock = mock(HttpRequest.class);
+        /*HttpRequest httpRequestMock = mock(HttpRequest.class);
         when(httpRequestMock.httpMethod()).thenReturn(HttpMethod.POST);
         when(httpRequestMock.body()).thenReturn(createBadRequestStream());
-        when(httpRequestMock.headers()).thenReturn(headerDictionaryMock);
+        when(httpRequestMock.headers()).thenReturn(headerDictionaryMock);*/
 
         HttpResponse httpResponseMock = mock(HttpResponse.class);
         setup
@@ -168,11 +131,9 @@ public class CloudAdapterTests {
         Bot botMock = mock(Bot.class);
         when(botMock.onTurn(any (TurnContext.class))).thenReturn(CompletableFuture.completedFuture());
 
-        Activity activity = new Activity("");
-
         // Act
         CloudAdapter adapter = new CloudAdapter();
-        adapter.processIncomingActivity(, activity, botMock);
+        adapter.processIncomingActivity("", createMessageActivity(), botMock);
 
         // Assert
         verify(botMock, never()).onTurn(any (TurnContext.class));
@@ -182,13 +143,6 @@ public class CloudAdapterTests {
     @Test
     public void injectCloudEnvironment() {
         // Arrange
-        HttpRequest httpRequestMock = mock(HttpRequest.class);
-        when(httpRequestMock.httpMethod()).thenReturn(HttpMethod.POST);
-        when(httpRequestMock.body()).thenReturn(createMessageActivityStream());
-        when(httpRequestMock.headers()).thenReturn(headerDictionaryMock);
-
-        HttpResponse httpResponseMock = mock(HttpResponse.class);
-
         Bot botMock = mock(Bot.class);
         when(botMock.onTurn(any (TurnContext.class))).thenReturn(CompletableFuture.completedFuture(null));
 
@@ -204,11 +158,9 @@ public class CloudAdapterTests {
         when(cloudEnvironmentMock.authenticateRequest(any (Activity.class), any (String.class))).thenReturn(CompletableFuture.completedFuture(authenticateRequestResult));
         when(cloudEnvironmentMock.createUserTokenClient(any (ClaimsIdentity.class))).thenReturn(CompletableFuture.completedFuture(userTokenClient));
 
-        OkHttpClient httpClient = mock(OkHttpClient.class);
-
         // Act
         CloudAdapter adapter = new CloudAdapter(cloudEnvironmentMock);
-        adapter.processIncomingActivity("", activity, botMock);
+        adapter.processIncomingActivity("", createMessageActivity(), botMock);
 
         // Assert
         verify(botMock, atMostOnce()).onTurn(any (TurnContext.class));
@@ -229,13 +181,6 @@ public class CloudAdapterTests {
         String relatesToActivityId = "relatesToActivityId";
         String connectionName = "connectionName";
 
-        HttpRequest httpRequestMock = mock(HttpRequest.class);
-        when(httpRequestMock.httpMethod()).thenReturn(HttpMethod.POST);
-        when(httpRequestMock.body()).thenReturn(createMessageActivityStream(userId, channelId, conversationId, recipientId, relatesToActivityId));
-        when(httpRequestMock.headers()).thenReturn(headerDictionaryMock.Object);
-
-        HttpResponse httpResponseMock = mock(HttpResponse.class);
-
         AuthenticateRequestResult authenticateRequestResult = new AuthenticateRequestResult();
         authenticateRequestResult.setClaimsIdentity(new ClaimsIdentity(""));
         authenticateRequestResult.setConnectorFactory(new TestConnectorFactory());
@@ -251,6 +196,7 @@ public class CloudAdapterTests {
         UserTokenClientBot bot = new UserTokenClientBot(connectionName);
 
         // Act
+        Activity activity = createMessageActivity(userId, channelId, conversationId, recipientId, relatesToActivityId);
         CloudAdapter adapter = new CloudAdapter(cloudEnvironmentMock);
         adapter.processIncomingActivity("", activity, bot);
 
@@ -273,11 +219,19 @@ public class CloudAdapterTests {
 
         // this code is testing the internal CreateTokenExchangeState function by doing the work in reverse
         String state = (String) args_GetSignInResource[0];
-        String json = Encoding.UTF8.GetString(Convert.FromBase64String(state));
-        TokenExchangeState tokenExchangeState = JsonConvert.DeserializeObject<TokenExchangeState>(json);
+        String json = "";
+        TokenExchangeState tokenExchangeState = null;
+
+        try {
+            JacksonAdapter jacksonAdapter = new JacksonAdapter();
+            json = jacksonAdapter.serialize(state);
+            tokenExchangeState = jacksonAdapter.deserialize(json, TokenExchangeState.class);
+        } catch (IOException e) {
+        }
+
         Assert.assertEquals(connectionName, tokenExchangeState.getConnectionName());
         Assert.assertEquals(appId, tokenExchangeState.getMsAppId());
-        Assert.assertEquals(conversationId, tokenExchangeState.getConversation().getId());
+        Assert.assertEquals(conversationId, tokenExchangeState.getConversation().getConversation().getId());
         Assert.assertEquals(recipientId, tokenExchangeState.getConversation().getBot().getId());
         Assert.assertEquals(relatesToActivityId, tokenExchangeState.getRelatesTo().getActivityId());
 
@@ -305,13 +259,6 @@ public class CloudAdapterTests {
         // this is just a basic test to verify the wire-up of a ConnectorFactory in the CloudAdapter
 
         // Arrange
-        HttpRequest httpRequestMock = mock(HttpRequest.class);
-        when(httpRequestMock.httpMethod()).thenReturn(HttpMethod.POST);
-        when(httpRequestMock.body()).thenReturn(this.createMessageActivityStream());
-        when(httpRequestMock.headers()).thenReturn(headerDictionaryMock.Object);
-
-        HttpResponse httpResponseMock = mock(HttpResponse.class);
-
         ClaimsIdentity claimsIdentity = new ClaimsIdentity("");
 
         AuthenticateRequestResult authenticateRequestResult = new AuthenticateRequestResult();
@@ -331,10 +278,10 @@ public class CloudAdapterTests {
 
         // Act
         CloudAdapter adapter = new CloudAdapter(cloudEnvironmentMock);
-        adapter.processIncomingActivity("", activity, bot);
+        adapter.processIncomingActivity("", createMessageActivity(), bot);
 
         // Assert
-        Assert.assertEquals("audience", bot.authorization.Parameter);
+        Assert.assertEquals("audience", bot.authorization);
         Assert.assertEquals(claimsIdentity, bot.identity);
         Assert.assertEquals(userTokenClient, bot.userTokenClient);
         Assert.assertTrue(bot.connectorClient != null);
@@ -354,9 +301,9 @@ public class CloudAdapterTests {
         TestUserTokenClient userTokenClient = new TestUserTokenClient("appId");
 
         BotFrameworkAuthentication cloudEnvironmentMock = mock(BotFrameworkAuthentication.class);
-        when(cloudEnvironmentMock.authenticateRequest()).thenReturn(CompletableFuture.completedFuture(authenticateRequestResult));
-        when(cloudEnvironmentMock.createConnectorFactory()).thenReturn(new TestConnectorFactory());
-        when(cloudEnvironmentMock.createUserTokenClient()).thenReturn(CompletableFuture.completedFuture(userTokenClient));
+        when(cloudEnvironmentMock.authenticateRequest(any (Activity.class), any(String.class))).thenReturn(CompletableFuture.completedFuture(authenticateRequestResult));
+        when(cloudEnvironmentMock.createConnectorFactory(any (ClaimsIdentity.class))).thenReturn(new TestConnectorFactory());
+        when(cloudEnvironmentMock.createUserTokenClient(any (ClaimsIdentity.class))).thenReturn(CompletableFuture.completedFuture(userTokenClient));
 
         ConnectorFactoryBot bot = new ConnectorFactoryBot();
 
@@ -424,16 +371,37 @@ public class CloudAdapterTests {
         Assert.assertEquals(expectedServiceUrl, actualServiceUrl6);
     }
 
-    private static Stream createMessageActivityStream() {
-        return createMessageActivityStream("userId", "channelId", "conversationId", "botId", "relatesToActivityId");
+    private static Activity createMessageActivity() {
+        return createMessageActivity("userId", "channelId", "conversationId", "botId", "relatesToActivityId");
     }
 
-    private static Stream createMessageActivityStream(String userId, String channelId, String conversationId, String recipient, String relatesToActivityId) {
+    private static Activity createMessageActivity(String userId, String channelId, String conversationId, String recipient, String relatesToActivityId) {
+        ConversationAccount conversationAccount = new ConversationAccount();
+        conversationAccount.setId(conversationId);
 
+        ChannelAccount fromChannelAccount = new ChannelAccount();
+        fromChannelAccount.setId(userId);
+
+        ChannelAccount toChannelAccount = new ChannelAccount();
+        toChannelAccount.setId(recipient);
+
+        ConversationReference conversationReference = new ConversationReference();
+        conversationReference.setActivityId(relatesToActivityId);
+
+        Activity activity = new Activity(ActivityTypes.MESSAGE);
+        activity.setText("hi");
+        activity.setServiceUrl("http://localhost");
+        activity.setChannelId(channelId);
+        activity.setConversation(conversationAccount);
+        activity.setFrom(fromChannelAccount);
+        activity.setLocale("locale");
+        activity.setRecipient(toChannelAccount);
+        activity.setRelatesTo(conversationReference);
+
+        return activity;
     }
 
-    private static Stream createBadRequestStream()
-    {
+    private static Stream createBadRequestStream() {
         MemoryStream stream = new MemoryStream();
         StreamWriter textWriter = new StreamWriter(stream);
         textWriter.Write("this.is.not.json");
@@ -442,21 +410,16 @@ public class CloudAdapterTests {
         return stream;
     }
 
-    private static HttpResponseMessage CreateInternalHttpResponse()
-    {
+    private static HttpResponseMessage createInternalHttpResponse() {
         var response = new HttpResponseMessage(HttpStatusCode.OK);
         response.Content = new StringContent(new JObject { { "id", "SendActivityId" } }.ToString());
         return response;
     }
 
-    private static Stream CreateInvokeActivityStream()
-    {
-        return CreateStream(new Activity { Type = ActivityTypes.Invoke, ServiceUrl = "http://localhost" });
-    }
-
-    private static Stream createStream(Activity activity) {
-        String json = ;
-
+    private static Activity createInvokeActivity() {
+        Activity activity = new Activity(ActivityTypes.INVOKE);
+        activity.setServiceUrl("http://localhost");
+        return activity;
     }
 
     private class ConnectorFactoryBot implements Bot {
@@ -465,7 +428,7 @@ public class CloudAdapterTests {
         private UserTokenClient userTokenClient;
         private BotCallbackHandler botCallbackHandler;
         private String oAuthScope;
-        private AuthenticationHeaderValue authorization;
+        private String authorization;
 
         public Identity getIdentity() {
             return identity;
@@ -487,7 +450,7 @@ public class CloudAdapterTests {
             return oAuthScope;
         }
 
-        public AuthenticationHeaderValue getAuthorization() {
+        public String getAuthorization() {
             return authorization;
         }
 
@@ -502,9 +465,12 @@ public class CloudAdapterTests {
             ConnectorFactory connectorFactory = turnContext.getTurnState().get(ConnectorFactory.class);
 
             connectorFactory.create("http://localhost/originalServiceUrl", oAuthScope).thenCompose(connector -> {
-                    var request = new HttpRequestMessage();
-                    connector.Credentials.ProcessHttpRequestAsync(request).thenApply(result -> null);
-                    Authorization = request.Headers.Authorization;
+                    OkHttpClient.Builder builder = new OkHttpClient.Builder();
+                    connector.credentials().applyCredentialsFilter(builder);
+                    OkHttpClient client = builder.build();
+                    client.newCall(RequestBody.create());
+
+                    authorization = client // request.Headers.Authorization;
                 }
             );
         }
@@ -565,7 +531,7 @@ public class CloudAdapterTests {
             appId = withAppId;
         }
 
-        private Dictionary<String, Object[]> record = new Dictionary<String, Object[]>();
+        private Map<String, Object[]> record = new HashMap<>();
 
         public Object[] getRecord(String key) {
             return record.get(key);
@@ -598,7 +564,8 @@ public class CloudAdapterTests {
 
         @Override
         public CompletableFuture<Map<String, TokenResponse>> getAadTokens(String userId, String connectionName, List<String> resourceUrls, String channelId) {
-            return null;
+            capture(MethodBase.GetCurrentMethod().Name, userId, connectionName, resourceUrls, channelId);
+            return CompletableFuture.completedFuture(new HashMap<String, TokenResponse>() { });
         }
 
         @Override
@@ -647,14 +614,9 @@ public class CloudAdapterTests {
             testToken = withTestToken;
         }
 
-        public CompletableFuture<Void> processHttpRequest(HttpRequestMessage request) {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", testToken);
-            return CompletableFuture.completedFuture(null);
-        }
-
         @Override
         public void applyCredentialsFilter(OkHttpClient.Builder clientBuilder) {
-            // Required by inheritance
+
         }
     }
 
@@ -662,7 +624,7 @@ public class CloudAdapterTests {
         @Override
         public CompletableFuture<ConnectorClient> create(String serviceUrl, String audience) {
             TestCredentials credentials = new TestCredentials(StringUtils.isNotBlank(audience) ? audience : "test-token");
-            return CompletableFuture.completedFuture(new ConnectorClient(new Uri(serviceUrl), credentials, null, disposeHttpClient: true));
+            return CompletableFuture.completedFuture(new ConnectorClient(new Uri(serviceUrl), credentials, null, true));
         }
     }
 }

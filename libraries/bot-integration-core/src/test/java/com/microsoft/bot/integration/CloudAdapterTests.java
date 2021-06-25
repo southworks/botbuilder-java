@@ -1,17 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-package com.microsoft.bot.integration.core;
+package com.microsoft.bot.integration;
 
-import com.auth0.jwt.interfaces.Claim;
-import com.microsoft.aad.msal4j.HttpMethod;
-import com.microsoft.aad.msal4j.HttpRequest;
-import com.microsoft.aad.msal4j.HttpResponse;
 import com.microsoft.bot.builder.Bot;
+import com.microsoft.bot.builder.BotAdapter;
 import com.microsoft.bot.builder.BotCallbackHandler;
+import com.microsoft.bot.builder.BotFrameworkAdapter;
+import com.microsoft.bot.builder.CloudAdapterBase;
 import com.microsoft.bot.builder.MessageFactory;
 import com.microsoft.bot.builder.TurnContext;
+import com.microsoft.bot.builder.TurnContextImpl;
 import com.microsoft.bot.connector.ConnectorClient;
+import com.microsoft.bot.connector.Conversations;
 import com.microsoft.bot.connector.authentication.AuthenticateRequestResult;
 import com.microsoft.bot.connector.authentication.AuthenticationConfiguration;
 import com.microsoft.bot.connector.authentication.BotFrameworkAuthentication;
@@ -21,76 +22,69 @@ import com.microsoft.bot.connector.authentication.ConnectorFactory;
 import com.microsoft.bot.connector.authentication.GovernmentAuthenticationConstants;
 import com.microsoft.bot.connector.authentication.PasswordServiceClientCredentialFactory;
 import com.microsoft.bot.connector.authentication.UserTokenClient;
-import com.microsoft.bot.integration.CloudAdapter;
+import com.microsoft.bot.connector.rest.RestConnectorClient;
 import com.microsoft.bot.restclient.credentials.ServiceClientCredentials;
 import com.microsoft.bot.restclient.serializer.JacksonAdapter;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityTypes;
 import com.microsoft.bot.schema.ChannelAccount;
 import com.microsoft.bot.schema.ConversationAccount;
+import com.microsoft.bot.schema.ConversationParameters;
 import com.microsoft.bot.schema.ConversationReference;
-import com.microsoft.bot.schema.InvokeResponse;
+import com.microsoft.bot.schema.ConversationResourceResponse;
 import com.microsoft.bot.schema.SignInResource;
 import com.microsoft.bot.schema.TokenExchangeRequest;
 import com.microsoft.bot.schema.TokenExchangeState;
 import com.microsoft.bot.schema.TokenResponse;
 import com.microsoft.bot.schema.TokenStatus;
-import com.sun.jndi.toolkit.url.Uri;
+import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.omg.IOP.Encoding;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.security.Identity;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
-
-import static org.mockito.Mockito.*;
 
 public class CloudAdapterTests {
 
     @Test
     public void basicMessageActivity() {
         // Arrange
-        Bot botMock = mock(Bot.class);
-        when(botMock.onTurn(any (TurnContext.class))).thenReturn(CompletableFuture.completedFuture());
+        Bot botMock = Mockito.mock(Bot.class);
+        Mockito.when(
+            botMock.onTurn(
+                Mockito.any(TurnContext.class)
+            )
+        ).thenReturn(CompletableFuture.completedFuture(null));
 
         // Act
         CloudAdapter adapter = new CloudAdapter();
         adapter.processIncomingActivity("", createMessageActivity(), botMock);
 
-        verify(botMock, atMostOnce()).onTurn(any (TurnContext.class));
+        // Assert
+        Mockito.verify(botMock, Mockito.times(1)).onTurn(Mockito.any(TurnContext.class));
     }
 
     @Test
-    public void invokeActivity() {
-        // Arrange
-        InvokeResponseBot botMock = mock(InvokeResponseBot.class);
-        when(botMock.onTurn(any (TurnContext.class))).thenReturn(CompletableFuture.completedFuture());
-
-        // Act
-        CloudAdapter adapter = new CloudAdapter();
-        adapter.processIncomingActivity("", createInvokeActivity(), botMock);
-
-        verify(botMock, atMostOnce()).onTurn(any (TurnContext.class));
-    }
-
-    @Test
-    public void messageActivityWithHttpClient() {
+    public void messageActivityWithHttpClient() throws IOException {
         // Arrange
         Bot bot = new MessageBot();
+        OkHttpClient httpClientMock = Mockito.mock(OkHttpClient.class);
+        Mockito.when(
+            httpClientMock.newCall(Mockito.any(Request.class)).execute()
+        ).thenReturn(createInternalHttpResponse());
 
         // Act
         BotFrameworkAuthentication cloudEnvironment = BotFrameworkAuthenticationFactory.create(
@@ -104,46 +98,42 @@ public class CloudAdapterTests {
             null,
             null,
             new PasswordServiceClientCredentialFactory(),
-            new AuthenticationConfiguration());
+            new AuthenticationConfiguration(),
+            httpClientMock);
         CloudAdapter adapter = new CloudAdapter(cloudEnvironment);
         adapter.processIncomingActivity("", createMessageActivity(), bot);
 
         // Assert
-        verify()
+        Mockito.verify(httpClientMock, Mockito.times(1)).newCall(Mockito.any(Request.class)).execute();
     }
 
-    @Ignore
     @Test
-    public void badRequest() {
-        // Arrange
-        /*var headerDictionaryMock = new Mock<IHeaderDictionary>();
-        headerDictionaryMock.Setup(h => h[It.Is<string>(v => v == "Authorization")]).Returns<string>(null);*/
+    public void constructorWithConfiguration() {
+        Properties appSettings = new Properties();
+        appSettings.put("MicrosoftAppId", "appId");
+        appSettings.put("MicrosoftAppPassword", "appPassword");
+        appSettings.put("ChannelService", GovernmentAuthenticationConstants.CHANNELSERVICE);
 
-        /*HttpRequest httpRequestMock = mock(HttpRequest.class);
-        when(httpRequestMock.httpMethod()).thenReturn(HttpMethod.POST);
-        when(httpRequestMock.body()).thenReturn(createBadRequestStream());
-        when(httpRequestMock.headers()).thenReturn(headerDictionaryMock);*/
-
-        HttpResponse httpResponseMock = mock(HttpResponse.class);
-        httpResponseMock.SetupProperty(x => x.StatusCode);
-
-        Bot botMock = mock(Bot.class);
-        when(botMock.onTurn(any (TurnContext.class))).thenReturn(CompletableFuture.completedFuture());
+        ConfigurationTest configuration = new ConfigurationTest();
+        configuration.setProperties(appSettings);
 
         // Act
-        CloudAdapter adapter = new CloudAdapter();
-        adapter.processIncomingActivity("", createMessageActivity(), botMock);
+        CloudAdapter adapter = new CloudAdapter(configuration);
 
         // Assert
-        verify(botMock, never()).onTurn(any (TurnContext.class));
-        Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, httpResponseMock.statusCode());
+
+        // TODO: work out what might be a reasonable side effect
     }
 
     @Test
     public void injectCloudEnvironment() {
         // Arrange
-        Bot botMock = mock(Bot.class);
-        when(botMock.onTurn(any (TurnContext.class))).thenReturn(CompletableFuture.completedFuture(null));
+        Bot botMock = Mockito.mock(Bot.class);
+        Mockito.when(
+            botMock.onTurn(
+                Mockito.any(TurnContext.class)
+            )
+        ).thenReturn(CompletableFuture.completedFuture(null));
 
         AuthenticateRequestResult authenticateRequestResult = new AuthenticateRequestResult();
         authenticateRequestResult.setClaimsIdentity(new ClaimsIdentity(""));
@@ -153,17 +143,24 @@ public class CloudAdapterTests {
 
         TestUserTokenClient userTokenClient = new TestUserTokenClient("appId");
 
-        BotFrameworkAuthentication cloudEnvironmentMock = mock(BotFrameworkAuthentication.class);
-        when(cloudEnvironmentMock.authenticateRequest(any (Activity.class), any (String.class))).thenReturn(CompletableFuture.completedFuture(authenticateRequestResult));
-        when(cloudEnvironmentMock.createUserTokenClient(any (ClaimsIdentity.class))).thenReturn(CompletableFuture.completedFuture(userTokenClient));
+        BotFrameworkAuthentication cloudEnvironmentMock = Mockito.mock(BotFrameworkAuthentication.class);
+        Mockito.when(
+            cloudEnvironmentMock.authenticateRequest(
+                Mockito.any(Activity.class),
+                Mockito.any(String.class))
+        ).thenReturn(CompletableFuture.completedFuture(authenticateRequestResult));
+        Mockito.when(
+            cloudEnvironmentMock.createUserTokenClient(
+                Mockito.any(ClaimsIdentity.class))
+        ).thenReturn(CompletableFuture.completedFuture(userTokenClient));
 
         // Act
         CloudAdapter adapter = new CloudAdapter(cloudEnvironmentMock);
         adapter.processIncomingActivity("", createMessageActivity(), botMock);
 
         // Assert
-        verify(botMock, atMostOnce()).onTurn(any (TurnContext.class));
-        verify(cloudEnvironmentMock, atMostOnce()).authenticateRequest(any (Activity.class), any(String.class));
+        Mockito.verify(botMock, Mockito.times(1)).onTurn(Mockito.any (TurnContext.class));
+        Mockito.verify(cloudEnvironmentMock, Mockito.times(1)).authenticateRequest(Mockito.any(Activity.class), Mockito.anyString());
     }
 
     @Test
@@ -188,9 +185,16 @@ public class CloudAdapterTests {
 
         TestUserTokenClient userTokenClient = new TestUserTokenClient(appId);
 
-        BotFrameworkAuthentication cloudEnvironmentMock = mock(BotFrameworkAuthentication.class);
-        when(cloudEnvironmentMock.authenticateRequest(any (Activity.class), any (String.class))).thenReturn(CompletableFuture.completedFuture(authenticateRequestResult));
-        when(cloudEnvironmentMock.createUserTokenClient(any (ClaimsIdentity.class))).thenReturn(CompletableFuture.completedFuture(userTokenClient));
+        BotFrameworkAuthentication cloudEnvironmentMock = Mockito.mock(BotFrameworkAuthentication.class);
+        Mockito.when(
+            cloudEnvironmentMock.authenticateRequest(
+                Mockito.any(Activity.class),
+                Mockito.anyString())
+        ).thenReturn(CompletableFuture.completedFuture(authenticateRequestResult));
+        Mockito.when(
+            cloudEnvironmentMock.createUserTokenClient(
+                Mockito.any(ClaimsIdentity.class))
+        ).thenReturn(CompletableFuture.completedFuture(userTokenClient));
 
         UserTokenClientBot bot = new UserTokenClientBot(connectionName);
 
@@ -200,13 +204,13 @@ public class CloudAdapterTests {
         adapter.processIncomingActivity("", activity, bot);
 
         // Assert
-        Object[] args_ExchangeToken = userTokenClient.getRecord("exchangeToken");
+        Object[] args_ExchangeToken = userTokenClient.getRecord().get("exchangeToken");
         Assert.assertEquals(userId, (String) args_ExchangeToken[0]);
         Assert.assertEquals(connectionName, (String)args_ExchangeToken[1]);
         Assert.assertEquals(channelId, (String) args_ExchangeToken[2]);
         Assert.assertEquals("TokenExchangeRequest", args_ExchangeToken[3].getClass().getName());
 
-        Object[] args_GetAadTokens = userTokenClient.getRecord("getSignInResource");
+        Object[] args_GetAadTokens = userTokenClient.getRecord().get("getAadTokens");
         Assert.assertEquals(userId, (String) args_GetAadTokens[0]);
         Assert.assertEquals(connectionName, (String) args_GetAadTokens[1]);
         Assert.assertEquals("x", ((String[]) args_GetAadTokens[2])[0]);
@@ -214,11 +218,11 @@ public class CloudAdapterTests {
 
         Assert.assertEquals(channelId, (String) args_GetAadTokens[3]);
 
-        Object[] args_GetSignInResource = userTokenClient.getRecord("getSignInResource");
+        Object[] args_GetSignInResource = userTokenClient.getRecord().get("getSignInResource");
 
         // this code is testing the internal CreateTokenExchangeState function by doing the work in reverse
         String state = (String) args_GetSignInResource[0];
-        String json = "";
+        String json;
         TokenExchangeState tokenExchangeState = null;
 
         try {
@@ -236,18 +240,18 @@ public class CloudAdapterTests {
 
         Assert.assertEquals("finalRedirect", (String) args_GetSignInResource[1]);
 
-        Object[] args_GetTokenStatus = userTokenClient.getRecord("GetTokenStatusAsync");
+        Object[] args_GetTokenStatus = userTokenClient.getRecord().get("getTokenStatus");
         Assert.assertEquals(userId, (String) args_GetTokenStatus[0]);
         Assert.assertEquals(channelId, (String) args_GetTokenStatus[1]);
         Assert.assertEquals("includeFilter", (String)args_GetTokenStatus[2]);
 
-        Object[] args_GetUserToken = userTokenClient.getRecord("GetUserTokenAsync");
+        Object[] args_GetUserToken = userTokenClient.getRecord().get("getUserToken");
         Assert.assertEquals(userId, (String)args_GetUserToken[0]);
         Assert.assertEquals(connectionName, (String)args_GetUserToken[1]);
         Assert.assertEquals(channelId, (String)args_GetUserToken[2]);
         Assert.assertEquals("magicCode", (String)args_GetUserToken[3]);
 
-        Object[] args_SignOutUser = userTokenClient.getRecord("SignOutUserAsync");
+        Object[] args_SignOutUser = userTokenClient.getRecord().get("signOutUser");
         Assert.assertEquals(userId, (String) args_SignOutUser[0]);
         Assert.assertEquals(connectionName, (String) args_SignOutUser[1]);
         Assert.assertEquals(channelId, (String) args_SignOutUser[2]);
@@ -268,10 +272,20 @@ public class CloudAdapterTests {
 
         TestUserTokenClient userTokenClient = new TestUserTokenClient("appId");
 
-        BotFrameworkAuthentication cloudEnvironmentMock = mock(BotFrameworkAuthentication.class);
-        when(cloudEnvironmentMock.authenticateRequest(any (Activity.class), any (String.class))).thenReturn(CompletableFuture.completedFuture(authenticateRequestResult));
-        when(cloudEnvironmentMock.createConnectorFactory(any (ClaimsIdentity.class))).thenReturn(new TestConnectorFactory());
-        when(cloudEnvironmentMock.createUserTokenClient(any (ClaimsIdentity.class))).thenReturn(CompletableFuture.completedFuture(userTokenClient));
+        BotFrameworkAuthentication cloudEnvironmentMock = Mockito.mock(BotFrameworkAuthentication.class);
+        Mockito.when(
+            cloudEnvironmentMock.authenticateRequest(
+                Mockito.any(Activity.class),
+                Mockito.anyString())
+        ).thenReturn(CompletableFuture.completedFuture(authenticateRequestResult));
+        Mockito.when(
+            cloudEnvironmentMock.createConnectorFactory(
+                Mockito.any(ClaimsIdentity.class))
+        ).thenReturn(new TestConnectorFactory());
+        Mockito.when(
+            cloudEnvironmentMock.createUserTokenClient(
+                Mockito.any(ClaimsIdentity.class))
+        ).thenReturn(CompletableFuture.completedFuture(userTokenClient));
 
         ConnectorFactoryBot bot = new ConnectorFactoryBot();
 
@@ -289,6 +303,7 @@ public class CloudAdapterTests {
 
     @Test
     public void cloudAdapterContinueConversation() {
+        // Arrange
         ClaimsIdentity claimsIdentity = new ClaimsIdentity("");
 
         AuthenticateRequestResult authenticateRequestResult = new AuthenticateRequestResult();
@@ -299,10 +314,20 @@ public class CloudAdapterTests {
 
         TestUserTokenClient userTokenClient = new TestUserTokenClient("appId");
 
-        BotFrameworkAuthentication cloudEnvironmentMock = mock(BotFrameworkAuthentication.class);
-        when(cloudEnvironmentMock.authenticateRequest(any (Activity.class), any(String.class))).thenReturn(CompletableFuture.completedFuture(authenticateRequestResult));
-        when(cloudEnvironmentMock.createConnectorFactory(any (ClaimsIdentity.class))).thenReturn(new TestConnectorFactory());
-        when(cloudEnvironmentMock.createUserTokenClient(any (ClaimsIdentity.class))).thenReturn(CompletableFuture.completedFuture(userTokenClient));
+        BotFrameworkAuthentication cloudEnvironmentMock = Mockito.mock(BotFrameworkAuthentication.class);
+        Mockito.when(
+            cloudEnvironmentMock.authenticateRequest(
+                Mockito.any(Activity.class),
+                Mockito.anyString())
+        ).thenReturn(CompletableFuture.completedFuture(authenticateRequestResult));
+        Mockito.when(
+            cloudEnvironmentMock.createConnectorFactory(
+                Mockito.any(ClaimsIdentity.class))
+        ).thenReturn(new TestConnectorFactory());
+        Mockito.when(
+            cloudEnvironmentMock.createUserTokenClient(
+                Mockito.any(ClaimsIdentity.class))
+        ).thenReturn(CompletableFuture.completedFuture(userTokenClient));
 
         // NOTE: present in C# but not used
         ConnectorFactoryBot bot = new ConnectorFactoryBot();
@@ -316,40 +341,40 @@ public class CloudAdapterTests {
         conversationReference.setServiceUrl(expectedServiceUrl);
         conversationReference.setConversation(conversationAccount);
 
-        String actualServiceUrl1 = "";
-        String actualServiceUrl2 = "";
-        String actualServiceUrl3 = "";
-        String actualServiceUrl4 = "";
-        String actualServiceUrl5 = "";
-        String actualServiceUrl6 = "";
+        final String[] actualServiceUrl1 = {""};
+        final String[] actualServiceUrl2 = {""};
+        final String[] actualServiceUrl3 = {""};
+        final String[] actualServiceUrl4 = {""};
+        final String[] actualServiceUrl5 = {""};
+        final String[] actualServiceUrl6 = {""};
 
         BotCallbackHandler callback1 = (t) -> {
-            actualServiceUrl1 = t.getActivity().getServiceUrl();
+            actualServiceUrl1[0] = t.getActivity().getServiceUrl();
             return CompletableFuture.completedFuture(null);
         };
 
         BotCallbackHandler callback2 = (t) -> {
-            actualServiceUrl2 = t.getActivity().getServiceUrl();
+            actualServiceUrl2[0] = t.getActivity().getServiceUrl();
             return CompletableFuture.completedFuture(null);
         };
 
         BotCallbackHandler callback3 = (t) -> {
-            actualServiceUrl3 = t.getActivity().getServiceUrl();
+            actualServiceUrl3[0] = t.getActivity().getServiceUrl();
             return CompletableFuture.completedFuture(null);
         };
 
         BotCallbackHandler callback4 = (t) -> {
-            actualServiceUrl4 = t.getActivity().getServiceUrl();
+            actualServiceUrl4[0] = t.getActivity().getServiceUrl();
             return CompletableFuture.completedFuture(null);
         };
 
         BotCallbackHandler callback5 = (t) -> {
-            actualServiceUrl5 = t.getActivity().getServiceUrl();
+            actualServiceUrl5[0] = t.getActivity().getServiceUrl();
             return CompletableFuture.completedFuture(null);
         };
 
         BotCallbackHandler callback6 = (t) -> {
-            actualServiceUrl6 = t.getActivity().getServiceUrl();
+            actualServiceUrl6[0] = t.getActivity().getServiceUrl();
             return CompletableFuture.completedFuture(null);
         };
 
@@ -363,12 +388,89 @@ public class CloudAdapterTests {
         adapter.continueConversation(claimsIdentity, conversationReference, "audience", callback6);
 
         // Assert
-        Assert.assertEquals(expectedServiceUrl, actualServiceUrl1);
-        Assert.assertEquals(expectedServiceUrl, actualServiceUrl2);
-        Assert.assertEquals(expectedServiceUrl, actualServiceUrl3);
-        Assert.assertEquals(expectedServiceUrl, actualServiceUrl4);
-        Assert.assertEquals(expectedServiceUrl, actualServiceUrl5);
-        Assert.assertEquals(expectedServiceUrl, actualServiceUrl6);
+        Assert.assertEquals(expectedServiceUrl, actualServiceUrl1[0]);
+        Assert.assertEquals(expectedServiceUrl, actualServiceUrl2[0]);
+        Assert.assertEquals(expectedServiceUrl, actualServiceUrl3[0]);
+        Assert.assertEquals(expectedServiceUrl, actualServiceUrl4[0]);
+        Assert.assertEquals(expectedServiceUrl, actualServiceUrl5[0]);
+        Assert.assertEquals(expectedServiceUrl, actualServiceUrl6[0]);
+    }
+
+    @Test
+    public void cloudAdapterDelay() {
+        DelayHelper.test(new CloudAdapter());
+    }
+
+    @Test
+    public void cloudAdapterCreateConversation() {
+        // Arrange
+        ClaimsIdentity claimsIdentity = new ClaimsIdentity("");
+
+        AuthenticateRequestResult authenticateRequestResult = new AuthenticateRequestResult();
+        authenticateRequestResult.setClaimsIdentity(claimsIdentity);
+        authenticateRequestResult.setConnectorFactory(new TestConnectorFactory());
+        authenticateRequestResult.setAudience("audience");
+        authenticateRequestResult.setCallerId("callerId");
+
+        TestUserTokenClient userTokenClient = new TestUserTokenClient("appId");
+
+        ConversationResourceResponse conversationResourceResponse = new ConversationResourceResponse();
+        Conversations conversationsMock = Mockito.mock(Conversations.class);
+        Mockito.when(
+            conversationsMock.createConversation(
+                Mockito.any(ConversationParameters.class))
+        ).thenReturn(CompletableFuture.completedFuture(conversationResourceResponse));
+
+        ConnectorClient connectorMock = Mockito.mock(ConnectorClient.class);
+        Mockito.when(
+            connectorMock.getConversations()
+        ).thenReturn(conversationsMock);
+
+        String expectedServiceUrl = "http://serviceUrl";
+        String expectedAudience = "audience";
+
+        ConnectorFactory connectorFactoryMock = Mockito.mock(ConnectorFactory.class);
+        Mockito.when(
+            connectorFactoryMock.create(
+                expectedServiceUrl,
+                expectedAudience)
+        ).thenReturn(CompletableFuture.completedFuture(connectorMock));
+
+        BotFrameworkAuthentication cloudEnvironmentMock = Mockito.mock(BotFrameworkAuthentication.class);
+        Mockito.when(
+            cloudEnvironmentMock.authenticateRequest(
+                Mockito.any(Activity.class),
+                Mockito.anyString())
+        ).thenReturn(CompletableFuture.completedFuture(authenticateRequestResult));
+        Mockito.when(
+            cloudEnvironmentMock.createConnectorFactory(
+                Mockito.any(ClaimsIdentity.class))
+        ).thenReturn(connectorFactoryMock);
+        Mockito.when(
+            cloudEnvironmentMock.createUserTokenClient(
+                Mockito.any(ClaimsIdentity.class))
+        ).thenReturn(CompletableFuture.completedFuture(userTokenClient));
+
+        String expectedChannelId = "expected-channel-id";
+        final String[] actualChannelId = {""};
+
+        BotCallbackHandler callback1 = (t) -> {
+            actualChannelId[0] = t.getActivity().getChannelId();
+            return CompletableFuture.completedFuture(null);
+        };
+
+        ConversationParameters conversationParameters = new ConversationParameters();
+        conversationParameters.setIsGroup(false);
+        conversationParameters.setBot(new ChannelAccount());
+        conversationParameters.setMembers(Arrays.asList(new ChannelAccount()));
+        conversationParameters.setTenantId("tenantId");
+
+        // Act
+        CloudAdapter adapter = new CloudAdapter(cloudEnvironmentMock);
+        adapter.createConversation("botAppId", expectedChannelId, expectedServiceUrl, expectedAudience, conversationParameters, callback1).join();
+
+        // Assert
+        Assert.assertEquals(expectedAudience, actualChannelId[0]);
     }
 
     private static Activity createMessageActivity() {
@@ -401,80 +503,18 @@ public class CloudAdapterTests {
         return activity;
     }
 
-    private static Stream createBadRequestStream() {
-        MemoryStream stream = new MemoryStream();
-        StreamWriter textWriter = new StreamWriter(stream);
-        textWriter.Write("this.is.not.json");
-        textWriter.Flush();
-        stream.Seek(0, SeekOrigin.Begin);
-        return stream;
+    private static Response createInternalHttpResponse() {
+        return new Response.Builder()
+            .code(200)
+            .body(ResponseBody.create(
+                MediaType.get("application/json; charset=utf-8"),
+                "{\"id\": \"sendActivityId\"}"))
+            .build();
     }
 
-    private static HttpResponseMessage createInternalHttpResponse() {
-        var response = new HttpResponseMessage(HttpStatusCode.OK);
-        response.Content = new StringContent(new JObject { { "id", "SendActivityId" } }.ToString());
-        return response;
-    }
-
-    private static Activity createInvokeActivity() {
-        Activity activity = new Activity(ActivityTypes.INVOKE);
-        activity.setServiceUrl("http://localhost");
-        return activity;
-    }
-
-    private class ConnectorFactoryBot implements Bot {
-        private Identity identity;
-        private ConnectorClient connectorClient;
-        private UserTokenClient userTokenClient;
-        private BotCallbackHandler botCallbackHandler;
-        private String oAuthScope;
-        private String authorization;
-
-        public Identity getIdentity() {
-            return identity;
-        }
-
-        // NOTE: probably not needed:
-        public ConnectorClient getConnectorClient() {
-            return connectorClient;
-        }
-
-        public UserTokenClient getUserTokenClient() {
-            return userTokenClient;
-        }
-
-        public BotCallbackHandler getBotCallbackHandler() {
-            return botCallbackHandler;
-        }
-
-        public String getoAuthScope() {
-            return oAuthScope;
-        }
-
-        public String getAuthorization() {
-            return authorization;
-        }
-        //
-
+    private class MessageBot implements Bot {
         public CompletableFuture<Void> onTurn(TurnContext turnContext) {
-            // verify the bot-framework protocol TurnState has been setup by the adapter
-            identity = turnContext.getTurnState().get("BotIdentity");
-            connectorClient = turnContext.getTurnState().get(ConnectorClient.class);
-            userTokenClient = turnContext.getTurnState().get(UserTokenClient.class);
-            botCallbackHandler = turnContext.getTurnState().get(BotCallbackHandler.class);
-            oAuthScope = turnContext.getTurnState().get("Microsoft.Bot.Builder.BotAdapter.OAuthScope");
-
-            ConnectorFactory connectorFactory = turnContext.getTurnState().get(ConnectorFactory.class);
-
-            connectorFactory.create("http://localhost/originalServiceUrl", oAuthScope).thenCompose(connector -> {
-                    OkHttpClient.Builder builder = new OkHttpClient.Builder();
-                    connector.credentials().applyCredentialsFilter(builder);
-                    OkHttpClient client = builder.build();
-                    client.newCall(RequestBody.create());
-
-                    authorization = client // request.Headers.Authorization;
-                }
-            );
+            return turnContext.sendActivity(MessageFactory.text("rage.rage.against.the.dying.of.the.light")).thenApply(result -> null);
         }
     }
 
@@ -488,41 +528,43 @@ public class CloudAdapterTests {
         public CompletableFuture<Void> onTurn(TurnContext turnContext) {
             // in the product the following calls are made from within the sign-in prompt begin and continue methods
 
-            UserTokenClient userTokenClient = turnContext.getTurnState().get(UserTokenClient.class);
+            UserTokenClient userTokenClient = turnContext.getTurnState().get(CloudAdapterBase.USER_TOKEN_CLIENT_KEY);
 
             userTokenClient.exchangeToken(
                 turnContext.getActivity().getFrom().getId(),
                 connectionName,
                 turnContext.getActivity().getChannelId(),
-                new TokenExchangeRequest() { }).thenApply(result -> null);
+                new TokenExchangeRequest() { }).join();
 
             userTokenClient.getAadTokens(
                 turnContext.getActivity().getFrom().getId(),
                 connectionName,
                 Arrays.asList("x", "y"),
-                turnContext.getActivity().getChannelId()).thenApply(result -> null);
+                turnContext.getActivity().getChannelId()).join();
 
             userTokenClient.getSignInResource(
                 connectionName,
                 turnContext.getActivity(),
-                "finalRedirect").thenApply(result -> null);
+                "finalRedirect").join();
 
             userTokenClient.getTokenStatus(
                 turnContext.getActivity().getFrom().getId(),
                 turnContext.getActivity().getChannelId(),
-                "includeFilter").thenApply(result -> null);
+                "includeFilter").join();
 
             userTokenClient.getUserToken(
                 turnContext.getActivity().getFrom().getId(),
                 connectionName,
                 turnContext.getActivity().getChannelId(),
-                "magicCode").thenApply(result -> null);
+                "magicCode").join();
 
             // in the product code the sign-out call is generally run as a general intercept before any dialog logic
-            return userTokenClient.signOutUser(
+
+            userTokenClient.signOutUser(
                 turnContext.getActivity().getFrom().getId(),
                 connectionName,
-                turnContext.getActivity().getChannelId());
+                turnContext.getActivity().getChannelId()).join();
+            return null;
         }
     }
 
@@ -535,8 +577,8 @@ public class CloudAdapterTests {
 
         private Map<String, Object[]> record = new HashMap<>();
 
-        public Object[] getRecord(String key) {
-            return record.get(key);
+        public Map<String, Object[]> getRecord() {
+            return record;
         }
 
         @Override
@@ -581,30 +623,40 @@ public class CloudAdapterTests {
         }
     }
 
-    private class InvokeResponseBot implements Bot {
+    private class ConnectorFactoryBot implements Bot {
+        private Identity identity;
+        private ConnectorClient connectorClient;
+        private UserTokenClient userTokenClient;
+        private BotCallbackHandler botCallbackHandler;
+        private String oAuthScope;
+        private String authorization;
 
-        @Override
         public CompletableFuture<Void> onTurn(TurnContext turnContext) {
-            return turnContext.sendActivity(createInvokeResponseActivity()).thenApply(result -> null);
-        }
+            // verify the bot-framework protocol TurnState has been setup by the adapter
+            identity = turnContext.getTurnState().get(BotFrameworkAdapter.BOT_IDENTITY_KEY);
+            connectorClient = turnContext.getTurnState().get(BotFrameworkAdapter.CONNECTOR_CLIENT_KEY);
+            userTokenClient = turnContext.getTurnState().get(CloudAdapterBase.USER_TOKEN_CLIENT_KEY);
+            botCallbackHandler = turnContext.getTurnState().get(TurnContextImpl.BOT_CALLBACK_HANDLER_KEY);
+            oAuthScope = turnContext.getTurnState().get(BotAdapter.OAUTH_SCOPE_KEY);
 
-        private Activity createInvokeResponseActivity() {
-            Activity activity = new Activity(ActivityTypes.INVOKE_RESPONSE);
-            InvokeResponse invokeResponse = new InvokeResponse(200, new Object[]{ "quite.honestly", "im.feeling.really.attacked.right.now" });
-            activity.setValue(invokeResponse);
+            ConnectorFactory connectorFactory = turnContext.getTurnState().get(CloudAdapterBase.CONNECTOR_FACTORY_KEY);
 
-            return activity;
-        }
-    }
-
-    private class MessageBot implements Bot {
-        public CompletableFuture<Void> onTurn(TurnContext turnContext) {
-            return turnContext.sendActivity(MessageFactory.text("rage.rage.against.the.dying.of.the.light")).thenApply(result -> null);
+            return connectorFactory.create("http://localhost/originalServiceUrl", oAuthScope).thenCompose(connector -> {
+                    OkHttpClient client = new OkHttpClient();
+                    OkHttpClient.Builder builder = client.newBuilder();
+                    connector.credentials().applyCredentialsFilter(builder);
+                    return null;
+                }
+            );
         }
     }
 
     private class TestCredentials implements ServiceClientCredentials {
         private String testToken;
+
+        public String getTestToken() {
+            return testToken;
+        }
 
         public TestCredentials(String withTestToken) {
             testToken = withTestToken;
@@ -612,7 +664,21 @@ public class CloudAdapterTests {
 
         @Override
         public void applyCredentialsFilter(OkHttpClient.Builder clientBuilder) {
-            // NOTE: required by inheritance
+            clientBuilder.interceptors().add(new TestCredentialsInterceptor(this));
+        }
+    }
+    public class TestCredentialsInterceptor implements Interceptor {
+        private TestCredentials credentials;
+
+        public TestCredentialsInterceptor(TestCredentials withCredentials) {
+            credentials = withCredentials
+        }
+
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            Request newRequest =
+                chain.request().newBuilder().header("Authorization", "Bearer " + credentials.getTestToken()).build();
+            return chain.proceed(newRequest);
         }
     }
 
@@ -620,7 +686,36 @@ public class CloudAdapterTests {
         @Override
         public CompletableFuture<ConnectorClient> create(String serviceUrl, String audience) {
             TestCredentials credentials = new TestCredentials(StringUtils.isNotBlank(audience) ? audience : "test-token");
-            return CompletableFuture.completedFuture(new ConnectorClient(new Uri(serviceUrl), credentials, null, true));
+            return CompletableFuture.completedFuture(new RestConnectorClient(serviceUrl, credentials));
+        }
+    }
+
+    private class ConfigurationTest implements Configuration {
+        private Properties properties;
+
+        public void setProperties(Properties withProperties) {
+            this.properties = withProperties;
+        }
+
+        @Override
+        public String getProperty(String key) {
+            return properties.getProperty(key);
+        }
+
+        @Override
+        public Properties getProperties() {
+            return this.properties;
+        }
+
+        @Override
+        public String[] getProperties(String key) {
+            String baseProperty = properties.getProperty(key);
+            if (baseProperty != null) {
+                String[] splitProperties = baseProperty.split(",");
+                return splitProperties;
+            } else {
+                return null;
+            }
         }
     }
 }

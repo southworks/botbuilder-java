@@ -26,7 +26,7 @@ public class CloudChannelServiceHandlerTests {
             null,
             "123",
             "456",
-            new Activity(ActivityTypes.MESSAGE)).thenApply(result -> null);
+            new Activity(ActivityTypes.MESSAGE)).join();
 
         Assert.assertEquals(AuthenticationConstants.ANONYMOUS_AUTH_TYPE, sut.getClaimsIdentity().getType());
         Assert.assertEquals(AuthenticationConstants.ANONYMOUS_SKILL_APPID, JwtTokenValidation.getAppIdFromClaims(sut.getClaimsIdentity().claims()));
@@ -41,10 +41,7 @@ public class CloudChannelServiceHandlerTests {
         }
 
         /**
-         * Initializes a new instance of the {@link CloudChannelServiceHandler} class,
-         * using Bot Framework Authentication.
-         *
-         * @param withAuth The Bot Framework Authentication object.
+         * {@inheritDoc}
          */
         public TestCloudChannelServiceHandler(BotFrameworkAuthentication withAuth) {
             super(withAuth);

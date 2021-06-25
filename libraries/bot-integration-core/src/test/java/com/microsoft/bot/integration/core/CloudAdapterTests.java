@@ -125,7 +125,6 @@ public class CloudAdapterTests {
         when(httpRequestMock.headers()).thenReturn(headerDictionaryMock);*/
 
         HttpResponse httpResponseMock = mock(HttpResponse.class);
-        setup
         httpResponseMock.SetupProperty(x => x.StatusCode);
 
         Bot botMock = mock(Bot.class);
@@ -201,13 +200,13 @@ public class CloudAdapterTests {
         adapter.processIncomingActivity("", activity, bot);
 
         // Assert
-        Object[] args_ExchangeToken = userTokenClient.getRecord("ExchangeTokenAsync"); // CHECK THIS STRING NAME
+        Object[] args_ExchangeToken = userTokenClient.getRecord("exchangeToken");
         Assert.assertEquals(userId, (String) args_ExchangeToken[0]);
         Assert.assertEquals(connectionName, (String)args_ExchangeToken[1]);
         Assert.assertEquals(channelId, (String) args_ExchangeToken[2]);
         Assert.assertEquals("TokenExchangeRequest", args_ExchangeToken[3].getClass().getName());
 
-        Object[] args_GetAadTokens = userTokenClient.getRecord("GetSignInResourceAsync");
+        Object[] args_GetAadTokens = userTokenClient.getRecord("getSignInResource");
         Assert.assertEquals(userId, (String) args_GetAadTokens[0]);
         Assert.assertEquals(connectionName, (String) args_GetAadTokens[1]);
         Assert.assertEquals("x", ((String[]) args_GetAadTokens[2])[0]);
@@ -215,7 +214,7 @@ public class CloudAdapterTests {
 
         Assert.assertEquals(channelId, (String) args_GetAadTokens[3]);
 
-        Object[] args_GetSignInResource = userTokenClient.getRecord("GetSignInResourceAsync");
+        Object[] args_GetSignInResource = userTokenClient.getRecord("getSignInResource");
 
         // this code is testing the internal CreateTokenExchangeState function by doing the work in reverse
         String state = (String) args_GetSignInResource[0];
@@ -305,6 +304,7 @@ public class CloudAdapterTests {
         when(cloudEnvironmentMock.createConnectorFactory(any (ClaimsIdentity.class))).thenReturn(new TestConnectorFactory());
         when(cloudEnvironmentMock.createUserTokenClient(any (ClaimsIdentity.class))).thenReturn(CompletableFuture.completedFuture(userTokenClient));
 
+        // NOTE: present in C# but not used
         ConnectorFactoryBot bot = new ConnectorFactoryBot();
 
         String expectedServiceUrl = "http://serviceUrl";
@@ -434,6 +434,7 @@ public class CloudAdapterTests {
             return identity;
         }
 
+        // NOTE: probably not needed:
         public ConnectorClient getConnectorClient() {
             return connectorClient;
         }
@@ -453,6 +454,7 @@ public class CloudAdapterTests {
         public String getAuthorization() {
             return authorization;
         }
+        //
 
         public CompletableFuture<Void> onTurn(TurnContext turnContext) {
             // verify the bot-framework protocol TurnState has been setup by the adapter
@@ -539,48 +541,42 @@ public class CloudAdapterTests {
 
         @Override
         public CompletableFuture<TokenResponse> exchangeToken(String userId, String connectionName, String channelId, TokenExchangeRequest exchangeRequest) {
-            capture(MethodBase.GetCurrentMethod().Name, userId, connectionName, channelId, exchangeRequest);
-            return CompletableFuture.completedFuture(new TokenResponse { });
-        }
-
-        @Override
-        public CompletableFuture<Dictionary<String, TokenResponse>> getAadTokens(String userId, String connectionName, String[] resourceUrls, String channelId) {
-            capture(MethodBase.GetCurrentMethod().Name, userId, connectionName, resourceUrls, channelId);
-            return CompletableFuture.completedFuture(new Dictionary<String, TokenResponse> { });
+            capture("exchangeToken", userId, connectionName, channelId, exchangeRequest);
+            return CompletableFuture.completedFuture(new TokenResponse() { });
         }
 
         @Override
         public CompletableFuture<SignInResource> getSignInResource(String connectionName, Activity activity, String finalRedirect) {
             String state = createTokenExchangeState(appId, connectionName, activity);
-            capture(MethodBase.GetCurrentMethod().Name, state, finalRedirect);
-            return CompletableFuture(new SignInResource { });
+            capture("getSignInResource", state, finalRedirect);
+            return CompletableFuture.completedFuture(new SignInResource() { });
         }
 
         @Override
-        public CompletableFuture<TokenStatus[]> getTokenStatus(String userId, String channelId, String includeFilter) {
-            capture(MethodBase.GetCurrentMethod().Name, userId, channelId, includeFilter);
-            return CompletableFuture.completedFuture(new TokenStatus[0]);
+        public CompletableFuture<List<TokenStatus>> getTokenStatus(String userId, String channelId, String includeFilter) {
+            capture("getTokenStatus", userId, channelId, includeFilter);
+            return CompletableFuture.completedFuture(Arrays.asList(new TokenStatus[0]));
         }
 
         @Override
         public CompletableFuture<Map<String, TokenResponse>> getAadTokens(String userId, String connectionName, List<String> resourceUrls, String channelId) {
-            capture(MethodBase.GetCurrentMethod().Name, userId, connectionName, resourceUrls, channelId);
+            capture("getAadTokens", userId, connectionName, resourceUrls, channelId);
             return CompletableFuture.completedFuture(new HashMap<String, TokenResponse>() { });
         }
 
         @Override
         public CompletableFuture<TokenResponse> getUserToken(String userId, String connectionName, String channelId, String magicCode) {
-            capture(MethodBase.GetCurrentMethod().Name, userId, connectionName, channelId, magicCode);
+            capture("getUserToken", userId, connectionName, channelId, magicCode);
             return CompletableFuture.completedFuture(new TokenResponse());
         }
 
         @Override
         public CompletableFuture<Void> signOutUser(String userId, String connectionName, String channelId) {
-            capture(MethodBase.GetCurrentMethod().Name, userId, connectionName, channelId);
+            capture("signOutUser", userId, connectionName, channelId);
             return CompletableFuture.completedFuture(null);
         }
 
-        private void capture(String name, Object[] args) {
+        private void capture(String name, Object... args) {
             record.put(name, args);
         }
     }
@@ -616,7 +612,7 @@ public class CloudAdapterTests {
 
         @Override
         public void applyCredentialsFilter(OkHttpClient.Builder clientBuilder) {
-
+            // NOTE: required by inheritance
         }
     }
 

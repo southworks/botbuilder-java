@@ -4,6 +4,7 @@
 package com.microsoft.bot.connector.authentication;
 
 import com.microsoft.bot.schema.CallerIdConstants;
+import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -29,7 +30,8 @@ public final class BotFrameworkAuthenticationFactory {
             null,
             null,
             new PasswordServiceClientCredentialFactory(),
-            new AuthenticationConfiguration());
+            new AuthenticationConfiguration(),
+            new OkHttpClient());
     }
 
     @SuppressWarnings("checkstyle:ParameterNumber")
@@ -44,7 +46,8 @@ public final class BotFrameworkAuthenticationFactory {
         String toBotFromEmulatorOpenIdMetadataUrl,
         String callerId,
         ServiceClientCredentialsFactory credentialFactory,
-        AuthenticationConfiguration authConfiguration
+        AuthenticationConfiguration authConfiguration,
+        OkHttpClient httpClient
     ) {
         if (StringUtils.isNotBlank(toChannelFromBotLoginUrl)
             || StringUtils.isNotBlank(toChannelFromBotOAuthScope)
@@ -64,7 +67,8 @@ public final class BotFrameworkAuthenticationFactory {
                 toBotFromEmulatorOpenIdMetadataUrl,
                 callerId,
                 credentialFactory,
-                authConfiguration
+                authConfiguration,
+                httpClient
             );
         } else {
             // else apply the built in default behavior, which is either the public cloud or the gov cloud
@@ -80,7 +84,8 @@ public final class BotFrameworkAuthenticationFactory {
                     AuthenticationConstants.TO_BOT_FROM_EMULATOR_OPENID_METADATA_URL,
                     CallerIdConstants.PUBLIC_AZURE_CHANNEL,
                     credentialFactory,
-                    authConfiguration
+                    authConfiguration,
+                    httpClient
                 );
             } else if (channelService == GovernmentAuthenticationConstants.CHANNELSERVICE) {
                 return new ParameterizedBotFrameworkAuthentication(
@@ -93,7 +98,8 @@ public final class BotFrameworkAuthenticationFactory {
                     GovernmentAuthenticationConstants.TO_BOT_FROM_EMULATOR_OPENID_METADATA_URL,
                     CallerIdConstants.US_GOV_CHANNEL,
                     credentialFactory,
-                    authConfiguration
+                    authConfiguration,
+                    httpClient
                 );
             } else {
                 // The ChannelService value is used an indicator of which built in set of constants to use.

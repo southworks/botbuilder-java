@@ -37,11 +37,12 @@ public class BotFrameworkClientImpl extends BotFrameworkClient {
 
     public BotFrameworkClientImpl(
         ServiceClientCredentialsFactory withCredentialsFactory,
-        String withLoginEndpoint
+        String withLoginEndpoint,
+        OkHttpClient withHttpClient
     ) {
         credentialsFactory = withCredentialsFactory;
         loginEndpoint = withLoginEndpoint;
-        httpClient = new OkHttpClient();
+        httpClient = withHttpClient != null ? withHttpClient : new OkHttpClient();
     }
 
     /**

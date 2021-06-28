@@ -403,17 +403,21 @@ public abstract class CloudAdapterBase extends BotAdapter {
      * This is a helper to create the ClaimsIdentity structure from an appId that will be added to the TurnContext.
      * It is intended for use in proactive and named-pipe scenarios.
      * @param botAppId The bot's application id.
+     * @param audience The audience for the claims identity
      * @return A {@link ClaimsIdentity} with the audience and appId claims set to the appId.
      */
-    protected ClaimsIdentity createClaimsIdentity(String botAppId) {
+    protected ClaimsIdentity createClaimsIdentity(String botAppId, String audience) {
         if (botAppId == null) {
             botAppId = "";
+        }
+        if (audience == null) {
+            audience = botAppId;
         }
 
         // Hand craft Claims Identity.
         HashMap<String, String> claims = new HashMap<String, String>();
         // Adding claims for both Emulator and Channel.
-        claims.put(AuthenticationConstants.AUDIENCE_CLAIM, botAppId);
+        claims.put(AuthenticationConstants.AUDIENCE_CLAIM, audience);
         claims.put(AuthenticationConstants.APPID_CLAIM, botAppId);
         ClaimsIdentity claimsIdentity = new ClaimsIdentity("anonymous", claims);
 

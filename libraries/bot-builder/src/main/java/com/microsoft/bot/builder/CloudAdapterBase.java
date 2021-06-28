@@ -194,7 +194,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
             return Async.completeExceptionally(new IllegalArgumentException("reference"));
         }
 
-        return processProactive(createClaimsIdentity(botAppId), reference.getContinuationActivity(), null, callback);
+        return processProactive(createClaimsIdentity(botAppId, null), reference.getContinuationActivity(), null, callback);
     }
 
     /**
@@ -250,7 +250,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
         }
         validateContinuationActivity(continuationActivity);
 
-        return processProactive(createClaimsIdentity(botAppId), continuationActivity, null, callback);
+        return processProactive(createClaimsIdentity(botAppId, null), continuationActivity, null, callback);
     }
 
     /**

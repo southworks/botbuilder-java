@@ -15,10 +15,15 @@ import com.microsoft.bot.connector.authentication.ClaimsIdentity;
 import com.microsoft.bot.connector.authentication.ConnectorFactory;
 import com.microsoft.bot.connector.authentication.UserTokenClient;
 import com.microsoft.bot.schema.Activity;
+import com.microsoft.bot.schema.ActivityEventNames;
 import com.microsoft.bot.schema.ActivityTypes;
+import com.microsoft.bot.schema.ConversationAccount;
+import com.microsoft.bot.schema.ConversationParameters;
 import com.microsoft.bot.schema.ConversationReference;
+import com.microsoft.bot.schema.ConversationResourceResponse;
 import com.microsoft.bot.schema.DeliveryModes;
 import com.microsoft.bot.schema.ExpectedReplies;
+import com.microsoft.bot.schema.InvokeResponse;
 import com.microsoft.bot.schema.InvokeResponse;
 import com.microsoft.bot.schema.ResourceResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -295,6 +301,53 @@ public abstract class CloudAdapterBase extends BotAdapter {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CompletableFuture<Void> createConversation(String botAppId, String channelId, String serviceUrl, String audience, ConversationParameters conversationParameters, BotCallbackHandler callback) {
+        if (StringUtils.isBlank(serviceUrl)) {
+            throw new IllegalArgumentException("serviceUrl cannot be null or empty");
+        }
+        if (conversationParameters == null) {
+            throw new IllegalArgumentException("conversationParameters cannot be null");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null");
+        }
+
+        logger.info(
+            String.format(
+                "createConversation for channel: %s",
+                channelId
+            )
+        );
+
+        // Create a ClaimsIdentity, to create the connector and for adding to the turn context.
+        ClaimsIdentity claimsIdentity = this.createClaimsIdentity(botAppId, audience);
+        claimsIdentity.claims().put(AuthenticationConstants.SERVICE_URL_CLAIM, serviceUrl);
+
+        // Create the connector factory.
+        ConnectorFactory connectorFactory = this.botFrameworkAuthentication.createConnectorFactory(claimsIdentity);
+
+        // Create the connector client to use for outbound requests.
+        return connectorFactory.create(serviceUrl, audience).thenCompose(connectorClient -> {
+            // Make the actual create conversation call using the connector.
+            return connectorClient.getConversations().createConversation(conversationParameters).thenCompose(createConversationResult -> {
+                // Create the create activity to communicate the results to the application.
+                Activity createActivity = this.createCreateActivity(createConversationResult, channelId, serviceUrl, conversationParameters);
+
+                // Create a UserTokenClient instance for the application to use. (For example, in the OAuthPrompt.)
+                return this.botFrameworkAuthentication.createUserTokenClient(claimsIdentity).thenCompose(userTokenClient -> {
+                    TurnContextImpl context = this.createTurnContext(createActivity, claimsIdentity, null, connectorClient, userTokenClient, callback, connectorFactory);
+
+                    // Run the pipeline
+                    return this.runPipeline(context, callback).thenApply(result -> null);
+                });
+            });
+        });
+    }
+
+    /**
      * The implementation for continue conversation.
      * @param claimsIdentity A {@link ClaimsIdentity} for the conversation.
      * @param continuationActivity The continuation {@link Activity} used to create the {@link TurnContext}.
@@ -410,6 +463,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
         if (botAppId == null) {
             botAppId = "";
         }
+        // Related to issue: https://github.com/microsoft/botframework-sdk/issues/6331
         if (audience == null) {
             audience = botAppId;
         }
@@ -422,6 +476,25 @@ public abstract class CloudAdapterBase extends BotAdapter {
         ClaimsIdentity claimsIdentity = new ClaimsIdentity("anonymous", claims);
 
         return claimsIdentity;
+    }
+
+    private Activity createCreateActivity(ConversationResourceResponse createConversationResult, String channelId, String serviceUrl, ConversationParameters conversationParameters) {
+        // Create a conversation update activity to represent the result.
+        Activity activity = Activity.createEventActivity();
+        activity.setName(ActivityEventNames.CREATE_CONVERSATION);
+        activity.setChannelId(channelId);
+        activity.setServiceUrl(serviceUrl);
+        String activityId = createConversationResult.getActivityId() != null
+            ? createConversationResult.getActivityId()
+            : UUID.randomUUID().toString();
+        activity.setId(activityId);
+        ConversationAccount conversation = new ConversationAccount();
+        conversation.setId(createConversationResult.getId());
+        conversation.setTenantId(conversation.getTenantId());
+        activity.setConversation(conversation);
+        activity.setChannelData(conversationParameters.getChannelData());
+        activity.setRecipient(conversationParameters.getBot());
+        return activity;
     }
 
     private TurnContextImpl createTurnContext(

@@ -24,7 +24,6 @@ import com.microsoft.bot.schema.ConversationResourceResponse;
 import com.microsoft.bot.schema.DeliveryModes;
 import com.microsoft.bot.schema.ExpectedReplies;
 import com.microsoft.bot.schema.InvokeResponse;
-import com.microsoft.bot.schema.InvokeResponse;
 import com.microsoft.bot.schema.ResourceResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

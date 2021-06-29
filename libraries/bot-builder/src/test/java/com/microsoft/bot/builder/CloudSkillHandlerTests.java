@@ -22,7 +22,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
@@ -39,8 +38,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CloudSkillHandlerTests {
 
-    private final String testSkillId = UUID.randomUUID().toString().replace("-", "");
-    private final String testAuthHeader = ""; // Empty since claims extraction is being mocked
+    private static final String TEST_SKILL_ID = UUID.randomUUID().toString().replace("-", "");
+    private static final String TEST_AUTH_HEADER = ""; // Empty since claims extraction is being mocked
 
     @Test
     public void testSendAndReplyToConversation() {
@@ -69,14 +68,14 @@ public class CloudSkillHandlerTests {
                 mockObjects.getConversationIdFactory(),
                 mockObjects.getAuth());
 
-            ResourceResponse response = replyToId == null ?
-                sut.handleSendToConversation(testAuthHeader, conversationId, activity).join() :
-                sut.handleReplyToActivity(testAuthHeader, conversationId, replyToId, activity).join();
+            ResourceResponse response = replyToId == null
+                ? sut.handleSendToConversation(TEST_AUTH_HEADER, conversationId, activity).join()
+                : sut.handleReplyToActivity(TEST_AUTH_HEADER, conversationId, replyToId, activity).join();
 
             // Assert
             // Assert the turnContext
             Assert.assertEquals(
-                CallerIdConstants.BOT_TO_BOT_PREFIX.concat(testSkillId),
+                CallerIdConstants.BOT_TO_BOT_PREFIX.concat(TEST_SKILL_ID),
                 mockObjects.getTurnContext().getActivity().getCallerId());
             Assert.assertNotNull(
                 mockObjects.getTurnContext().getTurnState().get(CloudSkillHandler.SKILL_CONVERSATION_REFERENCE_KEY));
@@ -110,11 +109,12 @@ public class CloudSkillHandlerTests {
     }
 
     @Test
-    public void TestCommandActivities() {
+    public void testCommandActivities() {
         List<String[]> theoryCases = new ArrayList<>();
         theoryCases.add(new String[]{ActivityTypes.COMMAND, "application/myApplicationCommand", null});
         theoryCases.add(new String[]{ActivityTypes.COMMAND, "application/myApplicationCommand", "replyToId"});
         theoryCases.add(new String[]{ActivityTypes.COMMAND, "other/myBotCommand", null});
+        theoryCases.add(new String[]{ActivityTypes.COMMAND, "other/myBotCommand", "replyToId"});
         theoryCases.add(new String[]{ActivityTypes.COMMAND_RESULT, "application/myApplicationCommandResult", null});
         theoryCases.add(new String[]{ActivityTypes.COMMAND_RESULT, "application/myApplicationCommandResult", "replyToId"});
         theoryCases.add(new String[]{ActivityTypes.COMMAND_RESULT, "other/myBotCommand", null});
@@ -130,7 +130,6 @@ public class CloudSkillHandlerTests {
             Activity activity = new Activity(commandActivityType);
             activity.setName(name);
             activity.setReplyToId(replyToId);
-
             String conversationId = mockObjects.createAndApplyConversationId(activity).join();
 
             // Act
@@ -140,14 +139,14 @@ public class CloudSkillHandlerTests {
                 mockObjects.getConversationIdFactory(),
                 mockObjects.getAuth());
 
-            ResourceResponse response = replyToId == null ?
-                sut.handleSendToConversation(testAuthHeader, conversationId, activity).join() :
-                sut.handleReplyToActivity(testAuthHeader, conversationId, replyToId, activity).join();
+            ResourceResponse response = replyToId == null
+                ? sut.handleSendToConversation(TEST_AUTH_HEADER, conversationId, activity).join()
+                : sut.handleReplyToActivity(TEST_AUTH_HEADER, conversationId, replyToId, activity).join();
 
             // Assert
             // Assert the turnContext
             Assert.assertEquals(
-                CallerIdConstants.BOT_TO_BOT_PREFIX.concat(testSkillId),
+                CallerIdConstants.BOT_TO_BOT_PREFIX.concat(TEST_SKILL_ID),
                 mockObjects.getTurnContext().getActivity().getCallerId());
             Assert.assertNotNull(
                 mockObjects.getTurnContext().getTurnState().get(CloudSkillHandler.SKILL_CONVERSATION_REFERENCE_KEY));
@@ -155,13 +154,13 @@ public class CloudSkillHandlerTests {
             if (StringUtils.startsWith(name, "application/")) {
                 // Should be sent to the channel and not to the bot.
                 Assert.assertNotNull(mockObjects.getChannelActivity());
-                Assert.assertNotNull(mockObjects.getBotActivity());
+                Assert.assertNull(mockObjects.getBotActivity());
 
                 // We should get the resourceId returned by the mock.
                 Assert.assertEquals("resourceId", response.getId());
             } else {
                 // Should be sent to the bot and not to the channel.
-                Assert.assertNotNull(mockObjects.getChannelActivity());
+                Assert.assertNull(mockObjects.getChannelActivity());
                 Assert.assertNotNull(mockObjects.getBotActivity());
 
                 // If the activity is bounced back to the bot we will get a GUID and not the mocked resourceId.
@@ -184,7 +183,7 @@ public class CloudSkillHandlerTests {
             mockObjects.getBot(),
             mockObjects.getConversationIdFactory(),
             mockObjects.getAuth());
-        sut.handleDeleteActivity(testAuthHeader, conversationId, activityToDelete).join();
+        sut.handleDeleteActivity(TEST_AUTH_HEADER, conversationId, activityToDelete).join();
 
         // Assert
         Assert.assertNotNull(mockObjects.getTurnContext().getTurnState().get(CloudSkillHandler.SKILL_CONVERSATION_REFERENCE_KEY));
@@ -198,7 +197,6 @@ public class CloudSkillHandlerTests {
         Activity activity = new Activity(ActivityTypes.MESSAGE);
         activity.setText(String.format("TestUpdate %s.", LocalDateTime.now()));
         String conversationId = mockObjects.createAndApplyConversationId(activity).join();
-
         String activityToUpdate = UUID.randomUUID().toString();
 
         // Act
@@ -207,10 +205,10 @@ public class CloudSkillHandlerTests {
             mockObjects.getBot(),
             mockObjects.getConversationIdFactory(),
             mockObjects.getAuth());
-        ResourceResponse response = sut.handleUpdateActivity(testAuthHeader, conversationId, activityToUpdate, activity).join();
-        Assert.assertEquals("resourceId", response.getId());
+        ResourceResponse response = sut.handleUpdateActivity(TEST_AUTH_HEADER, conversationId, activityToUpdate, activity).join();
 
         // Assert
+        Assert.assertEquals("resourceId", response.getId());
         Assert.assertNotNull(mockObjects.getTurnContext().getTurnState().get(CloudSkillHandler.SKILL_CONVERSATION_REFERENCE_KEY));
         Assert.assertEquals(activityToUpdate, mockObjects.getTurnContext().getActivity().getId());
         Assert.assertEquals(activity.getText(), mockObjects.getUpdateActivity().getText());
@@ -220,10 +218,10 @@ public class CloudSkillHandlerTests {
      * Helper class with mocks for adapter, bot and auth needed to instantiate CloudSkillHandler and run tests.
      * This class also captures the turnContext and activities sent back to the bot and the channel so we can run asserts on them.
      */
-    private class CloudSkillHandlerTestMocks {
-        private final String TestBotId = UUID.randomUUID().toString().replace("-", "");
-        private static final String TestBotEndpoint = "http://testbot.com/api/messages";
-        private static final String TestSkillEndpoint = "http://testskill.com/api/messages";
+    private static class CloudSkillHandlerTestMocks {
+        private static final String TEST_BOT_ID = UUID.randomUUID().toString().replace("-", "");
+        private static final String TEST_BOT_ENDPOINT = "http://testbot.com/api/messages";
+        private static final String TEST_SKILL_ENDPOINT = "http://testskill.com/api/messages";
 
         private final SkillConversationIdFactoryBase conversationIdFactory;
         private final BotAdapter adapter;
@@ -298,25 +296,25 @@ public class CloudSkillHandlerTests {
         public CompletableFuture<String> createAndApplyConversationId(Activity activity) {
             ConversationReference conversationReference = new ConversationReference();
             ConversationAccount conversationAccount = new ConversationAccount();
-            conversationAccount.setId(TestBotId);
+            conversationAccount.setId(TEST_BOT_ID);
             conversationReference.setConversation(conversationAccount);
-            conversationReference.setServiceUrl(TestBotEndpoint);
+            conversationReference.setServiceUrl(TEST_BOT_ENDPOINT);
 
             activity.applyConversationReference(conversationReference);
 
             BotFrameworkSkill skill = new BotFrameworkSkill();
-            skill.setAppId(testSkillId);
+            skill.setAppId(TEST_SKILL_ID);
             skill.setId("skill");
 
             try {
-                skill.setSkillEndpoint(new URI(TestSkillEndpoint));
+                skill.setSkillEndpoint(new URI(TEST_SKILL_ENDPOINT));
             }
             catch (URISyntaxException e) {
             }
 
             SkillConversationIdFactoryOptions options = new SkillConversationIdFactoryOptions();
-            options.setFromBotOAuthScope(TestBotId);
-            options.setFromBotId(TestBotId);
+            options.setFromBotOAuthScope(TEST_BOT_ID);
+            options.setFromBotId(TEST_BOT_ID);
             options.setActivity(activity);
             options.setBotFrameworkSkill(skill);
 
@@ -330,18 +328,17 @@ public class CloudSkillHandlerTests {
             // This code block catches and executes the custom bot callback created by the service handler.
             Mockito.when(
                 adapter.continueConversation(
-                    Mockito.any (ClaimsIdentity.class),
-                    Mockito.any (ConversationReference.class),
-                    Mockito.any(String.class),
+                    Mockito.any(ClaimsIdentity.class),
+                    Mockito.any(ConversationReference.class),
+                    Mockito.anyString(),
                     Mockito.any(BotCallbackHandler.class))
             ).thenAnswer(
-                new Answer<Void>() {
-                    Void answer(InvocationOnMock invocation) {
-                        TurnContext turnContext = new TurnContextImpl();
-                        BotCallbackHandler callback = invocation.getArgument(3);
-                        callback.invoke(turnContext);
-                        return null;
-                    }
+                (Answer<Void>) invocation -> {
+                    ConversationReference conv = invocation.getArgument(1);
+                    TurnContext turnContext = new TurnContextImpl(adapter, conv.getContinuationActivity());
+                    BotCallbackHandler callback = invocation.getArgument(3);
+                    callback.invoke(turnContext);
+                    return null;
                 }
             );
 
@@ -350,17 +347,15 @@ public class CloudSkillHandlerTests {
             Mockito.when(
                 adapter.sendActivities(
                     Mockito.any(TurnContext.class),
-                    Mockito.any(List.class))
+                    Mockito.anyList())
             ).thenAnswer(
-                new Answer<Void>() {
-                    Void answer(InvocationOnMock invocation) {
-                        // Capture the activity sent to the channel
-                        List<Activity> activities = invocation.getArgument(1);
-                        channelActivity = activities.get(0);
+                (Answer<Void>) invocation -> {
+                    // Capture the activity sent to the channel
+                    List<Activity> activities = invocation.getArgument(1);
+                    channelActivity = activities.get(0);
 
-                        // Do nothing, we don't want the activities sent to the channel in the tests.
-                        return null;
-                    }
+                    // Do nothing, we don't want the activities sent to the channel in the tests.
+                    return null;
                 }
             ).thenReturn(CompletableFuture.completedFuture(new ResourceResponse[]{new ResourceResponse("resourceId")}));
 
@@ -370,14 +365,13 @@ public class CloudSkillHandlerTests {
                     Mockito.any(TurnContext.class),
                     Mockito.any(ConversationReference.class))
             ).thenAnswer(
-                    new Answer<Void>() {
-                        Void answer(InvocationOnMock invocation) {
-                            // Capture the activity id to delete so we can assert it.
-                            activityToDelete = invocation.getArgument(1);
-                            return null;
-                        }
-                    }
-                );
+                (Answer<Void>) invocation -> {
+                    // Capture the activity id to delete so we can assert it.
+                    ConversationReference conv = invocation.getArgument(1);
+                    activityToDelete = conv.getActivityId();
+                    return null;
+                }
+            );
 
             // Mock the UpdateActivityAsync method
             Mockito.when(
@@ -385,11 +379,9 @@ public class CloudSkillHandlerTests {
                     Mockito.any(TurnContext.class),
                     Mockito.any(Activity.class))
             ).thenAnswer(
-                new Answer<Void>() {
-                    Void answer(InvocationOnMock invocation) {
-                        updateActivity = invocation.getArgument(1);
-                        return null;
-                    }
+                (Answer<Void>) invocation -> {
+                    updateActivity = invocation.getArgument(1);
+                    return null;
                 }).thenReturn(CompletableFuture.completedFuture(new ResourceResponse("resourceId")));
 
             return adapter;
@@ -400,11 +392,10 @@ public class CloudSkillHandlerTests {
             Mockito.when(
                 bot.onTurn(Mockito.any(TurnContext.class))
             ).thenAnswer(
-                new Answer<Void>() {
-                    Void answer(InvocationOnMock invocation) {
-                        botActivity = invocation.getArgument(0);
-                        return null;
-                    }
+                (Answer<Void>) invocation -> {
+                    TurnContextImpl turnContext = invocation.getArgument(0);
+                    botActivity = turnContext.getActivity();
+                    return null;
                 }
             );
 
@@ -417,15 +408,13 @@ public class CloudSkillHandlerTests {
             Mockito.when(
                 auth.authenticateChannelRequest(Mockito.any(String.class))
             ).thenAnswer(
-                new Answer<ClaimsIdentity>() {
-                    ClaimsIdentity answer(InvocationOnMock invocation) {
-                        HashMap<String, String> claims = new HashMap<String, String>();
-                        claims.put(AuthenticationConstants.AUDIENCE_CLAIM, TestBotId);
-                        claims.put(AuthenticationConstants.APPID_CLAIM, testSkillId);
-                        claims.put(AuthenticationConstants.SERVICE_URL_CLAIM, TestBotEndpoint);
+                (Answer<ClaimsIdentity>) invocation -> {
+                    HashMap<String, String> claims = new HashMap<>();
+                    claims.put(AuthenticationConstants.AUDIENCE_CLAIM, TEST_BOT_ID);
+                    claims.put(AuthenticationConstants.APPID_CLAIM, TEST_SKILL_ID);
+                    claims.put(AuthenticationConstants.SERVICE_URL_CLAIM, TEST_BOT_ENDPOINT);
 
-                        return new ClaimsIdentity("anonymous", claims);
-                    }
+                    return new ClaimsIdentity("anonymous", claims);
                 }
             );
             return auth;
@@ -442,7 +431,7 @@ public class CloudSkillHandlerTests {
 
             String key =
                 String.format(
-                    "%1$s-%2$s-%3$s-%4$s-skillconvo",
+                    "%s-%s-%s-%s-skillconvo",
                     options.getFromBotId(),
                     options.getBotFrameworkSkill().getAppId(),
                     skillConversationReference.getConversationReference().getConversation().getId(),

@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -41,97 +42,131 @@ public class CloudSkillHandlerTests {
     private final String testSkillId = UUID.randomUUID().toString().replace("-", "");
     private final String testAuthHeader = ""; // Empty since claims extraction is being mocked
 
-    public void testSendAndReplyToConversation(String activityType, String replyToId) {
-        // Arrange
-        CloudSkillHandlerTestMocks mockObjects = new CloudSkillHandlerTestMocks();
-        Activity activity = new Activity(activityType);
-        activity.setReplyToId(replyToId);
-        String conversationId =  mockObjects.createAndApplyConversationId(activity).join();
+    @Test
+    public void testSendAndReplyToConversation() {
+        List<String[]> theoryCases = new ArrayList<>();
+        theoryCases.add(new String[]{ActivityTypes.MESSAGE, null});
+        theoryCases.add(new String[]{ActivityTypes.MESSAGE, "replyToId"});
+        theoryCases.add(new String[]{ActivityTypes.EVENT, null});
+        theoryCases.add(new String[]{ActivityTypes.EVENT, "replyToId"});
+        theoryCases.add(new String[]{ActivityTypes.END_OF_CONVERSATION, null});
+        theoryCases.add(new String[]{ActivityTypes.END_OF_CONVERSATION, "replyToId"});
 
-        // Act
-        CloudSkillHandler sut = new CloudSkillHandler(
-            mockObjects.getAdapter(),
-            mockObjects.getBot(),
-            mockObjects.getConversationIdFactory(),
-            mockObjects.getAuth());
+        for (String[] theoryCase : theoryCases) {
+            String activityType = theoryCase[0];
+            String replyToId = theoryCase[1];
 
-        ResourceResponse response = replyToId == null ?
-            sut.handleSendToConversation(testAuthHeader, conversationId, activity).join() :
-            sut.handleReplyToActivity(testAuthHeader, conversationId, replyToId, activity).join();
+            // Arrange
+            CloudSkillHandlerTestMocks mockObjects = new CloudSkillHandlerTestMocks();
+            Activity activity = new Activity(activityType);
+            activity.setReplyToId(replyToId);
+            String conversationId =  mockObjects.createAndApplyConversationId(activity).join();
 
-        // Assert
-        // Assert the turnContext
-        Assert.assertEquals(
-            CallerIdConstants.BOT_TO_BOT_PREFIX.concat(testSkillId),
-            mockObjects.getTurnContext().getActivity().getCallerId());
-        Assert.assertNotNull(
-            mockObjects.getTurnContext().getTurnState().get(CloudSkillHandler.SKILL_CONVERSATION_REFERENCE_KEY));
+            // Act
+            CloudSkillHandler sut = new CloudSkillHandler(
+                mockObjects.getAdapter(),
+                mockObjects.getBot(),
+                mockObjects.getConversationIdFactory(),
+                mockObjects.getAuth());
 
-        // Assert based on activity type,
-        if (activityType.equals(ActivityTypes.MESSAGE)) {
-            // Should be sent to the channel and not to the bot.
-            Assert.assertNotNull(mockObjects.getChannelActivity());
-            Assert.assertNull(mockObjects.getBotActivity());
+            ResourceResponse response = replyToId == null ?
+                sut.handleSendToConversation(testAuthHeader, conversationId, activity).join() :
+                sut.handleReplyToActivity(testAuthHeader, conversationId, replyToId, activity).join();
 
-            // We should get the resourceId returned by the mock.
-            Assert.assertEquals("resourceId", response.getId());
+            // Assert
+            // Assert the turnContext
+            Assert.assertEquals(
+                CallerIdConstants.BOT_TO_BOT_PREFIX.concat(testSkillId),
+                mockObjects.getTurnContext().getActivity().getCallerId());
+            Assert.assertNotNull(
+                mockObjects.getTurnContext().getTurnState().get(CloudSkillHandler.SKILL_CONVERSATION_REFERENCE_KEY));
 
-            // Assert the activity sent to the channel.
-            Assert.assertEquals(activityType, mockObjects.getChannelActivity().getType());
-            Assert.assertNull(mockObjects.getChannelActivity().getCallerId());
-            Assert.assertEquals(replyToId, mockObjects.getChannelActivity().getReplyToId());
-        } else {
-            // Should be sent to the bot and not to the channel.
-            Assert.assertNull(mockObjects.getChannelActivity());
-            Assert.assertNotNull(mockObjects.getBotActivity());
+            // Assert based on activity type,
+            if (activityType.equals(ActivityTypes.MESSAGE)) {
+                // Should be sent to the channel and not to the bot.
+                Assert.assertNotNull(mockObjects.getChannelActivity());
+                Assert.assertNull(mockObjects.getBotActivity());
 
-            // If the activity is bounced back to the bot we will get a GUID and not the mocked resourceId.
-            Assert.assertNotEquals("resourceId", response.getId());
+                // We should get the resourceId returned by the mock.
+                Assert.assertEquals("resourceId", response.getId());
 
-            // Assert the activity sent back to the bot.
-            Assert.assertEquals(activityType, mockObjects.getBotActivity().getType());
-            Assert.assertEquals(replyToId, mockObjects.getBotActivity().getReplyToId());
+                // Assert the activity sent to the channel.
+                Assert.assertEquals(activityType, mockObjects.getChannelActivity().getType());
+                Assert.assertNull(mockObjects.getChannelActivity().getCallerId());
+                Assert.assertEquals(replyToId, mockObjects.getChannelActivity().getReplyToId());
+            } else {
+                // Should be sent to the bot and not to the channel.
+                Assert.assertNull(mockObjects.getChannelActivity());
+                Assert.assertNotNull(mockObjects.getBotActivity());
+
+                // If the activity is bounced back to the bot we will get a GUID and not the mocked resourceId.
+                Assert.assertNotEquals("resourceId", response.getId());
+
+                // Assert the activity sent back to the bot.
+                Assert.assertEquals(activityType, mockObjects.getBotActivity().getType());
+                Assert.assertEquals(replyToId, mockObjects.getBotActivity().getReplyToId());
+            }
         }
     }
 
-    public void TestCommandActivities(String commandActivityType, String name, String replyToId) {
-        // Arrange
-        CloudSkillHandlerTestMocks mockObjects = new CloudSkillHandlerTestMocks();
-        Activity activity = new Activity(commandActivityType);
-        activity.setName(name);
-        activity.setReplyToId(replyToId);
+    @Test
+    public void TestCommandActivities() {
+        List<String[]> theoryCases = new ArrayList<>();
+        theoryCases.add(new String[]{ActivityTypes.COMMAND, "application/myApplicationCommand", null});
+        theoryCases.add(new String[]{ActivityTypes.COMMAND, "application/myApplicationCommand", "replyToId"});
+        theoryCases.add(new String[]{ActivityTypes.COMMAND, "other/myBotCommand", null});
+        theoryCases.add(new String[]{ActivityTypes.COMMAND_RESULT, "application/myApplicationCommandResult", null});
+        theoryCases.add(new String[]{ActivityTypes.COMMAND_RESULT, "application/myApplicationCommandResult", "replyToId"});
+        theoryCases.add(new String[]{ActivityTypes.COMMAND_RESULT, "other/myBotCommand", null});
+        theoryCases.add(new String[]{ActivityTypes.COMMAND_RESULT, "other/myBotCommand", "replyToId"});
 
-        String conversationId = mockObjects.createAndApplyConversationId(activity).join();
+        for (String[] theoryCase : theoryCases) {
+            String commandActivityType = theoryCase[0];
+            String name = theoryCase[1];
+            String replyToId = theoryCase[2];
 
-        // Act
-        CloudSkillHandler sut = new CloudSkillHandler(
-            mockObjects.getAdapter(),
-            mockObjects.getBot(),
-            mockObjects.getConversationIdFactory(),
-            mockObjects.getAuth());
+            // Arrange
+            CloudSkillHandlerTestMocks mockObjects = new CloudSkillHandlerTestMocks();
+            Activity activity = new Activity(commandActivityType);
+            activity.setName(name);
+            activity.setReplyToId(replyToId);
 
-        ResourceResponse response = replyToId == null ?
-            sut.handleSendToConversation(testAuthHeader, conversationId, activity).join() :
-            sut.handleReplyToActivity(testAuthHeader, conversationId, replyToId, activity).join();
+            String conversationId = mockObjects.createAndApplyConversationId(activity).join();
 
-        // Assert
-        // Assert the turnContext
-        Assert.assertEquals(CallerIdConstants.BOT_TO_BOT_PREFIX.concat(testSkillId), mockObjects.getTurnContext().getActivity().getCallerId());
-        Assert.assertNotNull(mockObjects.getTurnContext().getTurnState().get(CloudSkillHandler.SKILL_CONVERSATION_REFERENCE_KEY));
-        if (StringUtils.startsWith(name, "application/")) {
-            // Should be sent to the channel and not to the bot.
-            Assert.assertNotNull(mockObjects.getChannelActivity());
-            Assert.assertNotNull(mockObjects.getBotActivity());
+            // Act
+            CloudSkillHandler sut = new CloudSkillHandler(
+                mockObjects.getAdapter(),
+                mockObjects.getBot(),
+                mockObjects.getConversationIdFactory(),
+                mockObjects.getAuth());
 
-            // We should get the resourceId returned by the mock.
-            Assert.assertEquals("resourceId", response.getId());
-        } else {
-            // Should be sent to the bot and not to the channel.
-            Assert.assertNotNull(mockObjects.getChannelActivity());
-            Assert.assertNotNull(mockObjects.getBotActivity());
+            ResourceResponse response = replyToId == null ?
+                sut.handleSendToConversation(testAuthHeader, conversationId, activity).join() :
+                sut.handleReplyToActivity(testAuthHeader, conversationId, replyToId, activity).join();
 
-            // If the activity is bounced back to the bot we will get a GUID and not the mocked resourceId.
-            Assert.assertNotEquals("resourceId", response.getId());
+            // Assert
+            // Assert the turnContext
+            Assert.assertEquals(
+                CallerIdConstants.BOT_TO_BOT_PREFIX.concat(testSkillId),
+                mockObjects.getTurnContext().getActivity().getCallerId());
+            Assert.assertNotNull(
+                mockObjects.getTurnContext().getTurnState().get(CloudSkillHandler.SKILL_CONVERSATION_REFERENCE_KEY));
+
+            if (StringUtils.startsWith(name, "application/")) {
+                // Should be sent to the channel and not to the bot.
+                Assert.assertNotNull(mockObjects.getChannelActivity());
+                Assert.assertNotNull(mockObjects.getBotActivity());
+
+                // We should get the resourceId returned by the mock.
+                Assert.assertEquals("resourceId", response.getId());
+            } else {
+                // Should be sent to the bot and not to the channel.
+                Assert.assertNotNull(mockObjects.getChannelActivity());
+                Assert.assertNotNull(mockObjects.getBotActivity());
+
+                // If the activity is bounced back to the bot we will get a GUID and not the mocked resourceId.
+                Assert.assertNotEquals("resourceId", response.getId());
+            }
         }
     }
 
@@ -144,7 +179,11 @@ public class CloudSkillHandlerTests {
         String activityToDelete = UUID.randomUUID().toString();
 
         // Act
-        CloudSkillHandler sut = new CloudSkillHandler(mockObjects.getAdapter(), mockObjects.getBot(), mockObjects.getConversationIdFactory(), mockObjects.getAuth());
+        CloudSkillHandler sut = new CloudSkillHandler(
+            mockObjects.getAdapter(),
+            mockObjects.getBot(),
+            mockObjects.getConversationIdFactory(),
+            mockObjects.getAuth());
         sut.handleDeleteActivity(testAuthHeader, conversationId, activityToDelete).join();
 
         // Assert
@@ -163,7 +202,11 @@ public class CloudSkillHandlerTests {
         String activityToUpdate = UUID.randomUUID().toString();
 
         // Act
-        CloudSkillHandler sut = new CloudSkillHandler(mockObjects.getAdapter(), mockObjects.getBot(), mockObjects.getConversationIdFactory(), mockObjects.getAuth());
+        CloudSkillHandler sut = new CloudSkillHandler(
+            mockObjects.getAdapter(),
+            mockObjects.getBot(),
+            mockObjects.getConversationIdFactory(),
+            mockObjects.getAuth());
         ResourceResponse response = sut.handleUpdateActivity(testAuthHeader, conversationId, activityToUpdate, activity).join();
         Assert.assertEquals("resourceId", response.getId());
 
@@ -302,7 +345,8 @@ public class CloudSkillHandlerTests {
                 }
             );
 
-            // Mock the adapter SendActivitiesAsync method (this for the cases where activity is sent back to the parent or channel)
+            // Mock the adapter SendActivitiesAsync method
+            // (this for the cases where activity is sent back to the parent or channel)
             Mockito.when(
                 adapter.sendActivities(
                     Mockito.any(TurnContext.class),

@@ -10,16 +10,22 @@ package com.microsoft.bot.connector.authentication;
 public class OAuthConfiguration {
     private String scope;
     private String authority;
+    private Boolean validateAuthority;
 
     /**
      * Construct with authority and scope.
-     * 
+     *
      * @param withAuthority The auth authority.
      * @param withScope     The auth scope.
+     * @param withValidateAuthority Whether the Authority should be validated.
      */
-    public OAuthConfiguration(String withAuthority, String withScope) {
+    public OAuthConfiguration(String withAuthority, String withScope, Boolean withValidateAuthority) {
         this.authority = withAuthority;
         this.scope = withScope;
+        if (withValidateAuthority == null) {
+            withValidateAuthority = true;
+        }
+        this.validateAuthority = withValidateAuthority;
     }
 
     /**
@@ -56,5 +62,21 @@ public class OAuthConfiguration {
      */
     public String getScope() {
         return scope;
+    }
+
+    /**
+     * Gets a value indicating whether the Authority should be validated.
+     * @return Boolean value indicating whether the Authority should be validated.
+     */
+    public Boolean getValidateAuthority() {
+        return validateAuthority;
+    }
+
+    /**
+     * Sets a value indicating whether the Authority should be validated.
+     * @param withValidateAuthority Boolean value indicating whether the Authority should be validated.
+     */
+    public void setValidateAuthority(Boolean withValidateAuthority) {
+        this.validateAuthority = withValidateAuthority;
     }
 }

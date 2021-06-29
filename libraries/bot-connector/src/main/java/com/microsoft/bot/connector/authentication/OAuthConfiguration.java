@@ -22,10 +22,17 @@ public class OAuthConfiguration {
     public OAuthConfiguration(String withAuthority, String withScope, Boolean withValidateAuthority) {
         this.authority = withAuthority;
         this.scope = withScope;
-        if (withValidateAuthority == null) {
-            withValidateAuthority = true;
-        }
-        this.validateAuthority = withValidateAuthority;
+        this.validateAuthority = withValidateAuthority != null? withValidateAuthority : true;
+    }
+
+    /**
+     * Construct with authority and scope.
+     *
+     * @param withAuthority The auth authority.
+     * @param withScope     The auth scope.
+     */
+    public OAuthConfiguration(String withAuthority, String withScope) {
+        this(withAuthority, withScope, null);
     }
 
     /**

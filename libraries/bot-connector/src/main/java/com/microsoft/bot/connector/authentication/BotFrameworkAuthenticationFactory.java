@@ -29,6 +29,7 @@ public final class BotFrameworkAuthenticationFactory {
             null,
             null,
             null,
+            null,
             new PasswordServiceClientCredentialFactory(),
             new AuthenticationConfiguration(),
             new OkHttpClient());

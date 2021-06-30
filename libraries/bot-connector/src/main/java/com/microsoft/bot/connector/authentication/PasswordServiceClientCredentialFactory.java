@@ -153,5 +153,13 @@ public class PasswordServiceClientCredentialFactory extends ServiceClientCredent
             this.oauthEndpoint = withOauthEndpoint;
             this.validateAuthority = withValidateAuthority;
         }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Boolean validateAuthority() {
+            return validateAuthority;
+        }
     }
 }

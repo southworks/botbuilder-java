@@ -436,7 +436,7 @@ public abstract class ChannelServiceHandlerBase {
         ClaimsIdentity claimsIdentity,
         String conversationId,
         String continuationToken) {
-        throw new NotImplementedException("onGetConversationMembers is not implemented");
+        throw new NotImplementedException("onGetConversations is not implemented");
     }
 
     /**

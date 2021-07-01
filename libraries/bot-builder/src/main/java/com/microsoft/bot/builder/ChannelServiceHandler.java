@@ -1,8 +1,5 @@
 package com.microsoft.bot.builder;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
 import com.microsoft.bot.connector.Async;
 import com.microsoft.bot.connector.authentication.AuthenticationConfiguration;
 import com.microsoft.bot.connector.authentication.AuthenticationException;
@@ -12,17 +9,9 @@ import com.microsoft.bot.connector.authentication.CredentialProvider;
 import com.microsoft.bot.connector.authentication.JwtTokenValidation;
 import com.microsoft.bot.connector.authentication.SkillValidation;
 import com.microsoft.bot.schema.Activity;
-import com.microsoft.bot.schema.AttachmentData;
-import com.microsoft.bot.schema.ChannelAccount;
-import com.microsoft.bot.schema.ConversationParameters;
-import com.microsoft.bot.schema.ConversationResourceResponse;
-import com.microsoft.bot.schema.ConversationsResult;
-import com.microsoft.bot.schema.PagedMembersResult;
-import com.microsoft.bot.schema.ResourceResponse;
-import com.microsoft.bot.schema.Transcript;
-
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A class to help with the implementation of the Bot Framework protocol.

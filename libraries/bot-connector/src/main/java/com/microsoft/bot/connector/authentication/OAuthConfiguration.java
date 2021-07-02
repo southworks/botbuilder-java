@@ -22,7 +22,7 @@ public class OAuthConfiguration {
     public OAuthConfiguration(String withAuthority, String withScope, Boolean withValidateAuthority) {
         this.authority = withAuthority;
         this.scope = withScope;
-        this.validateAuthority = withValidateAuthority != null? withValidateAuthority : true;
+        this.validateAuthority = withValidateAuthority;
     }
 
     /**

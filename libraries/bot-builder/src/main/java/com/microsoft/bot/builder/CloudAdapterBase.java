@@ -199,7 +199,10 @@ public abstract class CloudAdapterBase extends BotAdapter {
             return Async.completeExceptionally(new IllegalArgumentException("reference"));
         }
 
-        return processProactive(createClaimsIdentity(botAppId, null), reference.getContinuationActivity(), null, callback);
+        return processProactive(createClaimsIdentity(botAppId, null),
+                                reference.getContinuationActivity(),
+                                null,
+                                callback);
     }
 
     /**
@@ -303,7 +306,9 @@ public abstract class CloudAdapterBase extends BotAdapter {
      * {@inheritDoc}
      */
     @Override
-    public CompletableFuture<Void> createConversation(String botAppId, String channelId, String serviceUrl, String audience, ConversationParameters conversationParameters, BotCallbackHandler callback) {
+    public CompletableFuture<Void> createConversation(String botAppId, String channelId, String serviceUrl,
+                                                      String audience, ConversationParameters conversationParameters,
+                                                      BotCallbackHandler callback) {
         if (StringUtils.isBlank(serviceUrl)) {
             throw new IllegalArgumentException("serviceUrl cannot be null or empty");
         }
@@ -331,13 +336,20 @@ public abstract class CloudAdapterBase extends BotAdapter {
         // Create the connector client to use for outbound requests.
         return connectorFactory.create(serviceUrl, audience).thenCompose(connectorClient -> {
             // Make the actual create conversation call using the connector.
-            return connectorClient.getConversations().createConversation(conversationParameters).thenCompose(createConversationResult -> {
+            return connectorClient.getConversations().createConversation(conversationParameters).
+                thenCompose(createConversationResult -> {
                 // Create the create activity to communicate the results to the application.
-                Activity createActivity = this.createCreateActivity(createConversationResult, channelId, serviceUrl, conversationParameters);
+                Activity createActivity = this.createCreateActivity(createConversationResult,
+                                                                    channelId,
+                                                                    serviceUrl,
+                                                                    conversationParameters);
 
                 // Create a UserTokenClient instance for the application to use. (For example, in the OAuthPrompt.)
-                return this.botFrameworkAuthentication.createUserTokenClient(claimsIdentity).thenCompose(userTokenClient -> {
-                    TurnContextImpl context = this.createTurnContext(createActivity, claimsIdentity, null, connectorClient, userTokenClient, callback, connectorFactory);
+                return this.botFrameworkAuthentication.createUserTokenClient(claimsIdentity).
+                    thenCompose(userTokenClient -> {
+                    TurnContextImpl context = this.createTurnContext(createActivity, claimsIdentity, null,
+                                                                    connectorClient, userTokenClient, callback,
+                                                                    connectorFactory);
 
                     // Run the pipeline
                     return this.runPipeline(context, callback).thenApply(result -> null);
@@ -477,7 +489,8 @@ public abstract class CloudAdapterBase extends BotAdapter {
         return claimsIdentity;
     }
 
-    private Activity createCreateActivity(ConversationResourceResponse createConversationResult, String channelId, String serviceUrl, ConversationParameters conversationParameters) {
+    private Activity createCreateActivity(ConversationResourceResponse createConversationResult, String channelId,
+                                          String serviceUrl, ConversationParameters conversationParameters) {
         // Create a conversation update activity to represent the result.
         Activity activity = Activity.createEventActivity();
         activity.setName(ActivityEventNames.CREATE_CONVERSATION);

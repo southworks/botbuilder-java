@@ -27,8 +27,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
- * This class inherited all the implementations of {@link SkillHandler} class since we needed similar code for {@link CloudSkillHandler}.
- * The {@link CloudSkillHandler} class differs from {@link SkillHandler} class only in authentication by making use of {@link BotFrameworkAuthentication} class.
+ * This class inherited all the implementations of {@link SkillHandler}
+ * class since we needed similar code for {@link CloudSkillHandler}.
+ * The {@link CloudSkillHandler} class differs from {@link SkillHandler}
+ * class only in authentication by making use of {@link BotFrameworkAuthentication} class.
  * This class is internal since it is only used in skill handler classes.
  */
 public class SkillHandlerImpl {
@@ -68,6 +70,15 @@ public class SkillHandlerImpl {
         this.getOAuthScope = withGetOAuthScope;
     }
 
+    /**
+     *
+     * @param claimsIdentity claimsIdentity for the bot, should have
+     *                       AudienceClaim, AppIdClaim and ServiceUrlClaim.
+     * @param conversationId conversationId.
+     * @param activity       Activity to send.
+     *
+     * @return Task for a resource response.
+     */
     public CompletableFuture<ResourceResponse> onSendToConversation(
         ClaimsIdentity claimsIdentity,
         String conversationId,
@@ -75,6 +86,15 @@ public class SkillHandlerImpl {
         return processActivity(claimsIdentity, conversationId, null, activity);
     }
 
+    /**
+     * @param claimsIdentity  claimsIdentity for the bot, should have
+     *                        AudienceClaim, AppIdClaim and ServiceUrlClaim.
+     * @param conversationId  Conversation ID.
+     * @param activityId      activityId the reply is to (OPTIONAL).
+     * @param activity        Activity to send.
+     *
+     * @return Task for a resource response.
+     */
     public CompletableFuture<ResourceResponse> onReplyToActivity(
         ClaimsIdentity claimsIdentity,
         String conversationId,
@@ -83,6 +103,14 @@ public class SkillHandlerImpl {
         return processActivity(claimsIdentity, conversationId, activityId, activity);
     }
 
+    /**
+     * @param claimsIdentity  claimsIdentity for the bot, should have
+     *                        AudienceClaim, AppIdClaim and ServiceUrlClaim.
+     * @param conversationId  Conversation ID.
+     * @param activityId      activityId to delete.
+     *
+     * @return Task with void value.
+     */
     public CompletableFuture<Void> onDeleteActivity(
         ClaimsIdentity claimsIdentity,
         String conversationId,
@@ -101,6 +129,15 @@ public class SkillHandlerImpl {
             callback);
     }
 
+    /**
+     * @param claimsIdentity  claimsIdentity for the bot, should have
+     *                        AudienceClaim, AppIdClaim and ServiceUrlClaim.
+     * @param conversationId  Conversation ID.
+     * @param activityId      activityId the reply is to (OPTIONAL).
+     * @param activity        Activity to send.
+     *
+     * @return Task for a resource response.
+     */
     public CompletableFuture<ResourceResponse> onUpdateActivity(
         ClaimsIdentity claimsIdentity,
         String conversationId,
@@ -159,7 +196,8 @@ public class SkillHandlerImpl {
 
         SkillConversationReference skillConversationReference;
         try {
-            skillConversationReference = this.conversationIdFactory.getSkillConversationReference(conversationId).join();
+            skillConversationReference = this.conversationIdFactory.
+                getSkillConversationReference(conversationId).join();
         } catch (NotImplementedException ex) {
             if (this.logger != null) {
                 this.logger.warn("Got NotImplementedException when trying to call "
@@ -217,7 +255,7 @@ public class SkillHandlerImpl {
                     this.sendToBot(activity, turnContext);
                     break;
                 case ActivityTypes.COMMAND:
-                case ActivityTypes.COMMAND_RESULT: {
+                case ActivityTypes.COMMAND_RESULT:
                     if (activity.getName().startsWith("application/")) {
                         // Send to channel and capture the resource response
                         // for the SendActivityCall so we can return it.
@@ -227,7 +265,6 @@ public class SkillHandlerImpl {
                     }
 
                     break;
-                }
                 default:
                     // Capture the resource response for the SendActivityCall so we can return it.
                     resourceResponse.set(turnContext.sendActivity(activity).join());

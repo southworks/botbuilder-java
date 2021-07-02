@@ -35,7 +35,7 @@ public class ConnectorFactoryImpl extends ConnectorFactory {
     public CompletableFuture<ConnectorClient> create(String serviceUrl, String audience) {
         // Use the credentials factory to create credentials specific to this particular cloud environment.
         return credentialFactory.createCredentials(appId,
-            audience != null? audience : toChannelFromBotOAuthScope,
+            audience != null ? audience : toChannelFromBotOAuthScope,
             loginEndpoint,
             validateAuthority).thenCompose(credentials -> {
             // A new connector client for making calls against this serviceUrl using credentials

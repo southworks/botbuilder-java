@@ -8,8 +8,6 @@ import com.microsoft.bot.builder.CloudAdapterBase;
 import com.microsoft.bot.connector.authentication.BotFrameworkAuthentication;
 import com.microsoft.bot.connector.authentication.BotFrameworkAuthenticationFactory;
 import com.microsoft.bot.schema.Activity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -17,11 +15,6 @@ import java.util.concurrent.CompletableFuture;
  * both public and private.
  */
 public class CloudAdapter extends CloudAdapterBase {
-
-    /**
-     * The... ummm... logger.
-     */
-    private Logger logger = LoggerFactory.getLogger(CloudAdapter.class);
 
     /**
      * Initializes a new instance of the "CloudAdapter" class. (Public cloud. No auth. For testing.)

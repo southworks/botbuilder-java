@@ -8,7 +8,6 @@ import com.microsoft.bot.connector.authentication.ClaimsIdentity;
 import com.microsoft.bot.connector.authentication.CredentialProvider;
 import com.microsoft.bot.connector.authentication.JwtTokenValidation;
 import com.microsoft.bot.connector.authentication.SkillValidation;
-import com.microsoft.bot.schema.Activity;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.concurrent.CompletableFuture;
@@ -58,6 +57,8 @@ public class ChannelServiceHandler extends ChannelServiceHandlerBase {
      * HttpClient)} , we should move this code somewhere in that library when
      * we refactor auth, for now we keep it private to avoid adding more public
      * static functions that we will need to deprecate later.
+     * @param authHeader The Bearer token included as part of the request.
+     * @return A task that represents the work queued to execute.
      */
     protected CompletableFuture<ClaimsIdentity> authenticate(String authHeader) {
         if (StringUtils.isEmpty(authHeader)) {

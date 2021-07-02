@@ -671,7 +671,7 @@ public class CloudAdapterTests {
         private TestCredentials credentials;
 
         public TestCredentialsInterceptor(TestCredentials withCredentials) {
-            credentials = withCredentials
+            credentials = withCredentials;
         }
 
         @Override

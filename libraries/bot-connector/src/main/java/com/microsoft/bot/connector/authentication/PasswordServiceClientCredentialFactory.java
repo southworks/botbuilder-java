@@ -106,7 +106,7 @@ public class PasswordServiceClientCredentialFactory extends ServiceClientCredent
 
         if (loginEndpoint.toLowerCase()
                 .startsWith(AuthenticationConstants.TO_CHANNEL_FROM_BOT_LOGIN_URL_TEMPLATE.toLowerCase())) {
-            // TODO: Unpack necessity of these empty credentials based on the loginEndpoint
+            // TODO : Unpack necessity of these empty credentials based on the loginEndpoint
             //  as no tokens are fetched when auth is disabled.
             ServiceClientCredentials credentials = appId == null ? MicrosoftAppCredentials.empty()
                     : new MicrosoftAppCredentials(appId, this.password);
@@ -149,7 +149,7 @@ public class PasswordServiceClientCredentialFactory extends ServiceClientCredent
 
         public PrivateCloudAppCredentials(String appId, String password, String oAuthScope, String withOauthEndpoint,
                 Boolean withValidateAuthority) {
-            super(appId, password);
+            super(appId, password, null, oAuthScope);
             this.oauthEndpoint = withOauthEndpoint;
             this.validateAuthority = withValidateAuthority;
         }

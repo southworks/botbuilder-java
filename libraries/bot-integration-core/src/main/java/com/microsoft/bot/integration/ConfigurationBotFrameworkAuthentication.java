@@ -14,6 +14,7 @@ import com.microsoft.bot.connector.authentication.ServiceClientCredentialsFactor
 import com.microsoft.bot.connector.authentication.UserTokenClient;
 import com.microsoft.bot.connector.skills.BotFrameworkClient;
 import com.microsoft.bot.schema.Activity;
+import okhttp3.OkHttpClient;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -62,7 +63,8 @@ public class ConfigurationBotFrameworkAuthentication extends BotFrameworkAuthent
             callerId,
             credentialsFactory != null ? credentialsFactory
                     : new ConfigurationServiceClientCredentialFactory(configuration),
-            authConfiguration != null ? authConfiguration : new AuthenticationConfiguration());
+            authConfiguration != null ? authConfiguration : new AuthenticationConfiguration(),
+            new OkHttpClient());
     }
 
     /**

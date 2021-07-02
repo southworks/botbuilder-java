@@ -3,33 +3,19 @@
 
 package com.microsoft.bot.builder.skills;
 
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.microsoft.bot.builder.Bot;
 import com.microsoft.bot.builder.BotAdapter;
-import com.microsoft.bot.builder.BotCallbackHandler;
 import com.microsoft.bot.builder.ChannelServiceHandler;
-import com.microsoft.bot.builder.TurnContext;
 import com.microsoft.bot.connector.authentication.AuthenticationConfiguration;
 import com.microsoft.bot.connector.authentication.AuthenticationConstants;
 import com.microsoft.bot.connector.authentication.ChannelProvider;
 import com.microsoft.bot.connector.authentication.ClaimsIdentity;
 import com.microsoft.bot.connector.authentication.CredentialProvider;
 import com.microsoft.bot.connector.authentication.GovernmentAuthenticationConstants;
-import com.microsoft.bot.connector.authentication.JwtTokenValidation;
 import com.microsoft.bot.schema.Activity;
-import com.microsoft.bot.schema.ActivityTypes;
-import com.microsoft.bot.schema.CallerIdConstants;
-import com.microsoft.bot.schema.ConversationReference;
 import com.microsoft.bot.schema.ResourceResponse;
-
-import org.apache.commons.lang3.NotImplementedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A Bot Framework Handler for skills.
@@ -89,7 +75,7 @@ public class SkillHandler extends ChannelServiceHandler {
             adapter,
             bot,
             conversationIdFactory,
-            () -> this.channelProvider != null && this.channelProvider.isGovernment()
+            () -> this.getChannelProvider() != null && this.getChannelProvider().isGovernment()
                 ? GovernmentAuthenticationConstants.TO_CHANNEL_FROM_BOT_OAUTH_SCOPE
                 : AuthenticationConstants.TO_CHANNEL_FROM_BOT_OAUTH_SCOPE);
     }

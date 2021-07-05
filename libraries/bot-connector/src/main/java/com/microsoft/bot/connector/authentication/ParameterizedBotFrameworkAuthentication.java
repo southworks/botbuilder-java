@@ -69,7 +69,7 @@ public class ParameterizedBotFrameworkAuthentication extends BotFrameworkAuthent
      */
     @Override
     public CompletableFuture<ClaimsIdentity> authenticateChannelRequest(String authHeader) {
-        if (StringUtils.isBlank(authHeader.trim())) {
+        if (StringUtils.isBlank(authHeader)) {
             return this.credentialsFactory.isAuthenticationDisabled().thenApply(isAuthDisabled -> {
                if (!isAuthDisabled) {
                    throw new AuthenticationException("Unauthorized Access. Request is not authorized");

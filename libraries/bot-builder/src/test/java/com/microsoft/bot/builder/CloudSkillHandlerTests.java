@@ -358,7 +358,7 @@ public class CloudSkillHandlerTests {
                 ) {
                     // Mock the adapter ContinueConversationAsync method
                     // This code block catches and executes the custom bot callback created by the service handler.
-                    TurnContext turnContext = new TurnContextImpl(adapter, reference.getContinuationActivity());
+                    turnContext = new TurnContextImpl(adapter, reference.getContinuationActivity());
                     return callback.invoke(turnContext).thenApply(val -> null);
                 }
             };

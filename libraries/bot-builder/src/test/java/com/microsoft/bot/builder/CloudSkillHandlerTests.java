@@ -408,13 +408,14 @@ public class CloudSkillHandlerTests {
             Mockito.when(
                 auth.authenticateChannelRequest(Mockito.any(String.class))
             ).thenAnswer(
-                (Answer<ClaimsIdentity>) invocation -> {
+                (Answer <CompletableFuture<ClaimsIdentity>>) invocation -> {
                     HashMap<String, String> claims = new HashMap<>();
                     claims.put(AuthenticationConstants.AUDIENCE_CLAIM, TEST_BOT_ID);
                     claims.put(AuthenticationConstants.APPID_CLAIM, TEST_SKILL_ID);
                     claims.put(AuthenticationConstants.SERVICE_URL_CLAIM, TEST_BOT_ENDPOINT);
+                    ClaimsIdentity claimsIdentity = new ClaimsIdentity(AuthenticationConstants.ANONYMOUS_AUTH_TYPE, AuthenticationConstants.ANONYMOUS_AUTH_TYPE, claims);
 
-                    return new ClaimsIdentity("anonymous", claims);
+                    return CompletableFuture.completedFuture(claimsIdentity);
                 }
             );
             return auth;

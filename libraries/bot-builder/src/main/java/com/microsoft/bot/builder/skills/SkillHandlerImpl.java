@@ -145,7 +145,7 @@ public class SkillHandlerImpl {
         Activity activity) {
         SkillConversationReference skillConversationReference = getSkillConversationReference(conversationId).join();
 
-        AtomicReference<ResourceResponse> resourceResponse = new AtomicReference<ResourceResponse>();
+        final ResourceResponse[] resourceResponse = {};
 
         BotCallbackHandler callback = turnContext -> {
             turnContext.getTurnState().add(this.skillConversationReferenceKey, skillConversationReference);
@@ -155,7 +155,7 @@ public class SkillHandlerImpl {
                 CallerIdConstants.BOT_TO_BOT_PREFIX,
                 JwtTokenValidation.getAppIdFromClaims(claimsIdentity.claims()));
             turnContext.getActivity().setCallerId(callerId);
-            resourceResponse.set(turnContext.updateActivity(activity).join());
+            resourceResponse[0] = turnContext.updateActivity(activity).join();
             return CompletableFuture.completedFuture(null);
         };
 
@@ -164,8 +164,8 @@ public class SkillHandlerImpl {
             skillConversationReference.getOAuthScope(),
             callback);
 
-        if (resourceResponse.get() != null) {
-            return CompletableFuture.completedFuture(resourceResponse.get());
+        if (resourceResponse[0] != null) {
+            return CompletableFuture.completedFuture(resourceResponse[0]);
         } else {
             return CompletableFuture.completedFuture(new ResourceResponse(UUID.randomUUID().toString()));
         }

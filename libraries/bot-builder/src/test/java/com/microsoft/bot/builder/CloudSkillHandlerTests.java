@@ -280,7 +280,6 @@ public class CloudSkillHandlerTests {
         }
 
         /**
-         * Gets
          * @return the Activity sent to the Bot.
          */
         public String getActivityIdToDelete() {

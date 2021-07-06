@@ -8,9 +8,12 @@ import com.microsoft.bot.builder.skills.CloudSkillHandler;
 import com.microsoft.bot.builder.skills.SkillConversationIdFactoryBase;
 import com.microsoft.bot.builder.skills.SkillConversationIdFactoryOptions;
 import com.microsoft.bot.builder.skills.SkillConversationReference;
+import com.microsoft.bot.connector.authentication.AuthenticateRequestResult;
 import com.microsoft.bot.connector.authentication.AuthenticationConstants;
 import com.microsoft.bot.connector.authentication.BotFrameworkAuthentication;
 import com.microsoft.bot.connector.authentication.ClaimsIdentity;
+import com.microsoft.bot.connector.authentication.ConnectorFactory;
+import com.microsoft.bot.connector.authentication.UserTokenClient;
 import com.microsoft.bot.restclient.serializer.JacksonAdapter;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityTypes;
@@ -21,8 +24,6 @@ import com.microsoft.bot.schema.ResourceResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.net.URI;
@@ -248,13 +249,9 @@ public class CloudSkillHandlerTests {
             return adapter;
         }
 
-        public BotFrameworkAuthentication getAuth() {
-            return auth;
-        }
+        public BotFrameworkAuthentication getAuth() { return auth; }
 
-        public Bot getBot() {
-            return bot;
-        }
+        public Bot getBot() { return bot; }
 
         // Gets the TurnContext created to call the bot.
         public TurnContext getTurnContext() {
@@ -262,32 +259,29 @@ public class CloudSkillHandlerTests {
         }
 
         /**
-         * Gets the Activity sent to the channel.
-         * @return
+         * @return the Activity sent to the channel.
          */
         public Activity getChannelActivity() {
             return channelActivity;
         }
 
         /**
-         * Gets the Activity sent to the Bot.
-         * @return
+         * @return the Activity sent to the Bot.
          */
         public Activity getBotActivity() {
             return botActivity;
         }
 
         /**
-         * Gets the update activity.
-         * @return
+         * @return the update activity.
          */
         public Activity getUpdateActivity() {
             return updateActivity;
         }
 
         /**
-         * Gets the Activity sent to the Bot.
-         * @return
+         * Gets
+         * @return the Activity sent to the Bot.
          */
         public String getActivityIdToDelete() {
             return activityToDelete;
@@ -309,7 +303,7 @@ public class CloudSkillHandlerTests {
             try {
                 skill.setSkillEndpoint(new URI(TEST_SKILL_ENDPOINT));
             }
-            catch (URISyntaxException e) {
+            catch (URISyntaxException ignored) {
             }
 
             SkillConversationIdFactoryOptions options = new SkillConversationIdFactoryOptions();
@@ -346,7 +340,7 @@ public class CloudSkillHandlerTests {
                 public CompletableFuture<Void> deleteActivity(TurnContext context, ConversationReference reference) {
                     // Capture the activity id to delete so we can assert it.
                     activityToDelete = reference.getActivityId();
-                    return null;
+                    return CompletableFuture.completedFuture(null);
                 }
 
                 @Override
@@ -365,27 +359,18 @@ public class CloudSkillHandlerTests {
         }
 
         private Bot createMockBot() {
-            Bot bot = Mockito.mock(Bot.class);
-            Mockito.when(
-                bot.onTurn(Mockito.any(TurnContext.class))
-            ).thenAnswer(
-                (Answer<Void>) invocation -> {
-                    TurnContextImpl turnContext = invocation.getArgument(0);
+            return new Bot() {
+                @Override
+                public CompletableFuture<Void> onTurn(TurnContext turnContext) {
                     botActivity = turnContext.getActivity();
-                    return null;
+                    return CompletableFuture.completedFuture(null);
                 }
-            );
-
-            return bot;
+            };
         }
 
         private BotFrameworkAuthentication createMockBotFrameworkAuthentication() {
-            BotFrameworkAuthentication auth = Mockito.mock(BotFrameworkAuthentication.class);
-
-            Mockito.when(
-                auth.authenticateChannelRequest(Mockito.any(String.class))
-            ).thenAnswer(
-                (Answer <CompletableFuture<ClaimsIdentity>>) invocation -> {
+            return new BotFrameworkAuthentication() {
+                public CompletableFuture<ClaimsIdentity> authenticateChannelRequest(String authHeader) {
                     HashMap<String, String> claims = new HashMap<>();
                     claims.put(AuthenticationConstants.AUDIENCE_CLAIM, TEST_BOT_ID);
                     claims.put(AuthenticationConstants.APPID_CLAIM, TEST_SKILL_ID);
@@ -394,8 +379,27 @@ public class CloudSkillHandlerTests {
 
                     return CompletableFuture.completedFuture(claimsIdentity);
                 }
-            );
-            return auth;
+
+                @Override
+                public CompletableFuture<AuthenticateRequestResult> authenticateRequest(Activity activity, String authHeader) {
+                    return CompletableFuture.completedFuture(null);
+                }
+
+                @Override
+                public CompletableFuture<AuthenticateRequestResult> authenticateStreamingRequest(String authHeader, String channelIdHeader) {
+                    return CompletableFuture.completedFuture(null);
+                }
+
+                @Override
+                public ConnectorFactory createConnectorFactory(ClaimsIdentity claimsIdentity) {
+                    return null;
+                }
+
+                @Override
+                public CompletableFuture<UserTokenClient> createUserTokenClient(ClaimsIdentity claimsIdentity) {
+                    return CompletableFuture.completedFuture(null);
+                }
+            };
         }
     }
 
@@ -419,8 +423,9 @@ public class CloudSkillHandlerTests {
             try {
                 conversationRefs.putIfAbsent(key, jacksonAdapter.serialize(skillConversationReference));
             }
-            catch (IOException e) {
+            catch (IOException ignored) {
             }
+
             return CompletableFuture.completedFuture(key);
         }
 
@@ -433,7 +438,7 @@ public class CloudSkillHandlerTests {
                     conversationRefs.get(skillConversationId),
                     SkillConversationReference.class);
             }
-            catch (IOException e) {
+            catch (IOException ignored) {
             }
 
             return CompletableFuture.completedFuture(conversationReference);

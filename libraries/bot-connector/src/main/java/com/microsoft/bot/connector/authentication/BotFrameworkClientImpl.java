@@ -137,7 +137,8 @@ public class BotFrameworkClientImpl extends BotFrameworkClient {
 
                 if (response.isSuccessful()) {
                     // On success assuming either JSON that can be deserialized to T or empty.
-                    T result = Serialization.getAs(response.body().string(), type);
+                    String bodyString = response.body().string();
+                    T result = Serialization.getAs(bodyString, type);
                     TypedInvokeResponse<T> returnValue = new TypedInvokeResponse<T>(response.code(), result);
                     return CompletableFuture.completedFuture(returnValue);
                 } else {

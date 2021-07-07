@@ -39,7 +39,7 @@ public class BotFrameworkAuthenticationTests {
         // Arrange
         String fromBotId = "from-bot-id";
         String toBotId = "to-bot-id";
-        String loginUrl = AuthenticationConstants.TO_CHANNEL_FROM_BOT_LOGIN_URL_TEMPLATE;
+        String loginUrl = String.format(AuthenticationConstants.TO_CHANNEL_FROM_BOT_LOGIN_URL_TEMPLATE, AuthenticationConstants.DEFAULT_CHANNEL_AUTH_TENANT);
         URI toUrl = new URI("http://test1.com/test");
 
         ServiceClientCredentialsFactory credentialFactoryMock = Mockito.mock(ServiceClientCredentialsFactory.class);
@@ -48,7 +48,7 @@ public class BotFrameworkAuthenticationTests {
                 fromBotId,
                 toBotId,
                 loginUrl,
-                Boolean.FALSE)
+                Boolean.TRUE)
         ).thenReturn(CompletableFuture.completedFuture(MicrosoftAppCredentials.empty()));
 
         OkHttpClient httpClientMock = Mockito.mock(OkHttpClient.class);
@@ -66,6 +66,7 @@ public class BotFrameworkAuthenticationTests {
 
         Mockito.when(remoteCall.execute()).thenReturn(response);
         Mockito.when(httpClientMock.newCall(Mockito.any())).thenReturn(remoteCall);
+        Mockito.when(httpClientMock.newBuilder()).thenReturn(new OkHttpClient.Builder());
 
         BotFrameworkAuthentication bfa = BotFrameworkAuthenticationFactory.create(
             null,
@@ -95,12 +96,12 @@ public class BotFrameworkAuthenticationTests {
 
         // Act
         BotFrameworkClient bfc = bfa.createBotFrameworkClient();
-        TypedInvokeResponse invokeResponse = bfc.postActivity(fromBotId, toBotId, toUrl, serviceUrl, conversationId, activity, TypedInvokeResponse.class).join();
+        TypedInvokeResponse invokeResponse = bfc.postActivity(fromBotId, toBotId, toUrl, serviceUrl, conversationId, activity, Object.class).join();
 
         ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
-        JsonNode testData = mapper.readTree(mapper.writeValueAsString(invokeResponse));
+        JsonNode testData = mapper.readTree(invokeResponse.getBody().toString());
 
         // Assert
-        Assert.assertEquals("world", testData.get("hello").toString());
+        Assert.assertEquals("world", testData.get("hello").asText());
     }
 }

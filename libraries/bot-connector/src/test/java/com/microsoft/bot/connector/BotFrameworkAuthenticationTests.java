@@ -16,11 +16,13 @@ import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityTypes;
 import com.microsoft.bot.schema.ConversationAccount;
 import com.microsoft.bot.schema.TypedInvokeResponse;
-import okhttp3.MediaType;
+import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.Protocol;
 import okhttp3.ResponseBody;
+import okhttp3.MediaType;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -46,19 +48,24 @@ public class BotFrameworkAuthenticationTests {
                 fromBotId,
                 toBotId,
                 loginUrl,
-                Mockito.anyBoolean())
+                Boolean.FALSE)
         ).thenReturn(CompletableFuture.completedFuture(MicrosoftAppCredentials.empty()));
 
         OkHttpClient httpClientMock = Mockito.mock(OkHttpClient.class);
-        Mockito.when(
-            httpClientMock.newCall(Mockito.any(Request.class)).execute()
-        ).thenReturn(new Response.Builder()
-            .code(200)
-            .body(ResponseBody.create(
-                MediaType.get("application/json; charset=utf-8"),
-                "{\"hello\": \"world\"}"))
-            .build()
-        );
+        Call remoteCall = Mockito.mock(Call.class);
+
+        Response response = new Response.Builder()
+            .request(new Request.Builder().url(toUrl.toString()).build())
+            .protocol(Protocol.HTTP_1_1)
+            .code(200).message("").body(
+                ResponseBody.create(
+                    MediaType.parse("application/json; charset=utf-8"),
+                    "{\"hello\": \"world\"}"
+                ))
+            .build();
+
+        Mockito.when(remoteCall.execute()).thenReturn(response);
+        Mockito.when(httpClientMock.newCall(Mockito.any())).thenReturn(remoteCall);
 
         BotFrameworkAuthentication bfa = BotFrameworkAuthenticationFactory.create(
             null,

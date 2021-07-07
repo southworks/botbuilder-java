@@ -77,7 +77,9 @@ public final class BotFrameworkAuthenticationFactory {
             if (StringUtils.isBlank(channelService)) {
                 return new ParameterizedBotFrameworkAuthentication(
                     true,
-                    AuthenticationConstants.TO_CHANNEL_FROM_BOT_LOGIN_URL,
+                    String.format(
+                        AuthenticationConstants.TO_CHANNEL_FROM_BOT_LOGIN_URL_TEMPLATE,
+                        AuthenticationConstants.DEFAULT_CHANNEL_AUTH_TENANT),
                     AuthenticationConstants.TO_CHANNEL_FROM_BOT_OAUTH_SCOPE,
                     AuthenticationConstants.TO_BOT_FROM_CHANNEL_TOKEN_ISSUER,
                     AuthenticationConstants.OAUTH_URL,

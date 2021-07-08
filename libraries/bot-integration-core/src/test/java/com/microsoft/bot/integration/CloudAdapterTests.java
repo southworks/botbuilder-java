@@ -336,7 +336,11 @@ public class CloudAdapterTests {
 
         ConversationAccount conversationAccount = new ConversationAccount();
         conversationAccount.setId("conversation Id");
+
         Activity continuationActivity = new Activity(ActivityTypes.EVENT);
+        continuationActivity.setServiceUrl(expectedServiceUrl);
+        continuationActivity.setConversation(conversationAccount);
+
         ConversationReference conversationReference = new ConversationReference();
         conversationReference.setServiceUrl(expectedServiceUrl);
         conversationReference.setConversation(conversationAccount);

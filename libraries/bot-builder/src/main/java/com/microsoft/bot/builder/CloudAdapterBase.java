@@ -13,7 +13,9 @@ import com.microsoft.bot.connector.authentication.AuthenticationConstants;
 import com.microsoft.bot.connector.authentication.BotFrameworkAuthentication;
 import com.microsoft.bot.connector.authentication.ClaimsIdentity;
 import com.microsoft.bot.connector.authentication.ConnectorFactory;
+import com.microsoft.bot.connector.authentication.ConnectorFactoryImpl;
 import com.microsoft.bot.connector.authentication.UserTokenClient;
+import com.microsoft.bot.connector.authentication.UserTokenClientImpl;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityEventNames;
 import com.microsoft.bot.schema.ActivityTypes;
@@ -108,8 +110,9 @@ public abstract class CloudAdapterBase extends BotAdapter {
                 logger.info(String.format("Sending activity. ReplyToId: %s", activity.getReplyToId()));
 
                 if (activity.isType(ActivityTypes.DELAY)) {
-                    int delayMs = Integer.valueOf((String) activity.getValue()) != null
-                        ? (int) activity.getValue() : DEFAULT_MS_DELAY;
+                    int delayMs = activity.getValue() != null
+                        ? new Double(String.valueOf(activity.getValue())).intValue()
+                        : DEFAULT_MS_DELAY;
                     try {
                         Thread.sleep(delayMs);
                     } catch (InterruptedException e) {
@@ -374,7 +377,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
     ) {
         logger.info(
             String.format(
-                "processProactive for Conversation Id: %d",
+                "processProactive for Conversation Id: %s",
                 continuationActivity.getConversation().getId()));
 
         // Create the connector factory and  the inbound request, extracting parameters
@@ -451,8 +454,8 @@ public abstract class CloudAdapterBase extends BotAdapter {
                         authenticateRequestResult.getAudience(),
                         connectorClient,
                         userTokenClient,
-                        null,
-                        null);
+                        callbackHandler,
+                        authenticateRequestResult.getConnectorFactory());
 
                     // Run the pipeline
                     return runPipeline(context, callbackHandler).thenApply(task -> {

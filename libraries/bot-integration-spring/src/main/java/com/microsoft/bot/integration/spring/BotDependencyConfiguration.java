@@ -139,7 +139,7 @@ public abstract class BotDependencyConfiguration {
      * @see #getConfiguration()
      */
     @Bean
-    public CloudAdapter getCloudAdaptor(Configuration configuration){
+    public CloudAdapter getCloudAdapter(Configuration configuration){
         return new CloudAdapter(configuration);
     }
 

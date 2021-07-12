@@ -23,6 +23,7 @@ import com.microsoft.bot.connector.authentication.GovernmentAuthenticationConsta
 import com.microsoft.bot.connector.authentication.PasswordServiceClientCredentialFactory;
 import com.microsoft.bot.connector.authentication.UserTokenClient;
 import com.microsoft.bot.connector.rest.RestConnectorClient;
+import com.microsoft.bot.restclient.ServiceClient;
 import com.microsoft.bot.restclient.credentials.ServiceClientCredentials;
 import com.microsoft.bot.restclient.serializer.JacksonAdapter;
 import com.microsoft.bot.schema.Activity;
@@ -40,6 +41,7 @@ import com.microsoft.bot.schema.TokenStatus;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
@@ -47,9 +49,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+import retrofit2.Retrofit;
 
 import java.io.IOException;
-import java.security.Identity;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -628,7 +630,7 @@ public class CloudAdapterTests {
     }
 
     private class ConnectorFactoryBot implements Bot {
-        private Identity identity;
+        private ClaimsIdentity identity;
         private ConnectorClient connectorClient;
         private UserTokenClient userTokenClient;
         private BotCallbackHandler botCallbackHandler;
@@ -646,10 +648,16 @@ public class CloudAdapterTests {
             ConnectorFactory connectorFactory = turnContext.getTurnState().get(CloudAdapterBase.CONNECTOR_FACTORY_KEY);
 
             return connectorFactory.create("http://localhost/originalServiceUrl", oAuthScope).thenCompose(connector -> {
-                    OkHttpClient client = new OkHttpClient();
-                    OkHttpClient.Builder builder = client.newBuilder();
+                    OkHttpClient.Builder builder = new OkHttpClient.Builder();
                     connector.credentials().applyCredentialsFilter(builder);
-                    return null;
+                    ServiceClient serviceClient = new ServiceClient("http://localhost", builder, new Retrofit.Builder()) { };
+                try {
+                    Response response = serviceClient.httpClient().newCall(new Request.Builder().url("http://localhost").build()).execute();
+                    authorization = response.header("Authorization");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
                 }
             );
         }
@@ -668,7 +676,7 @@ public class CloudAdapterTests {
 
         @Override
         public void applyCredentialsFilter(OkHttpClient.Builder clientBuilder) {
-            clientBuilder.interceptors().add(new TestCredentialsInterceptor(this));
+            clientBuilder.addInterceptor(new TestCredentialsInterceptor(this));
         }
     }
     public class TestCredentialsInterceptor implements Interceptor {
@@ -680,9 +688,16 @@ public class CloudAdapterTests {
 
         @Override
         public Response intercept(Chain chain) throws IOException {
-            Request newRequest =
-                chain.request().newBuilder().header("Authorization", "Bearer " + credentials.getTestToken()).build();
-            return chain.proceed(newRequest);
+            String header = chain.request().header("Authorization");
+            Assert.assertNull(header);
+            return new Response.Builder()
+                .header("Authorization", credentials.getTestToken())
+                .request(chain.request())
+                .code(200)
+                .message("OK")
+                .protocol(Protocol.HTTP_1_1)
+                .body(ResponseBody.create(MediaType.parse("text/plain"), "azure rocks"))
+                .build();
         }
     }
 

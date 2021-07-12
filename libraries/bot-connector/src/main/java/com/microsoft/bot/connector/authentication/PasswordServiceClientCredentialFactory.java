@@ -134,7 +134,7 @@ public class PasswordServiceClientCredentialFactory extends ServiceClientCredent
          *
          * @return The OAuthEndpoint to use.
          */
-        public String getOauthEndpoint() {
+        public String oAuthEndpoint() {
             return oauthEndpoint;
         }
 

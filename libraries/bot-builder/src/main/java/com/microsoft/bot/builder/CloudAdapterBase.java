@@ -527,8 +527,10 @@ public abstract class CloudAdapterBase extends BotAdapter {
         turnContext.getTurnState().add(CloudAdapterBase.USER_TOKEN_CLIENT_KEY, userTokenClient);
         turnContext.getTurnState().add(TurnContextImpl.BOT_CALLBACK_HANDLER_KEY, callback);
         turnContext.getTurnState().add(CloudAdapterBase.CONNECTOR_FACTORY_KEY, connectorFactory);
-        // in non-skills scenarios the oauth scope value here will be null, so use Set
-        turnContext.getTurnState().add(BotAdapter.OAUTH_SCOPE_KEY, oauthScope);
+        // in non-skills scenarios the oauth scope value here will be null, so we are checking the value
+        if (oauthScope != null) {
+            turnContext.getTurnState().add(BotAdapter.OAUTH_SCOPE_KEY, oauthScope);
+        }
 
         return turnContext;
     }

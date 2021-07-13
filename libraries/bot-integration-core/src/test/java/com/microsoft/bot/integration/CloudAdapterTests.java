@@ -82,40 +82,6 @@ public class CloudAdapterTests {
     }
 
     @Test
-    public void messageActivityWithHttpClient() throws IOException {
-        // Arrange
-        Bot bot = new MessageBot();
-        OkHttpClient httpClientMock = Mockito.mock(OkHttpClient.class);
-        Call remoteCall = Mockito.mock(Call.class);
-
-        Response response = createInternalHttpResponse();
-
-        Mockito.when(remoteCall.execute()).thenReturn(response);
-        Mockito.when(httpClientMock.newCall(Mockito.any())).thenReturn(remoteCall);
-        Mockito.when(httpClientMock.newBuilder()).thenReturn(new OkHttpClient.Builder());
-
-        // Act
-        BotFrameworkAuthentication cloudEnvironment = BotFrameworkAuthenticationFactory.create(
-            null,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new PasswordServiceClientCredentialFactory(),
-            new AuthenticationConfiguration(),
-            httpClientMock);
-        CloudAdapter adapter = new CloudAdapter(cloudEnvironment);
-        adapter.processIncomingActivity("", createMessageActivity(), bot);
-
-        // Assert
-        Mockito.verify(remoteCall, Mockito.times(1)).execute();
-    }
-
-    @Test
     public void constructorWithConfiguration() {
         Properties appSettings = new Properties();
         appSettings.put("MicrosoftAppId", "appId");

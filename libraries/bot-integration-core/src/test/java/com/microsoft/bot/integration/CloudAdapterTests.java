@@ -38,6 +38,7 @@ import com.microsoft.bot.schema.TokenExchangeRequest;
 import com.microsoft.bot.schema.TokenExchangeState;
 import com.microsoft.bot.schema.TokenResponse;
 import com.microsoft.bot.schema.TokenStatus;
+import okhttp3.Call;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -53,6 +54,7 @@ import retrofit2.Retrofit;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,9 +86,13 @@ public class CloudAdapterTests {
         // Arrange
         Bot bot = new MessageBot();
         OkHttpClient httpClientMock = Mockito.mock(OkHttpClient.class);
-        Mockito.when(
-            httpClientMock.newCall(Mockito.any(Request.class)).execute()
-        ).thenReturn(createInternalHttpResponse());
+        Call remoteCall = Mockito.mock(Call.class);
+
+        Response response = createInternalHttpResponse();
+
+        Mockito.when(remoteCall.execute()).thenReturn(response);
+        Mockito.when(httpClientMock.newCall(Mockito.any())).thenReturn(remoteCall);
+        Mockito.when(httpClientMock.newBuilder()).thenReturn(new OkHttpClient.Builder());
 
         // Act
         BotFrameworkAuthentication cloudEnvironment = BotFrameworkAuthenticationFactory.create(
@@ -106,7 +112,7 @@ public class CloudAdapterTests {
         adapter.processIncomingActivity("", createMessageActivity(), bot);
 
         // Assert
-        Mockito.verify(httpClientMock, Mockito.times(1)).newCall(Mockito.any(Request.class)).execute();
+        Mockito.verify(remoteCall, Mockito.times(1)).execute();
     }
 
     @Test
@@ -207,18 +213,18 @@ public class CloudAdapterTests {
 
         // Assert
         Object[] args_ExchangeToken = userTokenClient.getRecord().get("exchangeToken");
-        Assert.assertEquals(userId, (String) args_ExchangeToken[0]);
-        Assert.assertEquals(connectionName, (String)args_ExchangeToken[1]);
-        Assert.assertEquals(channelId, (String) args_ExchangeToken[2]);
-        Assert.assertEquals("TokenExchangeRequest", args_ExchangeToken[3].getClass().getName());
+        Assert.assertEquals(userId, args_ExchangeToken[0]);
+        Assert.assertEquals(connectionName, args_ExchangeToken[1]);
+        Assert.assertEquals(channelId, args_ExchangeToken[2]);
+        Assert.assertEquals("TokenExchangeRequest", args_ExchangeToken[3].getClass().getSimpleName());
 
         Object[] args_GetAadTokens = userTokenClient.getRecord().get("getAadTokens");
-        Assert.assertEquals(userId, (String) args_GetAadTokens[0]);
-        Assert.assertEquals(connectionName, (String) args_GetAadTokens[1]);
-        Assert.assertEquals("x", ((String[]) args_GetAadTokens[2])[0]);
-        Assert.assertEquals("y", ((String[]) args_GetAadTokens[2])[1]);
+        Assert.assertEquals(userId, args_GetAadTokens[0]);
+        Assert.assertEquals(connectionName, args_GetAadTokens[1]);
+        Assert.assertEquals("x", ((List)args_GetAadTokens[2]).get(0));
+        Assert.assertEquals("y", ((List)args_GetAadTokens[2]).get(1));
 
-        Assert.assertEquals(channelId, (String) args_GetAadTokens[3]);
+        Assert.assertEquals(channelId, args_GetAadTokens[3]);
 
         Object[] args_GetSignInResource = userTokenClient.getRecord().get("getSignInResource");
 
@@ -229,7 +235,7 @@ public class CloudAdapterTests {
 
         try {
             JacksonAdapter jacksonAdapter = new JacksonAdapter();
-            json = jacksonAdapter.serialize(state);
+            json = new String(Base64.getDecoder().decode(state));
             tokenExchangeState = jacksonAdapter.deserialize(json, TokenExchangeState.class);
         } catch (IOException e) {
         }
@@ -240,23 +246,23 @@ public class CloudAdapterTests {
         Assert.assertEquals(recipientId, tokenExchangeState.getConversation().getBot().getId());
         Assert.assertEquals(relatesToActivityId, tokenExchangeState.getRelatesTo().getActivityId());
 
-        Assert.assertEquals("finalRedirect", (String) args_GetSignInResource[1]);
+        Assert.assertEquals("finalRedirect", args_GetSignInResource[1]);
 
         Object[] args_GetTokenStatus = userTokenClient.getRecord().get("getTokenStatus");
-        Assert.assertEquals(userId, (String) args_GetTokenStatus[0]);
-        Assert.assertEquals(channelId, (String) args_GetTokenStatus[1]);
-        Assert.assertEquals("includeFilter", (String)args_GetTokenStatus[2]);
+        Assert.assertEquals(userId, args_GetTokenStatus[0]);
+        Assert.assertEquals(channelId, args_GetTokenStatus[1]);
+        Assert.assertEquals("includeFilter", args_GetTokenStatus[2]);
 
         Object[] args_GetUserToken = userTokenClient.getRecord().get("getUserToken");
-        Assert.assertEquals(userId, (String)args_GetUserToken[0]);
-        Assert.assertEquals(connectionName, (String)args_GetUserToken[1]);
-        Assert.assertEquals(channelId, (String)args_GetUserToken[2]);
-        Assert.assertEquals("magicCode", (String)args_GetUserToken[3]);
+        Assert.assertEquals(userId, args_GetUserToken[0]);
+        Assert.assertEquals(connectionName, args_GetUserToken[1]);
+        Assert.assertEquals(channelId, args_GetUserToken[2]);
+        Assert.assertEquals("magicCode", args_GetUserToken[3]);
 
         Object[] args_SignOutUser = userTokenClient.getRecord().get("signOutUser");
-        Assert.assertEquals(userId, (String) args_SignOutUser[0]);
-        Assert.assertEquals(connectionName, (String) args_SignOutUser[1]);
-        Assert.assertEquals(channelId, (String) args_SignOutUser[2]);
+        Assert.assertEquals(userId, args_SignOutUser[0]);
+        Assert.assertEquals(connectionName, args_SignOutUser[1]);
+        Assert.assertEquals(channelId, args_SignOutUser[2]);
     }
 
     @Test
@@ -476,7 +482,7 @@ public class CloudAdapterTests {
         adapter.createConversation("botAppId", expectedChannelId, expectedServiceUrl, expectedAudience, conversationParameters, callback1).join();
 
         // Assert
-        Assert.assertEquals(expectedAudience, actualChannelId[0]);
+        Assert.assertEquals(expectedChannelId, actualChannelId[0]);
     }
 
     private static Activity createMessageActivity() {
@@ -511,7 +517,10 @@ public class CloudAdapterTests {
 
     private static Response createInternalHttpResponse() {
         return new Response.Builder()
+            .request(new Request.Builder().url("http://localhost").build())
+            .protocol(Protocol.HTTP_1_1)
             .code(200)
+            .message("")
             .body(ResponseBody.create(
                 MediaType.get("application/json; charset=utf-8"),
                 "{\"id\": \"sendActivityId\"}"))
@@ -540,7 +549,7 @@ public class CloudAdapterTests {
                 turnContext.getActivity().getFrom().getId(),
                 connectionName,
                 turnContext.getActivity().getChannelId(),
-                new TokenExchangeRequest() { }).join();
+                new TokenExchangeRequest()).join();
 
             userTokenClient.getAadTokens(
                 turnContext.getActivity().getFrom().getId(),

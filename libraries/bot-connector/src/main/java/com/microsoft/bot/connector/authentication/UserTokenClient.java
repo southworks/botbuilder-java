@@ -109,10 +109,10 @@ public abstract class UserTokenClient {
      * @return Base64 encoded token exchange state
      */
     protected static String createTokenExchangeState(String appId, String connectionName, Activity activity) {
-        if (StringUtils.isNotBlank(appId)) {
+        if (StringUtils.isBlank(appId)) {
             throw new IllegalArgumentException("appId");
         }
-        if (StringUtils.isNotBlank(appId)) {
+        if (StringUtils.isBlank(appId)) {
             throw new IllegalArgumentException("connectionName");
         }
         if (activity == null) {

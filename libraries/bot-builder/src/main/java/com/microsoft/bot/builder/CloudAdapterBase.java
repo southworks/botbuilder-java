@@ -505,7 +505,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
         activity.setId(activityId);
         ConversationAccount conversation = new ConversationAccount();
         conversation.setId(createConversationResult.getId());
-        conversation.setTenantId(conversation.getTenantId());
+        conversation.setTenantId(conversationParameters.getTenantId());
         activity.setConversation(conversation);
         activity.setChannelData(conversationParameters.getChannelData());
         activity.setRecipient(conversationParameters.getBot());

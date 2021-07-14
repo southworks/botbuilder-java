@@ -22,11 +22,11 @@ public class DelayHelper {
         Activity activity1 = new Activity(ActivityTypes.DELAY);
         activity1.setValue(275);
         Activity activity2 = new Activity(ActivityTypes.DELAY);
-        activity1.setValue(275L);
+        activity2.setValue(275L);
         Activity activity3 = new Activity(ActivityTypes.DELAY);
-        activity1.setValue(275F);
+        activity3.setValue(275F);
         Activity activity4 = new Activity(ActivityTypes.DELAY);
-        activity1.setValue(275D);
+        activity4.setValue(275D);
         List<Activity> activities = Arrays.asList(
             activity1,
             activity2,

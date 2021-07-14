@@ -111,7 +111,7 @@ public abstract class CloudAdapterBase extends BotAdapter {
 
                 if (activity.isType(ActivityTypes.DELAY)) {
                     int delayMs = activity.getValue() != null
-                        ? new Double(String.valueOf(activity.getValue())).intValue()
+                        ? ((Number) activity.getValue()).intValue()
                         : DEFAULT_MS_DELAY;
                     try {
                         Thread.sleep(delayMs);
